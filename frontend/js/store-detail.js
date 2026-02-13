@@ -37,8 +37,8 @@ function displayStoreDetails(store) {
   document.getElementById('storeRating').innerHTML = `${'⭐'.repeat(Math.floor(store.rating || 0))} (${store.rating || 0})`;
   document.getElementById('storeReviews').textContent = `${store.total_reviews} reviews`;
   document.getElementById('storeAddress').textContent = store.address?.street || 'Address unavailable';
-  document.getElementById('deliveryFee').textContent = `₹${store.base_delivery_fee}`;
-  document.getElementById('minOrder').textContent = `₹${store.minimum_order_value}`;
+  document.getElementById('deliveryFee').textContent = `GH₵${store.base_delivery_fee}`;
+  document.getElementById('minOrder').textContent = `GH₵${store.minimum_order_value}`;
   document.getElementById('deliveryRadius').textContent = `${store.delivery_radius} km`;
 }
 
@@ -51,7 +51,7 @@ async function loadProducts() {
     filteredProducts = [...allProducts];
     displayProducts();
   } else {
-    document.getElementById('productsContainer').innerHTML = 
+    document.getElementById('productsContainer').innerHTML =
       `<p style="grid-column: 1/-1; text-align: center; color: red;">Error loading products: ${result.error}</p>`;
   }
 }
@@ -76,8 +76,8 @@ function displayProducts() {
           <span class="review-count">${product.total_reviews} reviews</span>
         </div>
         <div class="product-price">
-          <span class="price">₹${product.price}</span>
-          ${product.original_price ? `<span class="original">₹${product.original_price}</span>` : ''}
+          <span class="price">GH₵${product.price}</span>
+          ${product.original_price ? `<span class="original">GH₵${product.original_price}</span>` : ''}
           ${product.discount ? `<span class="discount">${product.discount}% off</span>` : ''}
         </div>
         <p class="stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
@@ -97,12 +97,12 @@ function openProductModal(productId) {
   document.getElementById('modalImage').src = selectedProduct.images?.[0] || 'https://via.placeholder.com/300';
   document.getElementById('modalProductName').textContent = selectedProduct.name;
   document.getElementById('modalProductDescription').textContent = selectedProduct.description;
-  document.getElementById('modalPrice').textContent = `₹${selectedProduct.price}`;
-  document.getElementById('modalOriginalPrice').textContent = selectedProduct.original_price ? 
-    `₹${selectedProduct.original_price}` : '';
-  document.getElementById('modalDiscount').textContent = selectedProduct.discount ? 
+  document.getElementById('modalPrice').textContent = `GH₵${selectedProduct.price}`;
+  document.getElementById('modalOriginalPrice').textContent = selectedProduct.original_price ?
+    `GH₵${selectedProduct.original_price}` : '';
+  document.getElementById('modalDiscount').textContent = selectedProduct.discount ?
     `${selectedProduct.discount}% off` : '';
-  document.getElementById('modalStock').textContent = selectedProduct.stock > 0 ? 
+  document.getElementById('modalStock').textContent = selectedProduct.stock > 0 ?
     `${selectedProduct.stock} in stock` : 'Out of stock';
   document.getElementById('modalQuantity').value = 1;
   document.getElementById('modalQuantity').max = selectedProduct.stock;
@@ -172,7 +172,7 @@ async function handleLogout() {
 }
 
 // Close modal when clicking outside
-window.onclick = function(event) {
+window.onclick = function (event) {
   const modal = document.getElementById('productModal');
   if (event.target === modal) {
     closeProductModal();

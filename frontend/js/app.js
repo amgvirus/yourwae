@@ -443,7 +443,7 @@ async function processPayment(orderId, amount, paymentMethodId) {
           order_id: orderId,
           customer_id: currentUser.id,
           amount,
-          currency: 'USD',
+          currency: 'GHS',
           payment_method: 'card',
           transaction_id: `TXN-${Date.now()}`,
           status: 'completed',

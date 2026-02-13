@@ -131,7 +131,7 @@ CREATE TABLE payments (
   order_id UUID NOT NULL REFERENCES orders(id),
   customer_id UUID NOT NULL REFERENCES users(id),
   amount DECIMAL(15, 2) NOT NULL,
-  currency VARCHAR(3) DEFAULT 'USD',
+  currency VARCHAR(3) DEFAULT 'GHS',
   payment_method payment_method_type NOT NULL,
   transaction_id VARCHAR(255) UNIQUE NOT NULL,
   stripe_payment_intent_id VARCHAR(255),

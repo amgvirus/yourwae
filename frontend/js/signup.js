@@ -56,6 +56,11 @@ async function handleSignup(event) {
   const result = await window.fastGetApp.signup(email, password, firstName, lastName, phone, role);
 
   if (result.success) {
+    // Sign out so the user can manually log in on the login page
+    // (Supabase signUp auto-creates a session, which would cause
+    // auth.js to redirect away from the login page immediately)
+    await supabaseClient.auth.signOut();
+
     successMsg.textContent = 'Account created successfully! Redirecting to login...';
     successMsg.style.display = 'block';
     setTimeout(() => {

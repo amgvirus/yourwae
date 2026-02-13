@@ -16,7 +16,7 @@ async function loadCart() {
     displayCartItems(cartItems);
     calculateTotals(cartItems);
   } else {
-    document.getElementById('cartContainer').innerHTML = 
+    document.getElementById('cartContainer').innerHTML =
       `<p style="text-align: center; color: red;">Error loading cart: ${result.error}</p>`;
   }
 }
@@ -40,7 +40,7 @@ function displayCartItems(cartItems) {
       <img src="${item.products.images?.[0] || 'https://via.placeholder.com/100'}" alt="${item.products.name}">
       <div class="item-details">
         <h3>${item.products.name}</h3>
-        <p class="item-price">₹${item.products.price}</p>
+        <p class="item-price">GH₵${item.products.price}</p>
       </div>
       <div class="item-quantity">
         <button onclick="updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
@@ -48,7 +48,7 @@ function displayCartItems(cartItems) {
         <button onclick="updateQuantity('${item.id}', ${item.quantity + 1})">+</button>
       </div>
       <div class="item-total">
-        <p>₹${(item.products.price * item.quantity).toFixed(2)}</p>
+        <p>GH₵${(item.products.price * item.quantity).toFixed(2)}</p>
       </div>
       <button class="btn-remove" onclick="removeItem('${item.id}')">Remove</button>
     </div>
@@ -58,10 +58,10 @@ function displayCartItems(cartItems) {
 // Calculate totals
 function calculateTotals(cartItems) {
   if (!cartItems || cartItems.length === 0) {
-    document.getElementById('subtotal').textContent = '₹0';
-    document.getElementById('tax').textContent = '₹0';
-    document.getElementById('deliveryFee').textContent = '₹0';
-    document.getElementById('total').textContent = '₹0';
+    document.getElementById('subtotal').textContent = 'GH₵0';
+    document.getElementById('tax').textContent = 'GH₵0';
+    document.getElementById('deliveryFee').textContent = 'GH₵0';
+    document.getElementById('total').textContent = 'GH₵0';
     return;
   }
 
@@ -69,10 +69,10 @@ function calculateTotals(cartItems) {
   const tax = subtotal * 0.1;
   const deliveryFee = 50; // Default delivery fee
 
-  document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
-  document.getElementById('tax').textContent = `₹${tax.toFixed(2)}`;
-  document.getElementById('deliveryFee').textContent = `₹${deliveryFee.toFixed(2)}`;
-  document.getElementById('total').textContent = `₹${(subtotal + tax + deliveryFee).toFixed(2)}`;
+  document.getElementById('subtotal').textContent = `GH₵${subtotal.toFixed(2)}`;
+  document.getElementById('tax').textContent = `GH₵${tax.toFixed(2)}`;
+  document.getElementById('deliveryFee').textContent = `GH₵${deliveryFee.toFixed(2)}`;
+  document.getElementById('total').textContent = `GH₵${(subtotal + tax + deliveryFee).toFixed(2)}`;
 }
 
 // Update quantity (placeholder)
