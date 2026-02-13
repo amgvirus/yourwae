@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yourwae - Hyperlocal E-commerce Platform</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="navbar-logo">
+        <a href="index.html"><strong>⚡ Yourwae</strong></a>
+      </div>
+      <div class="navbar-menu">
+        <!-- Town Selector -->
+        <div class="town-selector">
+          <select id="townSelect" class="town-dropdown" onchange="handleTownChange()">
+            <option value="">Select Town</option>
+            <option value="hohoe">Hohoe</option>
+            <option value="dzodze">Dzodze</option>
+            <option value="anloga">Anloga</option>
+          </select>
+        </div>
+        <a href="stores.html" class="nav-link">Stores</a>
+        <a href="cart.html" class="nav-link" id="cartLink">
+          <span class="cart-icon">🛒</span>
+          Cart
+        </a>
+        <button id="loginBtn" class="nav-btn btn-primary" onclick="window.location.href='login.html'">Login</button>
+        <div id="userMenu" style="display: none;" class="user-menu">
+          <button class="nav-btn btn-secondary" onclick="window.location.href='orders.html'">My Orders</button>
+          <button id="logoutBtn" class="nav-btn btn-danger" onclick="handleLogout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Get Your Essentials Delivered Fast ⚡</h1>
+      <p>Order from local stores and get delivery in minutes</p>
+      <div class="hero-search">
+        <input type="text" id="searchInput" placeholder="Search stores or products..." class="search-input">
+        <button class="btn btn-primary" onclick="handleSearch()">Search</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Stores -->
+  <section class="featured-stores">
+    <div class="container">
+      <h2>Featured Stores</h2>
+      <div id="storesContainer" class="stores-grid">
+        <!-- Stores will be loaded here -->
+        <div class="loading">Loading stores...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works">
+    <div class="container">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Browse Stores</h3>
+          <p>Explore local stores near you</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Add Items</h3>
+          <p>Add products to your cart</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Checkout</h3>
+          <p>Pay online securely</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Track Delivery</h3>
+          <p>Get real-time delivery updates</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>Yourwae</h4>
+          <p>Your hyperlocal shopping platform</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="stores.html">Browse Stores</a></li>
+            <li><a href="#" onclick="currentUser ? window.location.href='orders.html' : window.location.href='login.html'">My Orders</a></li>
+            <li><a href="#" onclick="window.location.href='signup.html'">Become a Seller</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 Yourwae. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Yourwae</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="navbar-logo">
+        <a href="index.html"><strong>⚡ Yourwae</strong></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Signup Form -->
+  <section class="auth-section">
+    <div class="auth-container">
+      <div class="auth-box">
+        <h1>Join Yourwae</h1>
+        <p class="subtitle">Create your account</p>
+
+        <!-- Role Selection -->
+        <div class="role-selector">
+          <label class="role-option">
+            <input type="radio" name="role" value="customer" checked onchange="updateRoleUI()">
+            <span class="role-label">👤 Customer</span>
+          </label>
+          <label class="role-option">
+            <input type="radio" name="role" value="store" onchange="updateRoleUI()">
+            <span class="role-label">🏪 Store Owner</span>
+          </label>
+        </div>
+
+        <form id="signupForm" onsubmit="handleSignup(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" name="firstName" required placeholder="First name">
+            </div>
+            <div class="form-group">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" name="lastName" required placeholder="Last name">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required placeholder="Enter your email">
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" required placeholder="10-digit phone number">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required placeholder="Minimum 6 characters">
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirm password">
+          </div>
+
+          <div id="storeFields" style="display: none;">
+            <div class="form-group">
+              <label for="storeName">Store Name</label>
+              <input type="text" id="storeName" name="storeName" placeholder="Your store name">
+            </div>
+            <div class="form-group">
+              <label for="storeCategory">Store Category</label>
+              <select id="storeCategory" name="storeCategory">
+                <option value="">Select category</option>
+                <option value="grocery">Grocery</option>
+                <option value="electronics">Electronics</option>
+                <option value="pharmacy">Pharmacy</option>
+                <option value="fashion">Fashion</option>
+                <option value="beauty">Beauty</option>
+                <option value="home">Home</option>
+                <option value="food">Food</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="checkbox">
+            <input type="checkbox" required>
+            <span>I agree to the <a href="#">Terms & Conditions</a></span>
+          </label>
+
+          <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+        </form>
+
+        <p class="auth-footer">
+          Already have an account? <a href="login.html">Login here</a>
+        </p>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="successMessage" class="success-message" style="display: none;"></div>
+      </div>
+
+      <div class="auth-info">
+        <h2>Join Yourwae Today!</h2>
+        <p>Start shopping from local businesses or become a seller.</p>
+        <ul class="features">
+          <li>✓ Quick & Easy signup</li>
+          <li>✓ Secure transactions</li>
+          <li>✓ Real-time tracking</li>
+          <li>✓ Great rewards</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0"></script>
+  <script src="js/app.js"></script>
+  <script src="js/signup.js"></script>
+</body>
+</html>

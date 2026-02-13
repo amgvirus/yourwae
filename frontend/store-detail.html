@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store Detail - Yourwae</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="navbar-logo">
+        <a href="index.html"><strong>⚡ Yourwae</strong></a>
+      </div>
+      <div class="navbar-menu">
+        <a href="stores.html" class="nav-link">Stores</a>
+        <a href="cart.html" class="nav-link">🛒 Cart</a>
+        <button id="loginBtn" class="nav-btn btn-primary" onclick="window.location.href='login.html'">Login</button>
+        <div id="userMenu" style="display: none;" class="user-menu">
+          <button class="nav-btn btn-secondary" onclick="window.location.href='orders.html'">My Orders</button>
+          <button id="logoutBtn" class="nav-btn btn-danger" onclick="handleLogout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Store Header -->
+  <section id="storeHeader" class="store-header">
+    <div class="store-banner" id="storeBanner"></div>
+    <div class="store-details">
+      <div class="container">
+        <div class="store-header-content">
+          <div class="store-header-left">
+            <img id="storeImage" src="" alt="Store" class="store-logo">
+            <div class="store-text">
+              <h1 id="storeName"></h1>
+              <p id="storeCategory"></p>
+              <div class="store-rating">
+                <span id="storeRating"></span>
+                <span id="storeReviews"></span>
+              </div>
+              <p id="storeAddress"></p>
+            </div>
+          </div>
+          <div class="store-header-right">
+            <div class="info-box">
+              <p><strong>Delivery Fee:</strong> <span id="deliveryFee">₹0</span></p>
+              <p><strong>Min Order:</strong> <span id="minOrder">₹0</span></p>
+              <p><strong>Radius:</strong> <span id="deliveryRadius">0 km</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Section -->
+  <section class="products-section">
+    <div class="container">
+      <div class="products-header">
+        <h2>Products</h2>
+        <input type="text" id="searchProducts" placeholder="Search products..." class="search-input">
+      </div>
+
+      <div id="productsContainer" class="products-grid">
+        <div class="loading">Loading products...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Modal -->
+  <div id="productModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeProductModal()">&times;</span>
+      <div class="modal-body">
+        <div class="modal-image">
+          <img id="modalImage" src="" alt="Product">
+        </div>
+        <div class="modal-details">
+          <h2 id="modalProductName"></h2>
+          <p id="modalProductDescription"></p>
+          <div class="price-section">
+            <span class="price" id="modalPrice">₹0</span>
+            <span class="original-price" id="modalOriginalPrice"></span>
+            <span class="discount" id="modalDiscount"></span>
+          </div>
+          <div class="stock-info">
+            <p id="modalStock"></p>
+          </div>
+          <div class="quantity-selector">
+            <button onclick="decreaseQuantity()">-</button>
+            <input type="number" id="modalQuantity" value="1" min="1">
+            <button onclick="increaseQuantity()">+</button>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="addProductToCart()">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2024 Yourwae. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0"></script>
+  <script src="js/app.js"></script>
+  <script src="js/store-detail.js"></script>
+</body>
+</html>
