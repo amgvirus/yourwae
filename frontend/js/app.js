@@ -1,6 +1,6 @@
 // Supabase Configuration
-const SUPABASE_URL = https://dzphgpikqxfeiautsnbm.supabase.co; // Replace with your Supabase URL
-const SUPABASE_ANON_KEY = sb_publishable_twMoDMVTH-QJY_jIiZIpQQ_0IA8M1bk; // Replace with your Supabase anon key
+const SUPABASE_URL = 'https://dzphgpikqxfeiautsnbm.supabase.co'; // Replace with your Supabase URL
+const SUPABASE_ANON_KEY = 'sb_publishable_twMoDMVTH-QJY_jIiZIpQQ_0IA8M1bk'; // Replace with your Supabase anon key
 
 // Initialize Supabase
 const { createClient } = supabase;
@@ -19,17 +19,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function checkAuthStatus() {
   try {
     const { data: { user } } = await supabaseClient.auth.getUser();
-    
+
     if (user) {
       currentUser = user;
-      
+
       // Get user role from database
       const { data, error } = await supabaseClient
         .from('users')
         .select('role')
         .eq('id', user.id)
         .single();
-      
+
       if (data) {
         currentUserRole = data.role;
         updateUIForLoggedInUser();

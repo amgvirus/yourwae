@@ -1,19 +1,19 @@
 // Load featured stores on home page
 async function loadFeaturedStores() {
   const container = document.getElementById('storesContainer');
-  
+
   try {
     let stores = await storeAPI.getAllStores();
-    
+
     // Filter by selected town if available
     const selectedTown = townManager.getSelectedTown();
     if (selectedTown && selectedTown.id) {
       stores = stores.filter(store => store.town === selectedTown.id || store.town?._id === selectedTown.id);
     }
-    
+
     // Limit to 6 stores
     stores = stores.slice(0, 6);
-    
+
     if (stores.length === 0) {
       container.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No stores available in your town yet</p>';
       return;
@@ -46,7 +46,7 @@ async function loadFeaturedStores() {
 async function handleTownChange() {
   const select = document.getElementById('townSelect');
   const townValue = select.value;
-  
+
   if (townValue) {
     townManager.setSelectedTown(townValue, select.options[select.selectedIndex].text);
     loadFeaturedStores();
@@ -57,13 +57,13 @@ async function handleTownChange() {
 async function initializeTownSelector() {
   const select = document.getElementById('townSelect');
   if (!select) return;
-  
+
   try {
     const towns = await townAPI.getAllTowns();
-    
+
     // Clear existing options except the first one
     select.innerHTML = '<option value="">Select Town</option>';
-    
+
     // Add town options
     towns.forEach(town => {
       const option = document.createElement('option');
@@ -71,7 +71,7 @@ async function initializeTownSelector() {
       option.textContent = town.name;
       select.appendChild(option);
     });
-    
+
     // Restore previously selected town
     const selectedTown = townManager.getSelectedTown();
     if (selectedTown) {
@@ -99,9 +99,7 @@ async function handleSearch() {
 
 // Handle logout
 async function handleLogout() {
-  // Clear local auth data
-  localStorage.removeItem('token');
-  localStorage.removeItem('currentUser');
+  await window.fastGetApp.logout();
   window.location.href = 'index.html';
 }
 
@@ -109,7 +107,7 @@ async function handleLogout() {
 document.addEventListener('DOMContentLoaded', async () => {
   await initializeTownSelector();
   await loadFeaturedStores();
-  
+
   // Allow Enter key in search
   const searchInput = document.getElementById('searchInput');
   if (searchInput) {
