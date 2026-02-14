@@ -13,7 +13,45 @@ let currentUserRole = null;
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
   await checkAuthStatus();
+  initMobileMenu();
 });
+
+// ============== MOBILE MENU ==============
+function initMobileMenu() {
+  // Close menu on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMobileMenu();
+  });
+}
+
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const overlay = document.getElementById('menuOverlay');
+  const hamburger = document.getElementById('hamburgerBtn');
+
+  if (menu && overlay) {
+    const isActive = menu.classList.contains('active');
+    if (isActive) {
+      closeMobileMenu();
+    } else {
+      menu.classList.add('active');
+      overlay.classList.add('active');
+      if (hamburger) hamburger.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+}
+
+function closeMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const overlay = document.getElementById('menuOverlay');
+  const hamburger = document.getElementById('hamburgerBtn');
+
+  if (menu) menu.classList.remove('active');
+  if (overlay) overlay.classList.remove('active');
+  if (hamburger) hamburger.classList.remove('active');
+  document.body.style.overflow = '';
+}
 
 // Check authentication status
 async function checkAuthStatus() {
@@ -508,7 +546,27 @@ function updateUIForLoggedInUser() {
 
   if (loginBtn) loginBtn.style.display = 'none';
   if (logoutBtn) logoutBtn.style.display = 'block';
-  if (userMenu) userMenu.style.display = 'block';
+  if (userMenu) userMenu.style.display = 'flex';
+
+  // Mobile menu updates
+  const mobileLoginLink = document.getElementById('mobileLoginLink');
+  const mobileLogoutItem = document.getElementById('mobileLogoutItem');
+  const mobileUserName = document.getElementById('mobileUserName');
+  const mobileUserEmail = document.getElementById('mobileUserEmail');
+  const bottomNavAccount = document.getElementById('bottomNavAccount');
+
+  if (mobileLoginLink) mobileLoginLink.parentElement.style.display = 'none';
+  if (mobileLogoutItem) mobileLogoutItem.style.display = 'block';
+  if (mobileUserName && currentUser) {
+    mobileUserName.textContent = currentUser.email ? currentUser.email.split('@')[0] : 'User';
+  }
+  if (mobileUserEmail && currentUser) {
+    mobileUserEmail.textContent = currentUser.email || '';
+  }
+  if (bottomNavAccount) {
+    bottomNavAccount.href = 'orders.html';
+    bottomNavAccount.querySelector('span:last-child').textContent = 'Orders';
+  }
 }
 
 // Update UI for logged out user
@@ -520,6 +578,22 @@ function updateUIForLoggedOutUser() {
   if (loginBtn) loginBtn.style.display = 'block';
   if (logoutBtn) logoutBtn.style.display = 'none';
   if (userMenu) userMenu.style.display = 'none';
+
+  // Mobile menu updates
+  const mobileLoginLink = document.getElementById('mobileLoginLink');
+  const mobileLogoutItem = document.getElementById('mobileLogoutItem');
+  const mobileUserName = document.getElementById('mobileUserName');
+  const mobileUserEmail = document.getElementById('mobileUserEmail');
+  const bottomNavAccount = document.getElementById('bottomNavAccount');
+
+  if (mobileLoginLink) mobileLoginLink.parentElement.style.display = 'block';
+  if (mobileLogoutItem) mobileLogoutItem.style.display = 'none';
+  if (mobileUserName) mobileUserName.textContent = 'Welcome';
+  if (mobileUserEmail) mobileUserEmail.textContent = 'Sign in to your account';
+  if (bottomNavAccount) {
+    bottomNavAccount.href = 'login.html';
+    bottomNavAccount.querySelector('span:last-child').textContent = 'Account';
+  }
 }
 
 // Export functions

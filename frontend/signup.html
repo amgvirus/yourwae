@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up - Yourwae</title>
+  <title>Sign Up - YourWae</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
-  <!-- Navigation Bar -->
+  <!-- Top Navbar -->
   <nav class="navbar">
     <div class="navbar-container">
       <div class="navbar-logo">
-        <a href="index.html"><strong>⚡ Yourwae</strong></a>
+        <a href="index.html"><strong>Your<span class="brand-wae">Wae</span></strong></a>
       </div>
     </div>
   </nav>
@@ -20,8 +22,11 @@
   <section class="auth-section">
     <div class="auth-container">
       <div class="auth-box">
-        <h1>Join Yourwae</h1>
+        <h1>Join Your<span class="brand-wae">Wae</span></h1>
         <p class="subtitle">Create your account</p>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="successMessage" class="success-message" style="display: none;"></div>
 
         <!-- Role Selection -->
         <div class="role-selector">
@@ -99,19 +104,16 @@
         <p class="auth-footer">
           Already have an account? <a href="login.html">Login here</a>
         </p>
-
-        <div id="errorMessage" class="error-message" style="display: none;"></div>
-        <div id="successMessage" class="success-message" style="display: none;"></div>
       </div>
 
       <div class="auth-info">
-        <h2>Join Yourwae Today!</h2>
+        <h2>Join Your<span style="color: rgba(255,255,255,0.9);">Wae</span> Today!</h2>
         <p>Start shopping from local businesses or become a seller.</p>
         <ul class="features">
-          <li>✓ Quick & Easy signup</li>
-          <li>✓ Secure transactions</li>
-          <li>✓ Real-time tracking</li>
-          <li>✓ Great rewards</li>
+          <li>Quick & Easy signup</li>
+          <li>Secure transactions</li>
+          <li>Real-time tracking</li>
+          <li>Great rewards</li>
         </ul>
       </div>
     </div>
@@ -121,4 +123,5 @@
   <script src="js/app.js"></script>
   <script src="js/signup.js"></script>
 </body>
+
 </html>

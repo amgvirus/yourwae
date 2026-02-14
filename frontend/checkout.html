@@ -4,16 +4,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout - Yourwae</title>
+  <title>Checkout - YourWae</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
-  <!-- Navigation Bar -->
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" id="menuOverlay" onclick="closeMobileMenu()"></div>
+
+  <!-- Mobile Slide Menu -->
+  <nav class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <div class="user-avatar" id="mobileUserAvatar">👤</div>
+      <div class="user-info">
+        <div class="user-name" id="mobileUserName">Welcome</div>
+        <div class="user-email" id="mobileUserEmail">Sign in to your account</div>
+      </div>
+    </div>
+    <ul class="mobile-menu-links">
+      <li><a href="index.html"><span class="menu-icon">🏠</span> Home</a></li>
+      <li><a href="stores.html"><span class="menu-icon">🏪</span> Stores</a></li>
+      <li><a href="cart.html"><span class="menu-icon">🛒</span> Cart</a></li>
+      <li><a href="orders.html"><span class="menu-icon">📦</span> My Orders</a></li>
+      <li><a href="login.html" id="mobileLoginLink"><span class="menu-icon">🔑</span> Login</a></li>
+      <li id="mobileLogoutItem" style="display:none;"><a href="#" onclick="handleLogout()"><span
+            class="menu-icon">🚪</span> Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- Top Navbar -->
   <nav class="navbar">
     <div class="navbar-container">
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <div class="navbar-logo">
-        <a href="index.html"><strong>⚡ Yourwae</strong></a>
+        <a href="index.html"><strong>Your<span class="brand-wae">Wae</span></strong></a>
+      </div>
+      <div class="navbar-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search..." disabled>
       </div>
       <div class="navbar-menu">
         <a href="stores.html" class="nav-link">Stores</a>
@@ -30,7 +62,7 @@
   <!-- Checkout Section -->
   <section class="checkout-section">
     <div class="container">
-      <h1>Checkout</h1>
+      <h1>📋 Checkout</h1>
 
       <div class="checkout-content">
         <!-- Checkout Form -->
@@ -54,10 +86,10 @@
                   <label for="state">State</label>
                   <input type="text" id="state" required placeholder="State">
                 </div>
-                <div class="form-group">
-                  <label for="zip">Zip Code</label>
-                  <input type="text" id="zip" required placeholder="Zip code">
-                </div>
+              </div>
+              <div class="form-group">
+                <label for="zip">Zip Code</label>
+                <input type="text" id="zip" required placeholder="Zip code">
               </div>
               <div class="form-group">
                 <label for="specialInstructions">Special Instructions (Optional)</label>
@@ -72,11 +104,11 @@
             <div class="payment-options">
               <label class="payment-option">
                 <input type="radio" name="paymentMethod" value="card" checked>
-                <span class="payment-label">💳 Credit/Debit Card</span>
+                <span class="payment-label">💳 Card</span>
               </label>
               <label class="payment-option">
-                <input type="radio" name="paymentMethod" value="upi">
-                <span class="payment-label">📱 UPI</span>
+                <input type="radio" name="paymentMethod" value="mobile_money">
+                <span class="payment-label">📱 Mobile Money</span>
               </label>
               <label class="payment-option">
                 <input type="radio" name="paymentMethod" value="wallet">
@@ -135,7 +167,7 @@
           </div>
 
           <button class="btn btn-primary btn-full" onclick="placeOrder()">Place Order</button>
-          <button class="btn btn-secondary btn-full" onclick="window.location.href='cart.html'">Back to Cart</button>
+          <button class="btn btn-outline btn-full" onclick="window.location.href='cart.html'">Back to Cart</button>
         </div>
       </div>
     </div>
@@ -144,9 +176,37 @@
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
-      <p>&copy; 2024 Yourwae. All rights reserved.</p>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Your<span class="brand-wae">Wae</span>. All rights reserved.</p>
+      </div>
     </div>
   </footer>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-items">
+      <a href="index.html" class="bottom-nav-item">
+        <span class="nav-icon">🏠</span>
+        <span>Home</span>
+      </a>
+      <a href="stores.html" class="bottom-nav-item">
+        <span class="nav-icon">🏪</span>
+        <span>Stores</span>
+      </a>
+      <a href="cart.html" class="bottom-nav-item active">
+        <span class="nav-icon">🛒</span>
+        <span>Cart</span>
+      </a>
+      <a href="orders.html" class="bottom-nav-item">
+        <span class="nav-icon">📦</span>
+        <span>Orders</span>
+      </a>
+      <a href="login.html" class="bottom-nav-item" id="bottomNavAccount">
+        <span class="nav-icon">👤</span>
+        <span>Account</span>
+      </a>
+    </div>
+  </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0"></script>
   <script src="https://js.stripe.com/v3/"></script>

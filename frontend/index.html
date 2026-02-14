@@ -1,17 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yourwae - Hyperlocal E-commerce Platform</title>
+  <title>YourWae - Shop Local, Delivered Fast</title>
+  <meta name="description"
+    content="YourWae - Your hyperlocal e-commerce platform. Order from local stores and get delivery in minutes.">
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
-  <!-- Navigation Bar -->
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" id="menuOverlay" onclick="closeMobileMenu()"></div>
+
+  <!-- Mobile Slide Menu -->
+  <nav class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <div class="user-avatar" id="mobileUserAvatar">👤</div>
+      <div class="user-info">
+        <div class="user-name" id="mobileUserName">Welcome</div>
+        <div class="user-email" id="mobileUserEmail">Sign in to your account</div>
+      </div>
+    </div>
+    <ul class="mobile-menu-links">
+      <li><a href="index.html" class="active"><span class="menu-icon">🏠</span> Home</a></li>
+      <li><a href="stores.html"><span class="menu-icon">🏪</span> Stores</a></li>
+      <li><a href="cart.html"><span class="menu-icon">🛒</span> Cart</a></li>
+      <li><a href="orders.html"><span class="menu-icon">📦</span> My Orders</a></li>
+      <li><a href="login.html" id="mobileLoginLink"><span class="menu-icon">🔑</span> Login</a></li>
+      <li id="mobileLogoutItem" style="display:none;"><a href="#" onclick="handleLogout()"><span
+            class="menu-icon">🚪</span> Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- Top Navbar -->
   <nav class="navbar">
     <div class="navbar-container">
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <div class="navbar-logo">
-        <a href="index.html"><strong> Yourwae</strong></a>
+        <a href="index.html"><strong>Your<span class="brand-wae">Wae</span></strong></a>
+      </div>
+      <div class="navbar-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search stores or products...">
       </div>
       <div class="navbar-menu">
         <!-- Town Selector -->
@@ -40,11 +76,64 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
-      <h1>Get Your Essentials Delivered Fast ⚡</h1>
-      <p>Order from local stores and get delivery in minutes</p>
+      <h1>Shop Local, Get It Fast ⚡</h1>
+      <p>Order from trusted local stores and get delivery in minutes</p>
       <div class="hero-search">
-        <input type="text" id="searchInput" placeholder="Search stores or products..." class="search-input">
+        <input type="text" placeholder="Search stores or products..." class="search-input"
+          onclick="document.getElementById('searchInput').focus()">
         <button class="btn btn-primary" onclick="handleSearch()">Search</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Strip -->
+  <div class="category-strip">
+    <div class="container">
+      <a href="stores.html?cat=grocery" class="category-item">
+        <span class="category-icon">🛒</span>
+        <span class="category-label">Grocery</span>
+      </a>
+      <a href="stores.html?cat=electronics" class="category-item">
+        <span class="category-icon">📱</span>
+        <span class="category-label">Electronics</span>
+      </a>
+      <a href="stores.html?cat=pharmacy" class="category-item">
+        <span class="category-icon">💊</span>
+        <span class="category-label">Pharmacy</span>
+      </a>
+      <a href="stores.html?cat=fashion" class="category-item">
+        <span class="category-icon">👗</span>
+        <span class="category-label">Fashion</span>
+      </a>
+      <a href="stores.html?cat=beauty" class="category-item">
+        <span class="category-icon">💄</span>
+        <span class="category-label">Beauty</span>
+      </a>
+      <a href="stores.html?cat=home" class="category-item">
+        <span class="category-icon">🏠</span>
+        <span class="category-label">Home</span>
+      </a>
+      <a href="stores.html?cat=food" class="category-item">
+        <span class="category-icon">🍔</span>
+        <span class="category-label">Food</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Promo Banners -->
+  <section class="promo-banners">
+    <div class="container">
+      <div class="promo-card">
+        <h3>🔥 Free Delivery</h3>
+        <p>On your first 3 orders — no minimum!</p>
+      </div>
+      <div class="promo-card blue">
+        <h3>💎 Become a Seller</h3>
+        <p>List your store and reach more customers</p>
+      </div>
+      <div class="promo-card green">
+        <h3>⚡ Flash Deals</h3>
+        <p>Up to 50% off on select items daily</p>
       </div>
     </div>
   </section>
@@ -52,9 +141,11 @@
   <!-- Featured Stores -->
   <section class="featured-stores">
     <div class="container">
-      <h2>Featured Stores</h2>
+      <div class="section-header">
+        <h2>Featured Stores</h2>
+        <a href="stores.html" class="see-all-link">See All →</a>
+      </div>
       <div id="storesContainer" class="stores-grid">
-        <!-- Stores will be loaded here -->
         <div class="loading">Loading stores...</div>
       </div>
     </div>
@@ -83,7 +174,7 @@
         <div class="step">
           <div class="step-number">4</div>
           <h3>Track Delivery</h3>
-          <p>Get real-time delivery updates</p>
+          <p>Get real-time updates</p>
         </div>
       </div>
     </div>
@@ -94,14 +185,16 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <h4>Yourwae</h4>
+          <h4>Your<span class="brand-wae">Wae</span></h4>
           <p>Your hyperlocal shopping platform</p>
         </div>
         <div class="footer-section">
           <h4>Quick Links</h4>
           <ul>
             <li><a href="stores.html">Browse Stores</a></li>
-            <li><a href="#" onclick="currentUser ? window.location.href='orders.html' : window.location.href='login.html'">My Orders</a></li>
+            <li><a href="#"
+                onclick="currentUser ? window.location.href='orders.html' : window.location.href='login.html'">My
+                Orders</a></li>
             <li><a href="#" onclick="window.location.href='signup.html'">Become a Seller</a></li>
           </ul>
         </div>
@@ -115,13 +208,40 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2026 ZhiLak Codes (Yourwae). All rights reserved.</p>
+        <p>&copy; 2026 ZhiLak Codes (Your<span class="brand-wae">Wae</span>). All rights reserved.</p>
       </div>
     </div>
   </footer>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-items">
+      <a href="index.html" class="bottom-nav-item active">
+        <span class="nav-icon">🏠</span>
+        <span>Home</span>
+      </a>
+      <a href="stores.html" class="bottom-nav-item">
+        <span class="nav-icon">🏪</span>
+        <span>Stores</span>
+      </a>
+      <a href="cart.html" class="bottom-nav-item">
+        <span class="nav-icon">🛒</span>
+        <span>Cart</span>
+      </a>
+      <a href="orders.html" class="bottom-nav-item">
+        <span class="nav-icon">📦</span>
+        <span>Orders</span>
+      </a>
+      <a href="login.html" class="bottom-nav-item" id="bottomNavAccount">
+        <span class="nav-icon">👤</span>
+        <span>Account</span>
+      </a>
+    </div>
+  </nav>
 
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
   <script src="js/index.js"></script>
 </body>
+
 </html>
