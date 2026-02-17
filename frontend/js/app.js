@@ -83,39 +83,21 @@ async function checkAuthStatus() {
 // Signup function
 async function signup(email, password, firstName, lastName, phone, role = 'customer') {
   try {
-    // Create auth user
+    // Create auth user with metadata (trigger will handle public.users and wallets)
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone,
+          role: role
+        }
+      }
     });
 
     if (authError) throw authError;
-
-    // Create user record in database
-    const { data: userData, error: userError } = await supabaseClient
-      .from('users')
-      .insert([
-        {
-          id: authData.user.id,
-          email,
-          phone,
-          first_name: firstName,
-          last_name: lastName,
-          role,
-        },
-      ]);
-
-    if (userError) throw userError;
-
-    // Create wallet for user
-    await supabaseClient
-      .from('wallets')
-      .insert([
-        {
-          user_id: authData.user.id,
-          balance: 0,
-        },
-      ]);
 
     currentUser = authData.user;
     currentUserRole = role;

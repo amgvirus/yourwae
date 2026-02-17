@@ -197,6 +197,91 @@ CREATE TABLE reviews (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Enable Row Level Security
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE addresses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cart_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE deliveries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE wallets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE wallet_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+
+-- Create handle_new_user trigger function
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Insert into public.users
+  INSERT INTO public.users (id, email, phone, first_name, last_name, role)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'phone', ''),
+    COALESCE(NEW.raw_user_meta_data->>'first_name', ''),
+    COALESCE(NEW.raw_user_meta_data->>'last_name', ''),
+    CAST(COALESCE(NEW.raw_user_meta_data->>'role', 'customer') AS role_type)
+  );
+
+  -- Create wallet
+  INSERT INTO public.wallets (user_id, balance)
+  VALUES (NEW.id, 0);
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger for new user signup
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- RLS POLICIES --
+
+-- Users
+CREATE POLICY "Users can view their own profile" ON users
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update their own profile" ON users
+  FOR UPDATE USING (auth.uid() = id);
+
+-- Stores
+CREATE POLICY "Anyone can view active verified stores" ON stores
+  FOR SELECT USING (is_active = true AND is_verified = true);
+
+CREATE POLICY "Owners can manage their own stores" ON stores
+  FOR ALL USING (auth.uid() = owner_id);
+
+-- Products
+CREATE POLICY "Anyone can view products of active stores" ON products
+  FOR SELECT USING (is_active = true);
+
+CREATE POLICY "Store owners can manage their products" ON products
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM stores
+      WHERE stores.id = products.store_id AND stores.owner_id = auth.uid()
+    )
+  );
+
+-- Cart Items
+CREATE POLICY "Users can manage their own cart" ON cart_items
+  FOR ALL USING (auth.uid() = user_id);
+
+-- Orders
+CREATE POLICY "Users can view their own orders" ON orders
+  FOR SELECT USING (auth.uid() = customer_id);
+
+CREATE POLICY "Users can create their own orders" ON orders
+  FOR INSERT WITH CHECK (auth.uid() = customer_id);
+
+-- Wallets
+CREATE POLICY "Users can view their own wallet" ON wallets
+  FOR SELECT USING (auth.uid() = user_id);
+
 -- Create indexes
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_phone ON users(phone);
@@ -209,3 +294,4 @@ CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_payments_order_id ON payments(order_id);
 CREATE INDEX idx_deliveries_order_id ON deliveries(order_id);
 CREATE INDEX idx_cart_items_user_id ON cart_items(user_id);
+
