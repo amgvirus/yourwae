@@ -105,9 +105,13 @@ function displayProducts() {
         <p class="stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}" style="font-size: 11px; margin-top: 4px; color: ${product.stock > 0 ? '#28a745' : '#dc3545'};">
           ${product.stock > 0 ? `${product.stock} left` : 'Out of stock'}
         </p>
+        <button class="btn btn-primary btn-sm add-to-cart-btn" onclick="directAddToCart('${product.id}', event)" ${product.stock <= 0 ? 'disabled' : ''}>
+          Add to Cart
+        </button>
       </div>
     </div>
   `).join('');
+
 
 }
 
@@ -155,7 +159,7 @@ function decreaseQuantity() {
   }
 }
 
-// Add product to cart
+// Add product to cart (from modal)
 async function addProductToCart() {
   const user = window.fastGetApp.currentUser;
   if (!user) {
@@ -163,7 +167,6 @@ async function addProductToCart() {
     window.location.href = 'login.html';
     return;
   }
-
 
   const quantity = parseInt(document.getElementById('modalQuantity').value);
   const result = await window.fastGetApp.addToCart(selectedProduct.id, quantity);
@@ -175,6 +178,44 @@ async function addProductToCart() {
     alert('Error adding to cart: ' + result.error);
   }
 }
+
+// Direct Add to Cart (from card)
+async function directAddToCart(productId, event) {
+  event.stopPropagation(); // Prevent opening modal
+
+  const user = window.fastGetApp.currentUser;
+  if (!user) {
+    alert('Please login first');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const btn = event.currentTarget;
+  const originalText = btn.textContent;
+
+  try {
+    btn.disabled = true;
+    btn.textContent = 'Adding...';
+
+    const result = await window.fastGetApp.addToCart(productId, 1);
+    if (result.success) {
+      btn.textContent = 'Added! ✅';
+      btn.style.background = '#28a745';
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = '';
+        btn.disabled = false;
+      }, 2000);
+    } else {
+      throw new Error(result.error);
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
 
 // Filter products
 function filterProducts() {

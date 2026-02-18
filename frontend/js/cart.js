@@ -1,6 +1,9 @@
 // Load cart items
 async function loadCart() {
-  if (!window.currentUser) {
+  await window.fastGetApp.authReadyPromise;
+  const user = window.fastGetApp.currentUser;
+
+  if (!user) {
     document.getElementById('cartContainer').innerHTML = `
       <div style="text-align: center; padding: 40px;">
         <p>Please <a href="login.html">login</a> to view your cart</p>
@@ -8,6 +11,7 @@ async function loadCart() {
     `;
     return;
   }
+
 
   const result = await window.fastGetApp.getCartItems();
 
