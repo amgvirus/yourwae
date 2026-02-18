@@ -44,6 +44,11 @@ function displayCartItems(cartItems) {
       <img src="${(item.products.images && item.products.images[0]) || 'https://via.placeholder.com/100'}" alt="${item.products.name}">
       <div class="item-details">
         <h3>${item.products.name}</h3>
+        ${item.selected_variations ? `
+          <div class="item-variations">
+            ${Object.entries(item.selected_variations).map(([k, v]) => `<span>${k}: ${v}</span>`).join(' | ')}
+          </div>
+        ` : ''}
         <p class="item-price">₵${item.products.price.toFixed(2)}</p>
       </div>
 
@@ -53,42 +58,43 @@ function displayCartItems(cartItems) {
         <button onclick="updateQuantity('${item.id}', ${item.quantity + 1})">+</button>
       </div>
       <div class="item-total">
-        <p>GH₵${(item.products.price * item.quantity).toFixed(2)}</p>
+        <p>₵${(item.products.price * item.quantity).toFixed(2)}</p>
       </div>
       <button class="btn-remove" onclick="removeItem('${item.id}')">Remove</button>
     </div>
   `).join('');
 }
 
+
 // Calculate totals
 function calculateTotals(cartItems) {
   if (!cartItems || cartItems.length === 0) {
-    document.getElementById('subtotal').textContent = 'GH₵0';
-    document.getElementById('tax').textContent = 'GH₵0';
-    document.getElementById('deliveryFee').textContent = 'GH₵0';
-    document.getElementById('total').textContent = 'GH₵0';
+    document.getElementById('subtotal').textContent = '₵0.00';
+    document.getElementById('deliveryFee').textContent = '₵0.00';
+    document.getElementById('total').textContent = '₵0.00';
     return;
   }
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.products.price * item.quantity), 0);
-  const tax = subtotal * 0.1;
-  const deliveryFee = 50; // Default delivery fee
+  const deliveryFee = 7.00; // Flat fee
 
-  document.getElementById('subtotal').textContent = `GH₵${subtotal.toFixed(2)}`;
-  document.getElementById('tax').textContent = `GH₵${tax.toFixed(2)}`;
-  document.getElementById('deliveryFee').textContent = `GH₵${deliveryFee.toFixed(2)}`;
-  document.getElementById('total').textContent = `GH₵${(subtotal + tax + deliveryFee).toFixed(2)}`;
+  document.getElementById('subtotal').textContent = `₵${subtotal.toFixed(2)}`;
+  if (document.getElementById('taxRow')) document.getElementById('taxRow').style.display = 'none';
+  document.getElementById('deliveryFee').textContent = `₵${deliveryFee.toFixed(2)}`;
+  document.getElementById('total').textContent = `₵${(subtotal + deliveryFee).toFixed(2)}`;
 }
 
-// Update quantity (placeholder)
+
+// Update quantity
 async function updateQuantity(itemId, newQuantity) {
-  if (newQuantity < 1) {
-    removeItem(itemId);
-    return;
+  const result = await window.fastGetApp.updateCartItemQuantity(itemId, newQuantity);
+  if (result.success) {
+    loadCart();
+  } else {
+    alert('Error updating quantity: ' + result.error);
   }
-  alert('Quantity update feature coming soon');
-  loadCart();
 }
+
 
 // Remove item from cart
 async function removeItem(itemId) {

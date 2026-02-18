@@ -92,8 +92,9 @@ CREATE TABLE IF NOT EXISTS stores (
   email VARCHAR(255),
   operating_hours JSONB,
   delivery_radius DECIMAL(5, 2) DEFAULT 5,
-  base_delivery_fee DECIMAL(10, 2) DEFAULT 5,
-  delivery_fee_per_km DECIMAL(10, 2) DEFAULT 2,
+  base_delivery_fee DECIMAL(10, 2) DEFAULT 7.00,
+  delivery_fee_per_km DECIMAL(10, 2) DEFAULT 0,
+
   minimum_order_value DECIMAL(10, 2) DEFAULT 0,
   rating DECIMAL(3, 2) DEFAULT 0,
   total_reviews INTEGER DEFAULT 0,
@@ -124,6 +125,8 @@ CREATE TABLE IF NOT EXISTS products (
   total_reviews INTEGER DEFAULT 0,
   tags TEXT[],
   specifications JSONB,
+  variations JSONB DEFAULT '[]',
+
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -134,7 +137,9 @@ CREATE TABLE IF NOT EXISTS cart_items (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   quantity INTEGER NOT NULL DEFAULT 1,
+  selected_variations JSONB DEFAULT '{}',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

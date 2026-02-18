@@ -156,13 +156,41 @@ function openProductModal(productId = null) {
 
     if (productId) {
         title.textContent = 'Edit Product';
-        // Logic to populate for edit would go here
+        loadProductToEdit(productId);
     } else {
         title.textContent = 'Add New Product';
+        document.getElementById('pVariations').value = '';
     }
 
     modal.classList.add('active');
 }
+
+async function loadProductToEdit(productId) {
+    const { data: p, error } = await supabaseClient
+        .from('products')
+        .select('*')
+        .eq('id', productId)
+        .single();
+
+    if (p) {
+        document.getElementById('productId').value = p.id;
+        document.getElementById('pName').value = p.name;
+        document.getElementById('pDesc').value = p.description;
+        document.getElementById('pPrice').value = p.price;
+        document.getElementById('pStock').value = p.stock;
+        document.getElementById('pImage').value = p.images?.[0] || '';
+        updateImagePreview(p.images?.[0] || '');
+
+        // Variations format: Name: Opt, Opt | Name2: Opt, Opt
+        if (p.variations && p.variations.length > 0) {
+            const varStr = p.variations.map(v => `${v.name}: ${v.options.join(', ')}`).join(' | ');
+            document.getElementById('pVariations').value = varStr;
+        } else {
+            document.getElementById('pVariations').value = '';
+        }
+    }
+}
+
 
 function updateImagePreview(url) {
     const preview = document.getElementById('pImagePreview');
@@ -248,11 +276,31 @@ async function handleProductSubmit(e) {
         return;
     }
 
+    // Variations parsing
+    const varInput = document.getElementById('pVariations').value.trim();
+    let variations = [];
+    if (varInput) {
+        const groups = varInput.split('|');
+        groups.forEach(g => {
+            const parts = g.split(':');
+            if (parts.length === 2) {
+                const name = parts[0].trim();
+                const options = parts[1].split(',').map(o => o.trim()).filter(o => o);
+                if (name && options.length > 0) {
+                    variations.push({ name, options });
+                }
+            }
+        });
+    }
+
+    const productId = document.getElementById('productId').value;
+
     const formData = {
         name: document.getElementById('pName').value,
         description: document.getElementById('pDesc').value,
         price: Number(document.getElementById('pPrice').value),
         stock: Number(document.getElementById('pStock').value),
+        variations: variations,
         images: [document.getElementById('pImage').value || 'https://via.placeholder.com/150?text=Product'],
         store_id: currentStore.id,
         is_active: true
@@ -260,12 +308,20 @@ async function handleProductSubmit(e) {
 
 
     try {
-        const { error } = await supabaseClient
-            .from('products')
-            .insert([formData]);
+        let result;
+        if (productId) {
+            result = await supabaseClient
+                .from('products')
+                .update(formData)
+                .eq('id', productId);
+        } else {
+            result = await supabaseClient
+                .from('products')
+                .insert([formData]);
+        }
 
-        if (error) throw error;
-        alert('Product added successfully!');
+        if (result.error) throw result.error;
+        alert(productId ? 'Product updated!' : 'Product added!');
         closeProductModal();
         loadProducts();
     } catch (err) {

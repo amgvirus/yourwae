@@ -115,6 +115,8 @@ function displayProducts() {
 
 }
 
+let selectedVariations = {};
+
 // Open product modal
 function openProductModal(productId) {
   selectedProduct = allProducts.find(p => p.id === productId);
@@ -124,9 +126,9 @@ function openProductModal(productId) {
   document.getElementById('modalImage').src = selectedProduct.images?.[0] || 'https://via.placeholder.com/300';
   document.getElementById('modalProductName').textContent = selectedProduct.name;
   document.getElementById('modalProductDescription').textContent = selectedProduct.description;
-  document.getElementById('modalPrice').textContent = `GH₵${selectedProduct.price}`;
+  document.getElementById('modalPrice').textContent = `₵${selectedProduct.price.toFixed(2)}`;
   document.getElementById('modalOriginalPrice').textContent = selectedProduct.original_price ?
-    `GH₵${selectedProduct.original_price}` : '';
+    `₵${selectedProduct.original_price.toFixed(2)}` : '';
   document.getElementById('modalDiscount').textContent = selectedProduct.discount ?
     `${selectedProduct.discount}% off` : '';
   document.getElementById('modalStock').textContent = selectedProduct.stock > 0 ?
@@ -134,8 +136,45 @@ function openProductModal(productId) {
   document.getElementById('modalQuantity').value = 1;
   document.getElementById('modalQuantity').max = selectedProduct.stock;
 
+  // Render variations
+  renderModalVariations();
+
   document.getElementById('productModal').style.display = 'block';
 }
+
+function renderModalVariations() {
+  const container = document.getElementById('modalVariations');
+  container.innerHTML = '';
+  selectedVariations = {};
+
+  if (!selectedProduct.variations || selectedProduct.variations.length === 0) return;
+
+  selectedProduct.variations.forEach(v => {
+    const div = document.createElement('div');
+    div.className = 'variation-group';
+    div.innerHTML = `<h4>Select ${v.name}</h4>`;
+
+    const optionsDiv = document.createElement('div');
+    optionsDiv.className = 'variation-options';
+
+    v.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'variation-btn';
+      btn.textContent = opt;
+      btn.onclick = () => {
+        // Deselect others
+        optionsDiv.querySelectorAll('.variation-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedVariations[v.name] = opt;
+      };
+      optionsDiv.appendChild(btn);
+    });
+
+    div.appendChild(optionsDiv);
+    container.appendChild(div);
+  });
+}
+
 
 // Close product modal
 function closeProductModal() {
@@ -168,8 +207,18 @@ async function addProductToCart() {
     return;
   }
 
+  // Check if all variations are selected
+  if (selectedProduct.variations?.length > 0) {
+    for (const v of selectedProduct.variations) {
+      if (!selectedVariations[v.name]) {
+        alert(`Please select a ${v.name}`);
+        return;
+      }
+    }
+  }
+
   const quantity = parseInt(document.getElementById('modalQuantity').value);
-  const result = await window.fastGetApp.addToCart(selectedProduct.id, quantity);
+  const result = await window.fastGetApp.addToCart(selectedProduct.id, quantity, selectedVariations);
 
   if (result.success) {
     alert('Product added to cart!');
@@ -179,11 +228,20 @@ async function addProductToCart() {
   }
 }
 
+
 // Direct Add to Cart (from card)
 async function directAddToCart(productId, event) {
   event.stopPropagation(); // Prevent opening modal
 
+  const product = allProducts.find(p => p.id === productId);
+  if (product && product.variations?.length > 0) {
+    // If has variations, must open modal to choose
+    openProductModal(productId);
+    return;
+  }
+
   const user = window.fastGetApp.currentUser;
+
   if (!user) {
     alert('Please login first');
     window.location.href = 'login.html';

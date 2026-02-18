@@ -274,14 +274,20 @@
                             onclick="document.getElementById('fileInput').click()">
                         <p id="uploadStatus" style="font-size: 12px; color: #666; margin-top: 5px;"></p>
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label>Variations (Size/Color)</label>
+                        <input type="text" id="pVariations" placeholder="Size: S, M, L | Color: Red, Blue">
+                        <small style="color: #888; display: block; margin-top: 4px;">Format: Feature: Option1, Option2 |
+                            Feature2: OptionA, OptionB</small>
+                    </div>
 
-                <div class="form-group" style="margin-top: 20px; display: flex; gap: 10px;">
 
-                    <button type="submit" class="btn btn-primary" style="flex: 2;">Save Product</button>
-                    <button type="button" class="btn btn-secondary" style="flex: 1;"
-                        onclick="closeProductModal()">Cancel</button>
-                </div>
+                    <div class="form-group" style="margin-top: 20px; display: flex; gap: 10px;">
+
+                        <button type="submit" class="btn btn-primary" style="flex: 2;">Save Product</button>
+                        <button type="button" class="btn btn-secondary" style="flex: 1;"
+                            onclick="closeProductModal()">Cancel</button>
+                    </div>
             </form>
         </div>
     </div>

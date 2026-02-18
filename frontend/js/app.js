@@ -276,19 +276,20 @@ async function searchProducts(query) {
 }
 
 // Add to cart
-async function addToCart(productId, quantity) {
+async function addToCart(productId, quantity, selectedVariations = {}) {
   try {
     if (!currentUser) {
       return { success: false, error: 'User not logged in' };
     }
 
-    // Check if item already in cart
+    // Check if item already in cart with SAME variations
     const { data: existingItem } = await supabaseClient
       .from('cart_items')
-      .select('id')
+      .select('id, quantity')
       .eq('user_id', currentUser.id)
       .eq('product_id', productId)
-      .single();
+      .eq('selected_variations', JSON.stringify(selectedVariations))
+      .maybeSingle();
 
     if (existingItem) {
       // Update quantity
@@ -307,6 +308,7 @@ async function addToCart(productId, quantity) {
             user_id: currentUser.id,
             product_id: productId,
             quantity,
+            selected_variations: selectedVariations
           },
         ]);
 
@@ -319,6 +321,25 @@ async function addToCart(productId, quantity) {
     return { success: false, error: error.message };
   }
 }
+
+// Update cart item quantity
+async function updateCartItemQuantity(cartItemId, newQuantity) {
+  try {
+    if (newQuantity < 1) return removeFromCart(cartItemId);
+
+    const { error } = await supabaseClient
+      .from('cart_items')
+      .update({ quantity: newQuantity })
+      .eq('id', cartItemId);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating cart quantity:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 
 // Get cart items
 async function getCartItems() {
@@ -380,12 +401,10 @@ async function clearCart() {
 }
 
 // Calculate delivery fee
-function calculateDeliveryFee(distance, baseDeliveryFee = 5, feePerKm = 2) {
-  if (distance <= 1) {
-    return baseDeliveryFee;
-  }
-  return baseDeliveryFee + (distance - 1) * feePerKm;
+function calculateDeliveryFee() {
+  return 7.00; // Flat fee as requested
 }
+
 
 // Create order
 async function createOrder(storeId, deliveryAddress, paymentMethod, specialInstructions = '') {
@@ -428,21 +447,13 @@ async function createOrder(storeId, deliveryAddress, paymentMethod, specialInstr
         product_name: item.products.name,
         quantity: item.quantity,
         price: item.products.price,
+        selected_variations: item.selected_variations,
         discount: item.products.discount || 0,
       };
     });
 
-    // Calculate distance and delivery fee
-    const distance = calculateDistance(
-      store.address.latitude,
-      store.address.longitude,
-      deliveryAddress.latitude,
-      deliveryAddress.longitude
-    );
-
-    const deliveryFee = calculateDeliveryFee(distance, store.base_delivery_fee, store.delivery_fee_per_km);
-    const tax = subtotal * 0.1; // 10% tax
-    const totalAmount = subtotal + tax + deliveryFee;
+    const deliveryFee = calculateDeliveryFee();
+    const totalAmount = subtotal + deliveryFee;
 
     // Create order
     const { data: order, error: orderError } = await supabaseClient
@@ -454,7 +465,7 @@ async function createOrder(storeId, deliveryAddress, paymentMethod, specialInstr
           store_id: storeId,
           items,
           subtotal,
-          tax,
+          tax: 0, // Tax removed
           delivery_fee: deliveryFee,
           total_amount: totalAmount,
           delivery_address: deliveryAddress,
@@ -465,6 +476,7 @@ async function createOrder(storeId, deliveryAddress, paymentMethod, specialInstr
       ])
       .select('*')
       .single();
+
 
     if (orderError) throw orderError;
 
@@ -674,8 +686,10 @@ window.fastGetApp = {
   addToCart,
   getCartItems,
   removeFromCart,
+  updateCartItemQuantity,
   clearCart,
   createOrder,
+
   getUserOrders,
   processPayment,
   getDeliveryTracking,

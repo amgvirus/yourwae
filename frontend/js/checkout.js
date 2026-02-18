@@ -25,8 +25,8 @@ async function loadCheckoutData() {
 // Display order summary
 function displayOrderSummary(items) {
   const subtotal = items.reduce((sum, item) => sum + (item.products.price * item.quantity), 0);
-  const tax = subtotal * 0.1;
-  const deliveryFee = 50; // Default
+  const deliveryFee = 7.00; // Flat fee
+
 
   const summaryContent = document.getElementById('summaryContent');
   summaryContent.innerHTML = items.map(item => `
@@ -39,16 +39,15 @@ function displayOrderSummary(items) {
   `).join('');
 
   document.getElementById('summarySubtotal').textContent = `₵${subtotal.toFixed(2)}`;
-  document.getElementById('summaryTax').textContent = `₵${tax.toFixed(2)}`;
+  if (document.getElementById('summaryTax')) document.getElementById('summaryTax').parentElement.style.display = 'none';
   document.getElementById('summaryDeliveryFee').textContent = `₵${deliveryFee.toFixed(2)}`;
-  document.getElementById('summaryTotal').textContent = `₵${(subtotal + tax + deliveryFee).toFixed(2)}`;
+  document.getElementById('summaryTotal').textContent = `₵${(subtotal + deliveryFee).toFixed(2)}`;
 
 
   localStorage.setItem('checkoutTotals', JSON.stringify({
     subtotal,
-    tax,
     deliveryFee,
-    total: subtotal + tax + deliveryFee
+    total: subtotal + deliveryFee
   }));
 }
 
