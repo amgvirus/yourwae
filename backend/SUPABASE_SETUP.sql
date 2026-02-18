@@ -375,7 +375,32 @@ CREATE POLICY "Store owners can update orders for their stores" ON orders
   );
 
 -- Wallets
-DROP POLICY IF EXISTS "Users can view their own wallet" ON wallets;
+DROP POLICY IF EXISTS "Users can view their own wallet" ON wallets;-- Support for Storage
+-- This requires the 'storage' schema to be initialized in Supabase
+-- Usually happens automatically, but we ensure policies are set
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('product-images', 'product-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage Policies
+DROP POLICY IF EXISTS "Public Access" ON storage.objects;
+CREATE POLICY "Public Access" ON storage.objects
+  FOR SELECT USING (bucket_id = 'product-images');
+
+DROP POLICY IF EXISTS "Authenticated Uploads" ON storage.objects;
+CREATE POLICY "Authenticated Uploads" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'product-images' 
+    AND auth.role() = 'authenticated'
+  );
+
+DROP POLICY IF EXISTS "Authenticated Updates" ON storage.objects;
+CREATE POLICY "Authenticated Updates" ON storage.objects
+  FOR UPDATE USING (
+    bucket_id = 'product-images' 
+    AND auth.role() = 'authenticated'
+  );
 CREATE POLICY "Users can view their own wallet" ON wallets
   FOR SELECT USING (auth.uid() = user_id);
 

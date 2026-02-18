@@ -168,9 +168,75 @@ function updateImagePreview(url) {
     preview.src = url || 'https://via.placeholder.com/150?text=No+Image';
 }
 
+function triggerCamera() {
+    // On mobile this will trigger the camera, on desktop file browser
+    const fileInput = document.getElementById('fileInput');
+    fileInput.setAttribute('capture', 'environment');
+    fileInput.click();
+}
+
+async function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // 1. Show local preview
+    const reader = new FileReader();
+    reader.onload = (e) => updateImagePreview(e.target.result);
+    reader.readAsDataURL(file);
+
+    // 2. Upload to Supabase
+    await uploadImage(file);
+}
+
+async function uploadImage(file) {
+    const progressContainer = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const statusEl = document.getElementById('uploadStatus');
+
+    try {
+        progressContainer.style.display = 'block';
+        statusEl.textContent = 'Uploading image...';
+        progressBar.style.width = '20%';
+
+        const user = window.fastGetApp.currentUser;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        const filePath = fileName;
+
+        const { data, error } = await supabaseClient.storage
+            .from('product-images')
+            .upload(filePath, file);
+
+        if (error) throw error;
+
+        progressBar.style.width = '100%';
+
+        // Get public URL
+        const { data: { publicUrl } } = supabaseClient.storage
+            .from('product-images')
+            .getPublicUrl(filePath);
+
+        document.getElementById('pImage').value = publicUrl;
+        statusEl.textContent = 'Upload complete!';
+        statusEl.style.color = 'green';
+
+        setTimeout(() => {
+            progressContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+        }, 2000);
+
+    } catch (err) {
+        console.error('Upload error:', err);
+        statusEl.textContent = 'Upload failed: ' + err.message;
+        statusEl.style.color = 'red';
+    }
+}
+
 function closeProductModal() {
     document.getElementById('productModal').classList.remove('active');
     updateImagePreview('');
+    document.getElementById('uploadStatus').textContent = '';
+    document.getElementById('pImage').value = '';
 }
 
 async function handleProductSubmit(e) {
