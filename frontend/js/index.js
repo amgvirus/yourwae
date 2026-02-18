@@ -97,11 +97,6 @@ async function handleSearch() {
   window.location.href = 'stores.html?search=' + encodeURIComponent(query);
 }
 
-// Handle logout
-async function handleLogout() {
-  await window.fastGetApp.logout();
-  window.location.href = 'index.html';
-}
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
