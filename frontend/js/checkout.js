@@ -33,16 +33,16 @@ function displayOrderSummary(items) {
     <div class="summary-item-row">
       <div class="item-details">
         <p class="item-name">${item.products.name} x ${item.quantity}</p>
-        <p class="item-store">Store ID: ${item.products.store_id}</p>
       </div>
-      <span class="item-total">GH₵${(item.products.price * item.quantity).toFixed(2)}</span>
+      <span class="item-total">₵${(item.products.price * item.quantity).toFixed(2)}</span>
     </div>
   `).join('');
 
-  document.getElementById('summarySubtotal').textContent = `GH₵${subtotal.toFixed(2)}`;
-  document.getElementById('summaryTax').textContent = `GH₵${tax.toFixed(2)}`;
-  document.getElementById('summaryDeliveryFee').textContent = `GH₵${deliveryFee.toFixed(2)}`;
-  document.getElementById('summaryTotal').textContent = `GH₵${(subtotal + tax + deliveryFee).toFixed(2)}`;
+  document.getElementById('summarySubtotal').textContent = `₵${subtotal.toFixed(2)}`;
+  document.getElementById('summaryTax').textContent = `₵${tax.toFixed(2)}`;
+  document.getElementById('summaryDeliveryFee').textContent = `₵${deliveryFee.toFixed(2)}`;
+  document.getElementById('summaryTotal').textContent = `₵${(subtotal + tax + deliveryFee).toFixed(2)}`;
+
 
   localStorage.setItem('checkoutTotals', JSON.stringify({
     subtotal,

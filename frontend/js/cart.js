@@ -37,11 +37,12 @@ function displayCartItems(cartItems) {
 
   container.innerHTML = cartItems.map(item => `
     <div class="cart-item">
-      <img src="${item.products.images?.[0] || 'https://via.placeholder.com/100'}" alt="${item.products.name}">
+      <img src="${(item.products.images && item.products.images[0]) || 'https://via.placeholder.com/100'}" alt="${item.products.name}">
       <div class="item-details">
         <h3>${item.products.name}</h3>
-        <p class="item-price">GH₵${item.products.price}</p>
+        <p class="item-price">₵${item.products.price.toFixed(2)}</p>
       </div>
+
       <div class="item-quantity">
         <button onclick="updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
         <input type="number" value="${item.quantity}" readonly>

@@ -35,7 +35,10 @@ function displayStores() {
 
   container.innerHTML = paginatedStores.map(store => `
     <div class="store-card" onclick="window.location.href='store-detail.html?id=${store.id}'">
-      <img src="${store.store_image || 'https://via.placeholder.com/200'}" alt="${store.store_name}">
+      ${store.store_image ?
+      `<img src="${store.store_image}" alt="${store.store_name}">` :
+      `<div class="store-initials-logo">${window.fastGetApp.getStoreInitials(store.store_name)}</div>`
+    }
       <div class="store-info">
         <h3>${store.store_name}</h3>
         <p class="category">${store.category}</p>
@@ -50,6 +53,7 @@ function displayStores() {
       </div>
     </div>
   `).join('');
+
 
 
   updatePaginationUI();

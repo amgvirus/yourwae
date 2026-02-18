@@ -25,15 +25,35 @@ async function loadStore() {
     displayStoreDetails(store);
     loadProducts();
   } else {
-    document.body.innerHTML = `<p style="text-align: center; padding: 50px;">Error loading store: ${result.error}</p>`;
+    document.getElementById('storeName').textContent = 'Store Not Found';
+    console.error('Error loading store:', result.error);
   }
 }
+
 
 // Display store details
 function displayStoreDetails(store) {
   document.getElementById('storeName').textContent = store.store_name;
   document.getElementById('storeCategory').textContent = store.category;
-  document.getElementById('storeImage').src = store.store_image || 'https://via.placeholder.com/200';
+
+  const img = document.getElementById('storeImage');
+  if (store.store_image) {
+    img.src = store.store_image;
+    img.style.display = 'block';
+    if (document.getElementById('storeInitials')) document.getElementById('storeInitials').style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    let initialsDiv = document.getElementById('storeInitials');
+    if (!initialsDiv) {
+      initialsDiv = document.createElement('div');
+      initialsDiv.id = 'storeInitials';
+      initialsDiv.className = 'store-initials-logo';
+      img.parentNode.insertBefore(initialsDiv, img);
+    }
+    initialsDiv.style.display = 'flex';
+    initialsDiv.textContent = window.fastGetApp.getStoreInitials(store.store_name);
+  }
+
   document.getElementById('storeRating').innerHTML = `${'⭐'.repeat(Math.floor(store.rating || 0))} (${store.rating || 0})`;
   document.getElementById('storeReviews').textContent = `${store.total_reviews} reviews`;
   document.getElementById('storeAddress').textContent = store.address?.street || 'Address unavailable';
@@ -41,6 +61,7 @@ function displayStoreDetails(store) {
   document.getElementById('minOrder').textContent = `GH₵${store.minimum_order_value}`;
   document.getElementById('deliveryRadius').textContent = `${store.delivery_radius} km`;
 }
+
 
 // Load products
 async function loadProducts() {
@@ -67,25 +88,27 @@ function displayProducts() {
 
   container.innerHTML = filteredProducts.map(product => `
     <div class="product-card" onclick="openProductModal('${product.id}')">
-      <img src="${product.images?.[0] || 'https://via.placeholder.com/150'}" alt="${product.name}">
+      <div style="position: relative;">
+        <img src="${(product.images && product.images[0]) || 'https://via.placeholder.com/150'}" alt="${product.name}">
+        ${product.discount ? `<span class="discount-badge">-${product.discount}%</span>` : ''}
+      </div>
       <div class="product-info">
         <h3>${product.name}</h3>
-        <p class="product-desc">${product.description.substring(0, 50)}...</p>
+        <div class="product-price">
+          <span class="price">₵${product.price ? product.price.toFixed(2) : '0.00'}</span>
+          ${product.original_price ? `<span class="original">₵${product.original_price.toFixed(2)}</span>` : ''}
+        </div>
         <div class="product-rating">
           <span>${'⭐'.repeat(Math.floor(product.rating || 0))}</span>
-          <span class="review-count">${product.total_reviews} reviews</span>
+          <span class="review-count">(${product.total_reviews || 0})</span>
         </div>
-        <div class="product-price">
-          <span class="price">GH₵${product.price}</span>
-          ${product.original_price ? `<span class="original">GH₵${product.original_price}</span>` : ''}
-          ${product.discount ? `<span class="discount">${product.discount}% off</span>` : ''}
-        </div>
-        <p class="stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
-          ${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+        <p class="stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}" style="font-size: 11px; margin-top: 4px; color: ${product.stock > 0 ? '#28a745' : '#dc3545'};">
+          ${product.stock > 0 ? `${product.stock} left` : 'Out of stock'}
         </p>
       </div>
     </div>
   `).join('');
+
 }
 
 // Open product modal
@@ -134,11 +157,13 @@ function decreaseQuantity() {
 
 // Add product to cart
 async function addProductToCart() {
-  if (!window.currentUser) {
+  const user = window.fastGetApp.currentUser;
+  if (!user) {
     alert('Please login first');
     window.location.href = 'login.html';
     return;
   }
+
 
   const quantity = parseInt(document.getElementById('modalQuantity').value);
   const result = await window.fastGetApp.addToCart(selectedProduct.id, quantity);
@@ -180,7 +205,9 @@ window.onclick = function (event) {
 };
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await window.fastGetApp.authReadyPromise;
   loadStore();
   document.getElementById('searchProducts').addEventListener('input', filterProducts);
 });
+
