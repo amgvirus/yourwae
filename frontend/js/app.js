@@ -9,25 +9,18 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Authentication State
 let currentUser = null;
 let currentUserRole = null;
-let authResolve;
-const authInitialized = new Promise(resolve => { authResolve = resolve; });
-
+let authInitialized = false;
+let authReadyPromiseResolver;
+const authReadyPromise = new Promise(resolve => {
+  authReadyPromiseResolver = resolve;
+});
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
+  await checkAuthStatus();
   initMobileMenu();
-
-  // Listener for auth changes
-  supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    console.log('Auth event:', event);
-    if (session) {
-      await handleUserLogin(session.user);
-    } else {
-      handleUserLogout();
-    }
-  });
+  setupAuthListener();
 });
-
 
 // ============== MOBILE MENU ==============
 function initMobileMenu() {
@@ -66,40 +59,61 @@ function closeMobileMenu() {
   document.body.style.overflow = '';
 }
 
-async function handleUserLogin(user) {
-  currentUser = user;
+// Setup reactive auth listener
+function setupAuthListener() {
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    console.log('Auth event:', event);
+    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      if (session?.user) {
+        currentUser = session.user;
+        await fetchUserRole(session.user.id);
+        updateUIForLoggedInUser();
+      }
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      currentUserRole = null;
+      updateUIForLoggedOutUser();
+    }
+  });
+}
+
+// Fetch user role separately
+async function fetchUserRole(userId) {
   try {
     const { data, error } = await supabaseClient
       .from('users')
       .select('role')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single();
 
-    currentUserRole = data?.role || 'customer';
-  } catch (err) {
-    console.error('Error fetching role:', err);
-    currentUserRole = 'customer';
+    if (data) {
+      currentUserRole = data.role;
+    }
+  } catch (error) {
+    console.warn('Could not fetch user role:', error);
   }
-  updateUIForLoggedInUser();
-  authResolve();
 }
 
-function handleUserLogout() {
-  currentUser = null;
-  currentUserRole = null;
-  updateUIForLoggedOutUser();
-  authResolve();
-}
-
-// Check authentication status (Legacy/Initial)
+// Check authentication status
 async function checkAuthStatus() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) {
-    await handleUserLogin(session.user);
-  } else {
-    handleUserLogout();
+  try {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    if (user) {
+      currentUser = user;
+      updateUIForLoggedInUser(); // Update UI immediately
+      await fetchUserRole(user.id); // Then fetch role
+      updateUIForLoggedInUser(); // Update again if role adds specific UI elements
+    } else {
+      updateUIForLoggedOutUser();
+    }
+  } catch (error) {
+    console.error('Error checking auth status:', error);
+    updateUIForLoggedOutUser();
+  } finally {
+    authInitialized = true;
+    authReadyPromiseResolver();
   }
-  await authInitialized;
 }
 
 // Signup function
@@ -171,6 +185,16 @@ async function logout() {
   } catch (error) {
     console.error('Logout error:', error);
     return { success: false, error: error.message };
+  }
+}
+
+// Global Logout Handler
+async function handleLogout() {
+  const result = await logout();
+  if (result.success) {
+    window.location.href = 'index.html';
+  } else {
+    alert('Logout failed: ' + result.error);
   }
 }
 
@@ -620,9 +644,5 @@ window.fastGetApp = {
   calculateDeliveryFee,
   calculateDistance,
   checkAuthStatus,
-  authInitialized,
-  get currentUser() { return currentUser; },
-  get currentUserRole() { return currentUserRole; },
+  authReadyPromise,
 };
-
-

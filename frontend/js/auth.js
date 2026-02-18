@@ -36,5 +36,10 @@ async function handleGoogleLogin() {
   alert('Google login coming soon!');
 }
 
-// Redirect if already logged in - REMOVED (Handled by app.js listener)
-
+// Redirect if already logged in
+document.addEventListener('DOMContentLoaded', async () => {
+  await window.fastGetApp.authReadyPromise;
+  if (window.currentUser) {
+    window.location.href = 'index.html';
+  }
+});

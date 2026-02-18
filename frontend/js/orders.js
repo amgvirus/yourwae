@@ -3,14 +3,12 @@ let currentFilter = 'all';
 
 // Load orders
 async function loadOrders() {
-  // Wait for auth to initialize
-  await window.fastGetApp.authInitialized;
+  await window.fastGetApp.authReadyPromise;
 
-  if (!window.fastGetApp.currentUser) {
+  if (!window.currentUser) {
     window.location.href = 'login.html';
     return;
   }
-
 
   const result = await window.fastGetApp.getUserOrders();
 
@@ -156,13 +154,6 @@ function closeOrderModal() {
   document.getElementById('orderModal').style.display = 'none';
 }
 
-// Handle logout
-async function handleLogout() {
-  const result = await window.fastGetApp.logout();
-  if (result.success) {
-    window.location.href = 'index.html';
-  }
-}
 
 // Close modal when clicking outside
 window.onclick = function (event) {
