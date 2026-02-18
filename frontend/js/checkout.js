@@ -3,7 +3,10 @@ let currentStore = null;
 
 // Load checkout data
 async function loadCheckoutData() {
-  if (!window.currentUser) {
+  await window.fastGetApp.authReadyPromise;
+
+  const currentUser = window.fastGetApp.currentUser;
+  if (!currentUser) {
     window.location.href = 'login.html';
     return;
   }
@@ -67,7 +70,7 @@ function setupPaymentMethodListeners() {
 
 // Place order
 async function placeOrder() {
-  if (!window.currentUser) {
+  if (!window.fastGetApp.currentUser) {
     alert('Please login first');
     window.location.href = 'login.html';
     return;

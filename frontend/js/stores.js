@@ -151,10 +151,10 @@ async function initializeTownSelector() {
 
 // Handle logout
 async function handleLogout() {
-  // Clear local auth data
-  localStorage.removeItem('token');
-  localStorage.removeItem('currentUser');
-  window.location.href = 'stores.html';
+  const result = await window.fastGetApp.logout();
+  if (result.success) {
+    window.location.href = 'stores.html';
+  }
 }
 
 // Initialize

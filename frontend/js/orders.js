@@ -50,7 +50,7 @@ function displayOrders() {
       <div class="order-details">
         <p><strong>Store:</strong> ${order.stores?.store_name || 'Unknown'}</p>
         <p><strong>Items:</strong> ${order.items?.length || 0}</p>
-        <p><strong>Total:</strong> GH₵${(order.total_amount || 0).toFixed(2)}</p>
+        <p><strong>Total:</strong> ₵${(order.total_amount || 0).toFixed(2)}</p>
       </div>
 
       <div class="order-delivery">
@@ -97,7 +97,7 @@ function openOrderModal(orderId) {
         ${order.items?.map(item => `
           <div class="order-item">
             <p><strong>${item.product_name}</strong> x ${item.quantity}</p>
-            <p>GH₵${(item.price * item.quantity).toFixed(2)}</p>
+            <p>₵${(item.price * item.quantity).toFixed(2)}</p>
           </div>
         `).join('') || '<p>No items</p>'}
       </div>
@@ -112,19 +112,19 @@ function openOrderModal(orderId) {
         <h3>Amount Summary</h3>
         <div class="summary-item">
           <span>Subtotal:</span>
-          <span>GH₵${(order.subtotal || 0).toFixed(2)}</span>
+          <span>₵${(order.subtotal || 0).toFixed(2)}</span>
         </div>
         <div class="summary-item">
           <span>Tax:</span>
-          <span>GH₵${(order.tax || 0).toFixed(2)}</span>
+          <span>₵${(order.tax || 0).toFixed(2)}</span>
         </div>
         <div class="summary-item">
           <span>Delivery Fee:</span>
-          <span>GH₵${(order.delivery_fee || 0).toFixed(2)}</span>
+          <span>₵${(order.delivery_fee || 0).toFixed(2)}</span>
         </div>
         <div class="summary-item total">
           <span>Total:</span>
-          <span>GH₵${(order.total_amount || 0).toFixed(2)}</span>
+          <span>₵${(order.total_amount || 0).toFixed(2)}</span>
         </div>
       </div>
 
