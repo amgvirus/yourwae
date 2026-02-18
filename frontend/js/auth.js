@@ -40,6 +40,11 @@ async function handleGoogleLogin() {
 document.addEventListener('DOMContentLoaded', async () => {
   await window.fastGetApp.authReadyPromise;
   if (window.currentUser) {
-    window.location.href = 'index.html';
+    // Redirect based on role
+    if (window.currentUser.user_metadata && window.currentUser.user_metadata.role === 'store') {
+      window.location.href = 'seller-dashboard.html';
+    } else {
+      window.location.href = 'index.html';
+    }
   }
 });

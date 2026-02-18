@@ -5,7 +5,7 @@ let currentFilter = 'all';
 async function loadOrders() {
   await window.fastGetApp.authReadyPromise;
 
-  if (!window.currentUser) {
+  if (!window.fastGetApp.currentUser) {
     window.location.href = 'login.html';
     return;
   }

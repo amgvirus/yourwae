@@ -329,7 +329,6 @@ DROP POLICY IF EXISTS "Users can manage their own cart" ON cart_items;
 CREATE POLICY "Users can manage their own cart" ON cart_items
   FOR ALL USING (auth.uid() = user_id);
 
--- Orders
 DROP POLICY IF EXISTS "Users can view their own orders" ON orders;
 CREATE POLICY "Users can view their own orders" ON orders
   FOR SELECT USING (auth.uid() = customer_id);
@@ -337,6 +336,24 @@ CREATE POLICY "Users can view their own orders" ON orders
 DROP POLICY IF EXISTS "Users can create their own orders" ON orders;
 CREATE POLICY "Users can create their own orders" ON orders
   FOR INSERT WITH CHECK (auth.uid() = customer_id);
+
+DROP POLICY IF EXISTS "Store owners can view orders for their stores" ON orders;
+CREATE POLICY "Store owners can view orders for their stores" ON orders
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM stores
+      WHERE stores.id = orders.store_id AND stores.owner_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS "Store owners can update orders for their stores" ON orders;
+CREATE POLICY "Store owners can update orders for their stores" ON orders
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM stores
+      WHERE stores.id = orders.store_id AND stores.owner_id = auth.uid()
+    )
+  );
 
 -- Wallets
 DROP POLICY IF EXISTS "Users can view their own wallet" ON wallets;

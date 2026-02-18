@@ -576,6 +576,18 @@ function updateUIForLoggedInUser() {
   if (logoutBtn) logoutBtn.style.display = 'block';
   if (userMenu) userMenu.style.display = 'flex';
 
+  // Role-based button update in navbar
+  const myOrdersBtn = userMenu?.querySelector('button:first-child');
+  if (myOrdersBtn) {
+    if (currentUserRole === 'store') {
+      myOrdersBtn.textContent = 'Store Dashboard';
+      myOrdersBtn.onclick = () => window.location.href = 'seller-dashboard.html';
+    } else {
+      myOrdersBtn.textContent = 'My Orders';
+      myOrdersBtn.onclick = () => window.location.href = 'orders.html';
+    }
+  }
+
   // Mobile menu updates
   const mobileLoginLink = document.getElementById('mobileLoginLink');
   const mobileLogoutItem = document.getElementById('mobileLogoutItem');
@@ -585,17 +597,37 @@ function updateUIForLoggedInUser() {
 
   if (mobileLoginLink) mobileLoginLink.parentElement.style.display = 'none';
   if (mobileLogoutItem) mobileLogoutItem.style.display = 'block';
+
+  // Update mobile menu "My Orders" link based on role
+  const mobileOrdersLink = document.querySelector('.mobile-menu-links a[href="orders.html"]');
+  if (mobileOrdersLink) {
+    if (currentUserRole === 'store') {
+      mobileOrdersLink.innerHTML = '<span class="menu-icon">🏪</span> Store Dashboard';
+      mobileOrdersLink.href = 'seller-dashboard.html';
+    } else {
+      mobileOrdersLink.innerHTML = '<span class="menu-icon">📦</span> My Orders';
+      mobileOrdersLink.href = 'orders.html';
+    }
+  }
+
   if (mobileUserName && currentUser) {
     mobileUserName.textContent = currentUser.email ? currentUser.email.split('@')[0] : 'User';
   }
   if (mobileUserEmail && currentUser) {
     mobileUserEmail.textContent = currentUser.email || '';
   }
+
   if (bottomNavAccount) {
-    bottomNavAccount.href = 'orders.html';
-    bottomNavAccount.querySelector('span:last-child').textContent = 'Orders';
+    if (currentUserRole === 'store') {
+      bottomNavAccount.href = 'seller-dashboard.html';
+      bottomNavAccount.querySelector('span:last-child').textContent = 'Dashboard';
+    } else {
+      bottomNavAccount.href = 'orders.html';
+      bottomNavAccount.querySelector('span:last-child').textContent = 'Orders';
+    }
   }
 }
+
 
 // Update UI for logged out user
 function updateUIForLoggedOutUser() {
@@ -641,8 +673,10 @@ window.fastGetApp = {
   getUserOrders,
   processPayment,
   getDeliveryTracking,
-  calculateDeliveryFee,
   calculateDistance,
   checkAuthStatus,
   authReadyPromise,
+  get currentUser() { return currentUser; },
+  get currentUserRole() { return currentUserRole; },
 };
+

@@ -56,16 +56,15 @@ async function handleSignup(event) {
   const result = await window.fastGetApp.signup(email, password, firstName, lastName, phone, role);
 
   if (result.success) {
-    // Sign out so the user can manually log in on the login page
-    // (Supabase signUp auto-creates a session, which would cause
-    // auth.js to redirect away from the login page immediately)
-    await supabaseClient.auth.signOut();
-
-    successMsg.textContent = 'Account created successfully! Redirecting to login...';
-    successMsg.style.display = 'block';
+    alert('Signup successful! Redirecting...');
+    // Small delay to allow trigger to complete
     setTimeout(() => {
-      window.location.href = 'login.html';
-    }, 2000);
+      if (role === 'store') {
+        window.location.href = 'seller-dashboard.html';
+      } else {
+        window.location.href = 'index.html';
+      }
+    }, 1500);
   } else {
     errorMsg.textContent = 'Error: ' + result.error;
     errorMsg.style.display = 'block';
@@ -75,7 +74,11 @@ async function handleSignup(event) {
 // Redirect if already logged in
 document.addEventListener('DOMContentLoaded', async () => {
   await window.fastGetApp.authReadyPromise;
-  if (window.currentUser) {
-    window.location.href = 'index.html';
+  if (window.fastGetApp.currentUser) {
+    if (window.fastGetApp.currentUserRole === 'store') {
+      window.location.href = 'seller-dashboard.html';
+    } else {
+      window.location.href = 'index.html';
+    }
   }
 });
