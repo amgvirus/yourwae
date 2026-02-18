@@ -79,18 +79,37 @@
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label for="city">City</label>
-                  <input type="text" id="city" required placeholder="City">
+                  <label for="city">City / Town</label>
+                  <select id="city" required>
+                    <option value="">Select Area</option>
+                    <optgroup label="Main Towns (₵7.00)">
+                      <option value="hohoe">Hohoe</option>
+                      <option value="dzodze">Dzodze</option>
+                      <option value="anloga">Anloga</option>
+                    </optgroup>
+                    <optgroup label="Surrounding Hohoe">
+                      <option value="akpafu">Akpafu (₵20.00)</option>
+                      <option value="sanko">Sanko (₵15.00)</option>
+                      <option value="likpe">Likpe (₵20.00)</option>
+                      <option value="lolobi">Lolobi (₵20.00)</option>
+                      <option value="fodome">Fodome (₵20.00)</option>
+                      <option value="wli">Wli (₵22.00)</option>
+                      <option value="ve">Ve (₵25.00)</option>
+                      <option value="alavanyo">Alavanyo (₵20.00)</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="region">Region</label>
+                  <input type="text" id="region" required placeholder="Volta Region" value="Volta Region">
                 </div>
                 <div class="form-group">
-                  <label for="state">State</label>
-                  <input type="text" id="state" required placeholder="State">
+                  <label for="zip">ZIP / Postal Code (Optional)</label>
+                  <input type="text" id="zip" placeholder="0000">
                 </div>
               </div>
-              <div class="form-group">
-                <label for="zip">Zip Code</label>
-                <input type="text" id="zip" required placeholder="Zip code">
-              </div>
+
               <div class="form-group">
                 <label for="specialInstructions">Special Instructions (Optional)</label>
                 <textarea id="specialInstructions" placeholder="Any special instructions for delivery"></textarea>

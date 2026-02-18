@@ -23,12 +23,27 @@ async function loadCheckoutData() {
 
   displayOrderSummary(cartItems);
   setupPaymentMethodListeners();
+  setupLocationListeners();
+}
+
+// Setup location listeners for dynamic delivery fee
+function setupLocationListeners() {
+  const citySelect = document.getElementById('city');
+  if (citySelect) {
+    citySelect.addEventListener('change', () => {
+      displayOrderSummary(cartItems);
+    });
+  }
 }
 
 // Display order summary
 function displayOrderSummary(items) {
   const subtotal = items.reduce((sum, item) => sum + (item.products.price * item.quantity), 0);
-  const deliveryFee = 7.00; // Flat fee
+
+  // Get town name from select
+  const citySelect = document.getElementById('city');
+  const selectedTown = citySelect ? citySelect.value : '';
+  const deliveryFee = window.fastGetApp.calculateDeliveryFee(selectedTown);
 
 
   const summaryContent = document.getElementById('summaryContent');
@@ -78,9 +93,10 @@ async function placeOrder() {
 
   // Validate address
   const street = document.getElementById('street').value.trim();
-  const city = document.getElementById('city').value.trim();
-  const state = document.getElementById('state').value.trim();
-  const zip = document.getElementById('zip').value.trim();
+  const city = document.getElementById('city').value;
+  const state = document.getElementById('region').value.trim();
+  const zip = document.getElementById('zip').value.trim() || '0000'; // Default zip if missing
+
 
   if (!street || !city || !state || !zip) {
     alert('Please fill in all address fields');

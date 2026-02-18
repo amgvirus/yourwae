@@ -410,10 +410,28 @@ async function clearCart() {
   }
 }
 
+// Delivery Fee Mapping
+const DELIVERY_FEE_MAPPING = {
+  'hohoe': 7.00,
+  'dzodze': 7.00,
+  'anloga': 7.00,
+  'akpafu': 20.00,
+  'sanko': 15.00,
+  'likpe': 20.00,
+  'lolobi': 20.00,
+  'fodome': 20.00,
+  'wli': 22.00,
+  've': 25.00,
+  'alavanyo': 20.00
+};
+
 // Calculate delivery fee
-function calculateDeliveryFee() {
-  return 7.00; // Flat fee as requested
+function calculateDeliveryFee(townName) {
+  if (!townName) return 7.00;
+  const townKey = townName.toLowerCase().trim();
+  return DELIVERY_FEE_MAPPING[townKey] || 7.00; // Default to 7.00 if unknown
 }
+
 
 
 // Create order
@@ -462,7 +480,8 @@ async function createOrder(storeId, deliveryAddress, paymentMethod, specialInstr
       };
     });
 
-    const deliveryFee = calculateDeliveryFee();
+    const deliveryFee = calculateDeliveryFee(deliveryAddress.city);
+
     const totalAmount = subtotal + deliveryFee;
 
     // Create order

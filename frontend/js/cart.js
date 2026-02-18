@@ -76,11 +76,15 @@ function calculateTotals(cartItems) {
   }
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.products.price * item.quantity), 0);
-  const deliveryFee = 7.00; // Flat fee
+
+  // Use selected town if available
+  const selectedTown = typeof townManager !== 'undefined' ? townManager.getSelectedTown() : null;
+  const deliveryFee = selectedTown ? window.fastGetApp.calculateDeliveryFee(selectedTown.name) : 7.00;
 
   document.getElementById('subtotal').textContent = `₵${subtotal.toFixed(2)}`;
   if (document.getElementById('taxRow')) document.getElementById('taxRow').style.display = 'none';
   document.getElementById('deliveryFee').textContent = `₵${deliveryFee.toFixed(2)}`;
+
   document.getElementById('total').textContent = `₵${(subtotal + deliveryFee).toFixed(2)}`;
 }
 
