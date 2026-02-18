@@ -1,17 +1,56 @@
-# CREATE DATABASE SCHEMA - SUPABASE SQL
+-- CREATE DATABASE SCHEMA - SUPABASE SQL
 
--- Create enum types
-CREATE TYPE role_type AS ENUM ('customer', 'store', 'admin', 'delivery_partner');
-CREATE TYPE order_status AS ENUM ('pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'cancelled');
-CREATE TYPE payment_status AS ENUM ('pending', 'processing', 'completed', 'failed', 'refunded');
-CREATE TYPE payment_method_type AS ENUM ('card', 'wallet', 'upi', 'netbanking', 'cod');
-CREATE TYPE delivery_status AS ENUM ('assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled');
-CREATE TYPE address_type AS ENUM ('home', 'work', 'other');
-CREATE TYPE transaction_type AS ENUM ('credit', 'debit');
-CREATE TYPE store_category AS ENUM ('grocery', 'electronics', 'pharmacy', 'fashion', 'beauty', 'home', 'food', 'other');
+-- Create enum types if they don't exist
+DO $$ BEGIN
+    CREATE TYPE role_type AS ENUM ('customer', 'store', 'admin', 'delivery_partner');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE order_status AS ENUM ('pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'cancelled');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE payment_status AS ENUM ('pending', 'processing', 'completed', 'failed', 'refunded');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE payment_method_type AS ENUM ('card', 'wallet', 'upi', 'netbanking', 'cod');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE delivery_status AS ENUM ('assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE address_type AS ENUM ('home', 'work', 'other');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE transaction_type AS ENUM ('credit', 'debit');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE store_category AS ENUM ('grocery', 'electronics', 'pharmacy', 'fashion', 'beauty', 'home', 'food', 'other');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(255) UNIQUE NOT NULL,
   phone VARCHAR(20) UNIQUE NOT NULL,
@@ -25,7 +64,7 @@ CREATE TABLE users (
 );
 
 -- Addresses table
-CREATE TABLE addresses (
+CREATE TABLE IF NOT EXISTS addresses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   type address_type DEFAULT 'home',
@@ -41,7 +80,7 @@ CREATE TABLE addresses (
 );
 
 -- Stores table
-CREATE TABLE stores (
+CREATE TABLE IF NOT EXISTS stores (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   owner_id UUID NOT NULL REFERENCES users(id),
   store_name VARCHAR(255) NOT NULL,
@@ -68,7 +107,7 @@ CREATE TABLE stores (
 );
 
 -- Products table
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
@@ -90,7 +129,7 @@ CREATE TABLE products (
 );
 
 -- Cart items table
-CREATE TABLE cart_items (
+CREATE TABLE IF NOT EXISTS cart_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
@@ -100,7 +139,7 @@ CREATE TABLE cart_items (
 );
 
 -- Orders table
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_number VARCHAR(50) UNIQUE NOT NULL,
   customer_id UUID NOT NULL REFERENCES users(id),
@@ -126,7 +165,7 @@ CREATE TABLE orders (
 );
 
 -- Payments table
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES orders(id),
   customer_id UUID NOT NULL REFERENCES users(id),
@@ -144,7 +183,7 @@ CREATE TABLE payments (
 );
 
 -- Deliveries table
-CREATE TABLE deliveries (
+CREATE TABLE IF NOT EXISTS deliveries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES orders(id),
   delivery_partner_id UUID REFERENCES users(id),
@@ -167,7 +206,7 @@ CREATE TABLE deliveries (
 );
 
 -- Wallets table
-CREATE TABLE wallets (
+CREATE TABLE IF NOT EXISTS wallets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   balance DECIMAL(15, 2) DEFAULT 0,
@@ -176,7 +215,7 @@ CREATE TABLE wallets (
 );
 
 -- Wallet transactions table
-CREATE TABLE wallet_transactions (
+CREATE TABLE IF NOT EXISTS wallet_transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   wallet_id UUID NOT NULL REFERENCES wallets(id) ON DELETE CASCADE,
   amount DECIMAL(15, 2) NOT NULL,
@@ -186,7 +225,7 @@ CREATE TABLE wallet_transactions (
 );
 
 -- Reviews table
-CREATE TABLE reviews (
+CREATE TABLE IF NOT EXISTS reviews (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id),
   product_id UUID REFERENCES products(id),
@@ -215,14 +254,20 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   -- Insert into public.users
+  -- Uses COALESCE and handles potential null raw_user_meta_data
   INSERT INTO public.users (id, email, phone, first_name, last_name, role)
   VALUES (
     NEW.id,
     NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'phone', ''),
+    COALESCE(NEW.phone, NEW.raw_user_meta_data->>'phone', ''),
     COALESCE(NEW.raw_user_meta_data->>'first_name', ''),
     COALESCE(NEW.raw_user_meta_data->>'last_name', ''),
-    CAST(COALESCE(NEW.raw_user_meta_data->>'role', 'customer') AS role_type)
+    CASE 
+      WHEN NEW.raw_user_meta_data->>'role' = 'store' THEN 'store'::role_type
+      WHEN NEW.raw_user_meta_data->>'role' = 'admin' THEN 'admin'::role_type
+      WHEN NEW.raw_user_meta_data->>'role' = 'delivery_partner' THEN 'delivery_partner'::role_type
+      ELSE 'customer'::role_type
+    END
   );
 
   -- Create wallet
@@ -230,8 +275,14 @@ BEGIN
   VALUES (NEW.id, 0);
 
   RETURN NEW;
+EXCEPTION
+  WHEN others THEN
+    -- Fallback: If anything fails, still allows auth user creation
+    -- though public record might be missing. Good for debugging.
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
 
 -- Trigger for new user signup
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
@@ -242,23 +293,29 @@ CREATE TRIGGER on_auth_user_created
 -- RLS POLICIES --
 
 -- Users
+DROP POLICY IF EXISTS "Users can view their own profile" ON users;
 CREATE POLICY "Users can view their own profile" ON users
   FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON users;
 CREATE POLICY "Users can update their own profile" ON users
   FOR UPDATE USING (auth.uid() = id);
 
 -- Stores
+DROP POLICY IF EXISTS "Anyone can view active verified stores" ON stores;
 CREATE POLICY "Anyone can view active verified stores" ON stores
   FOR SELECT USING (is_active = true AND is_verified = true);
 
+DROP POLICY IF EXISTS "Owners can manage their own stores" ON stores;
 CREATE POLICY "Owners can manage their own stores" ON stores
   FOR ALL USING (auth.uid() = owner_id);
 
 -- Products
+DROP POLICY IF EXISTS "Anyone can view products of active stores" ON products;
 CREATE POLICY "Anyone can view products of active stores" ON products
   FOR SELECT USING (is_active = true);
 
+DROP POLICY IF EXISTS "Store owners can manage their products" ON products;
 CREATE POLICY "Store owners can manage their products" ON products
   FOR ALL USING (
     EXISTS (
@@ -268,30 +325,37 @@ CREATE POLICY "Store owners can manage their products" ON products
   );
 
 -- Cart Items
+DROP POLICY IF EXISTS "Users can manage their own cart" ON cart_items;
 CREATE POLICY "Users can manage their own cart" ON cart_items
   FOR ALL USING (auth.uid() = user_id);
 
 -- Orders
+DROP POLICY IF EXISTS "Users can view their own orders" ON orders;
 CREATE POLICY "Users can view their own orders" ON orders
   FOR SELECT USING (auth.uid() = customer_id);
 
+DROP POLICY IF EXISTS "Users can create their own orders" ON orders;
 CREATE POLICY "Users can create their own orders" ON orders
   FOR INSERT WITH CHECK (auth.uid() = customer_id);
 
 -- Wallets
+DROP POLICY IF EXISTS "Users can view their own wallet" ON wallets;
 CREATE POLICY "Users can view their own wallet" ON wallets
   FOR SELECT USING (auth.uid() = user_id);
 
+
 -- Create indexes
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_phone ON users(phone);
-CREATE INDEX idx_stores_owner_id ON stores(owner_id);
-CREATE INDEX idx_stores_is_active ON stores(is_active);
-CREATE INDEX idx_products_store_id ON products(store_id);
-CREATE INDEX idx_orders_customer_id ON orders(customer_id);
-CREATE INDEX idx_orders_store_id ON orders(store_id);
-CREATE INDEX idx_orders_status ON orders(status);
-CREATE INDEX idx_payments_order_id ON payments(order_id);
-CREATE INDEX idx_deliveries_order_id ON deliveries(order_id);
-CREATE INDEX idx_cart_items_user_id ON cart_items(user_id);
+-- Create indexes if they don't exist
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
+CREATE INDEX IF NOT EXISTS idx_stores_owner_id ON stores(owner_id);
+CREATE INDEX IF NOT EXISTS idx_stores_is_active ON stores(is_active);
+CREATE INDEX IF NOT EXISTS idx_products_store_id ON products(store_id);
+CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_orders_store_id ON orders(store_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_payments_order_id ON payments(order_id);
+CREATE INDEX IF NOT EXISTS idx_deliveries_order_id ON deliveries(order_id);
+CREATE INDEX IF NOT EXISTS idx_cart_items_user_id ON cart_items(user_id);
+
 

@@ -9,12 +9,25 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Authentication State
 let currentUser = null;
 let currentUserRole = null;
+let authResolve;
+const authInitialized = new Promise(resolve => { authResolve = resolve; });
+
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
-  await checkAuthStatus();
   initMobileMenu();
+
+  // Listener for auth changes
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    console.log('Auth event:', event);
+    if (session) {
+      await handleUserLogin(session.user);
+    } else {
+      handleUserLogout();
+    }
+  });
 });
+
 
 // ============== MOBILE MENU ==============
 function initMobileMenu() {
@@ -53,31 +66,40 @@ function closeMobileMenu() {
   document.body.style.overflow = '';
 }
 
-// Check authentication status
-async function checkAuthStatus() {
+async function handleUserLogin(user) {
+  currentUser = user;
   try {
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data, error } = await supabaseClient
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single();
 
-    if (user) {
-      currentUser = user;
-
-      // Get user role from database
-      const { data, error } = await supabaseClient
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      if (data) {
-        currentUserRole = data.role;
-        updateUIForLoggedInUser();
-      }
-    } else {
-      updateUIForLoggedOutUser();
-    }
-  } catch (error) {
-    console.error('Error checking auth status:', error);
+    currentUserRole = data?.role || 'customer';
+  } catch (err) {
+    console.error('Error fetching role:', err);
+    currentUserRole = 'customer';
   }
+  updateUIForLoggedInUser();
+  authResolve();
+}
+
+function handleUserLogout() {
+  currentUser = null;
+  currentUserRole = null;
+  updateUIForLoggedOutUser();
+  authResolve();
+}
+
+// Check authentication status (Legacy/Initial)
+async function checkAuthStatus() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    await handleUserLogin(session.user);
+  } else {
+    handleUserLogout();
+  }
+  await authInitialized;
 }
 
 // Signup function
@@ -598,4 +620,9 @@ window.fastGetApp = {
   calculateDeliveryFee,
   calculateDistance,
   checkAuthStatus,
+  authInitialized,
+  get currentUser() { return currentUser; },
+  get currentUserRole() { return currentUserRole; },
 };
+
+

@@ -36,10 +36,5 @@ async function handleGoogleLogin() {
   alert('Google login coming soon!');
 }
 
-// Redirect if already logged in
-document.addEventListener('DOMContentLoaded', async () => {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (user) {
-    window.location.href = 'index.html';
-  }
-});
+// Redirect if already logged in - REMOVED (Handled by app.js listener)
+

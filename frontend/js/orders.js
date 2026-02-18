@@ -3,10 +3,14 @@ let currentFilter = 'all';
 
 // Load orders
 async function loadOrders() {
-  if (!window.currentUser) {
+  // Wait for auth to initialize
+  await window.fastGetApp.authInitialized;
+
+  if (!window.fastGetApp.currentUser) {
     window.location.href = 'login.html';
     return;
   }
+
 
   const result = await window.fastGetApp.getUserOrders();
 
