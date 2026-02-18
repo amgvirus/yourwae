@@ -22,9 +22,12 @@ async function loadDashboard() {
             .eq('owner_id', user.id)
             .single();
 
-        if (storeError) {
+        if (storeError || !store) {
             console.error('Store fetch error:', storeError);
-            document.getElementById('storeNameHeader').textContent = 'Error: Store not found. Please contact support.';
+            document.getElementById('storeNameHeader').innerHTML =
+                '<span style="color: red;">Error: Store not found.</span><br>' +
+                'If you just signed up, your account might still be syncing. ' +
+                'Please ensure you ran the <strong>latest SUPABASE_SETUP.sql</strong> and <strong>REPAIR_USERS.sql</strong>.';
             return;
         }
 
@@ -160,17 +163,30 @@ function openProductModal(productId = null) {
     modal.classList.add('active');
 }
 
+function updateImagePreview(url) {
+    const preview = document.getElementById('pImagePreview');
+    preview.src = url || 'https://via.placeholder.com/150?text=No+Image';
+}
+
 function closeProductModal() {
     document.getElementById('productModal').classList.remove('active');
+    updateImagePreview('');
 }
 
 async function handleProductSubmit(e) {
     e.preventDefault();
+
+    if (!currentStore) {
+        alert('Missing store information. Please complete store registration.');
+        return;
+    }
+
     const formData = {
         name: document.getElementById('pName').value,
         description: document.getElementById('pDesc').value,
         price: Number(document.getElementById('pPrice').value),
         stock_quantity: Number(document.getElementById('pStock').value),
+        image_url: document.getElementById('pImage').value || 'https://via.placeholder.com/150?text=Product',
         store_id: currentStore.id,
         is_active: true
     };

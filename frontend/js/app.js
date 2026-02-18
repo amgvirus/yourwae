@@ -88,11 +88,14 @@ async function fetchUserRole(userId) {
 
     if (data) {
       currentUserRole = data.role;
+    } else {
+      console.error(`User profile missing in public.users for ID: ${userId}. Please run REPAIR_USERS.sql.`);
     }
   } catch (error) {
     console.warn('Could not fetch user role:', error);
   }
 }
+
 
 // Check authentication status
 async function checkAuthStatus() {
@@ -117,9 +120,9 @@ async function checkAuthStatus() {
 }
 
 // Signup function
-async function signup(email, password, firstName, lastName, phone, role = 'customer') {
+async function signup(email, password, firstName, lastName, phone, role = 'customer', storeName = '', storeCategory = '') {
   try {
-    // Create auth user with metadata (trigger will handle public.users and wallets)
+    // Create auth user with metadata (trigger will handle public.users, wallets, and stores)
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
       email,
       password,
@@ -128,10 +131,13 @@ async function signup(email, password, firstName, lastName, phone, role = 'custo
           first_name: firstName,
           last_name: lastName,
           phone: phone,
-          role: role
+          role: role,
+          store_name: storeName,
+          store_category: storeCategory
         }
       }
     });
+
 
     if (authError) throw authError;
 

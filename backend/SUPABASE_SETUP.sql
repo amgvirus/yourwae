@@ -251,15 +251,17 @@ ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
 
 -- Create handle_new_user trigger function
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+SET search_path = public
+AS $$
 BEGIN
   -- Insert into public.users
-  -- Uses COALESCE and handles potential null raw_user_meta_data
+  -- Uses ON CONFLICT to avoid failing if record already exists
   INSERT INTO public.users (id, email, phone, first_name, last_name, role)
   VALUES (
     NEW.id,
     NEW.email,
-    COALESCE(NEW.phone, NEW.raw_user_meta_data->>'phone', ''),
+    COALESCE(NEW.raw_user_meta_data->>'phone', NEW.phone, ''),
     COALESCE(NEW.raw_user_meta_data->>'first_name', ''),
     COALESCE(NEW.raw_user_meta_data->>'last_name', ''),
     CASE 
@@ -268,20 +270,37 @@ BEGIN
       WHEN NEW.raw_user_meta_data->>'role' = 'delivery_partner' THEN 'delivery_partner'::role_type
       ELSE 'customer'::role_type
     END
-  );
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    phone = EXCLUDED.phone,
+    first_name = EXCLUDED.first_name,
+    last_name = EXCLUDED.last_name,
+    role = EXCLUDED.role;
 
-  -- Create wallet
+  -- Create wallet if it doesn't exist
   INSERT INTO public.wallets (user_id, balance)
-  VALUES (NEW.id, 0);
+  VALUES (NEW.id, 0)
+  ON CONFLICT (user_id) DO NOTHING;
+
+  -- Create store if role is 'store'
+  IF (NEW.raw_user_meta_data->>'role' = 'store') THEN
+    INSERT INTO public.stores (owner_id, store_name, category, is_verified, is_active)
+    VALUES (
+      NEW.id,
+      COALESCE(NEW.raw_user_meta_data->>'store_name', 'My Store'),
+      CAST(COALESCE(NEW.raw_user_meta_data->>'store_category', 'other') AS store_category),
+      true, -- Auto-verify for now to allow immediate use
+      true
+    )
+    ON CONFLICT (owner_id) DO NOTHING;
+  END IF;
 
   RETURN NEW;
-EXCEPTION
-  WHEN others THEN
-    -- Fallback: If anything fails, still allows auth user creation
-    -- though public record might be missing. Good for debugging.
-    RETURN NEW;
 END;
+
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
 
 
 -- Trigger for new user signup

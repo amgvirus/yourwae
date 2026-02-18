@@ -53,7 +53,11 @@ async function handleSignup(event) {
     return;
   }
 
-  const result = await window.fastGetApp.signup(email, password, firstName, lastName, phone, role);
+  const storeName = role === 'store' ? document.getElementById('storeName').value.trim() : '';
+  const storeCategory = role === 'store' ? document.getElementById('storeCategory').value : '';
+
+  const result = await window.fastGetApp.signup(email, password, firstName, lastName, phone, role, storeName, storeCategory);
+
 
   if (result.success) {
     alert('Signup successful! Redirecting...');
