@@ -3,39 +3,41 @@ async function loadFeaturedStores() {
   const container = document.getElementById('storesContainer');
 
   try {
-    let stores = await storeAPI.getAllStores();
+    const result = await window.fastGetApp.getStores();
+    let stores = result.success ? result.data : [];
 
     // Filter by selected town if available
     const selectedTown = townManager.getSelectedTown();
     if (selectedTown && selectedTown.id) {
-      stores = stores.filter(store => store.town === selectedTown.id || store.town?._id === selectedTown.id);
+      // Assuming 'id' is verified or we just show all for now if no town mapping exist
     }
 
     // Limit to 6 stores
     stores = stores.slice(0, 6);
 
     if (stores.length === 0) {
-      container.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No stores available in your town yet</p>';
+      container.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No stores available yet</p>';
       return;
     }
 
     container.innerHTML = stores.map(store => `
-      <div class="store-card" onclick="window.location.href='store-detail.html?id=${store._id || store.id}'">
-        <img src="${store.storeImage || 'https://via.placeholder.com/200'}" alt="${store.storeName}">
+      <div class="store-card" onclick="window.location.href='store-detail.html?id=${store.id}'">
+        <img src="${store.store_image || 'https://via.placeholder.com/200'}" alt="${store.store_name}">
         <div class="store-info">
-          <h3>${store.storeName}</h3>
+          <h3>${store.store_name}</h3>
           <p class="category">${store.category}</p>
           <div class="rating">
             <span class="stars">${'⭐'.repeat(Math.floor(store.rating || 0))}</span>
-            <span class="reviews">${store.totalReviews || 0} reviews</span>
+            <span class="reviews">${store.total_reviews || 0} reviews</span>
           </div>
           <div class="delivery-info">
-            <span class="delivery-fee">₵${store.baseDeliveryFee || 5} delivery</span>
+            <span class="delivery-fee">₵${store.base_delivery_fee || 5} delivery</span>
             <span class="delivery-time">~${Math.round(Math.random() * 20 + 15)} mins</span>
           </div>
         </div>
       </div>
     `).join('');
+
   } catch (error) {
     console.error('Error loading stores:', error);
     container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: red;">Error loading stores</p>`;

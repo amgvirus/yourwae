@@ -7,20 +7,15 @@ let selectedTown = null;
 // Load stores
 async function loadStores() {
   try {
-    let stores = await storeAPI.getAllStores();
-    
-    // Filter by selected town if available
-    const town = townManager.getSelectedTown();
-    if (town && town.id) {
-      stores = stores.filter(store => store.town === town.id || store.town?._id === town.id);
-    }
-    
+    const result = await window.fastGetApp.getStores(50);
+    let stores = result.success ? result.data : [];
+
     allStores = stores;
     filteredStores = [...allStores];
     displayStores();
   } catch (error) {
     console.error('Error loading stores:', error);
-    document.getElementById('storesContainer').innerHTML = 
+    document.getElementById('storesContainer').innerHTML =
       `<p style="grid-column: 1/-1; text-align: center; color: red;">Error loading stores</p>`;
   }
 }
@@ -39,22 +34,23 @@ function displayStores() {
   }
 
   container.innerHTML = paginatedStores.map(store => `
-    <div class="store-card" onclick="window.location.href='store-detail.html?id=${store._id || store.id}'">
-      <img src="${store.storeImage || 'https://via.placeholder.com/200'}" alt="${store.storeName}">
+    <div class="store-card" onclick="window.location.href='store-detail.html?id=${store.id}'">
+      <img src="${store.store_image || 'https://via.placeholder.com/200'}" alt="${store.store_name}">
       <div class="store-info">
-        <h3>${store.storeName}</h3>
+        <h3>${store.store_name}</h3>
         <p class="category">${store.category}</p>
         <div class="rating">
           <span class="stars">${'⭐'.repeat(Math.floor(store.rating || 0))}</span>
-          <span class="reviews">${store.totalReviews || 0} reviews</span>
+          <span class="reviews">${store.total_reviews || 0} reviews</span>
         </div>
         <div class="delivery-info">
-          <span class="delivery-fee">₵${store.baseDeliveryFee || 5} delivery</span>
+          <span class="delivery-fee">₵${store.base_delivery_fee || 5} delivery</span>
           <span class="delivery-time">~15-30 mins</span>
         </div>
       </div>
     </div>
   `).join('');
+
 
   updatePaginationUI();
 }
@@ -97,7 +93,7 @@ function filterStores() {
 
   filteredStores = allStores.filter(store => {
     const matchesSearch = store.storeName.toLowerCase().includes(searchTerm) ||
-                         store.storeDescription?.toLowerCase().includes(searchTerm);
+      store.storeDescription?.toLowerCase().includes(searchTerm);
     const matchesCategory = !category || store.category === category;
 
     return matchesSearch && matchesCategory;
@@ -111,7 +107,7 @@ function filterStores() {
 function handleTownChange() {
   const select = document.getElementById('townSelect');
   const townValue = select.value;
-  
+
   if (townValue) {
     townManager.setSelectedTown(townValue, select.options[select.selectedIndex].text);
     currentPage = 1;
@@ -123,13 +119,13 @@ function handleTownChange() {
 async function initializeTownSelector() {
   const select = document.getElementById('townSelect');
   if (!select) return;
-  
+
   try {
     const towns = await townAPI.getAllTowns();
-    
+
     // Clear existing options except the first one
     select.innerHTML = '<option value="">Select Town</option>';
-    
+
     // Add town options (using town names directly for now)
     const townNames = ['Hohoe', 'Dzodze', 'Anloga'];
     townNames.forEach(name => {
@@ -138,7 +134,7 @@ async function initializeTownSelector() {
       option.textContent = name;
       select.appendChild(option);
     });
-    
+
     // Restore previously selected town
     const selectedTown = townManager.getSelectedTown();
     if (selectedTown) {

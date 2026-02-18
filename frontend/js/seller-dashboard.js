@@ -65,16 +65,17 @@ async function loadProducts() {
 
     container.innerHTML = products.map(p => `
     <div class="product-item">
-      <img src="${p.image_url || 'https://via.placeholder.com/60'}" alt="${p.name}">
+      <img src="${(p.images && p.images[0]) || 'https://via.placeholder.com/60'}" alt="${p.name}">
       <div class="product-info">
         <h4>${p.name}</h4>
-        <p>₵${p.price.toFixed(2)} | Stock: ${p.stock_quantity}</p>
+        <p>₵${p.price.toFixed(2)} | Stock: ${p.stock}</p>
       </div>
       <div class="action-btns">
         <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">Edit</button>
       </div>
     </div>
   `).join('');
+
 }
 
 async function loadOrders() {
@@ -251,11 +252,12 @@ async function handleProductSubmit(e) {
         name: document.getElementById('pName').value,
         description: document.getElementById('pDesc').value,
         price: Number(document.getElementById('pPrice').value),
-        stock_quantity: Number(document.getElementById('pStock').value),
-        image_url: document.getElementById('pImage').value || 'https://via.placeholder.com/150?text=Product',
+        stock: Number(document.getElementById('pStock').value),
+        images: [document.getElementById('pImage').value || 'https://via.placeholder.com/150?text=Product'],
         store_id: currentStore.id,
         is_active: true
     };
+
 
     try {
         const { error } = await supabaseClient
