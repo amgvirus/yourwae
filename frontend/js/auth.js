@@ -39,12 +39,14 @@ async function handleGoogleLogin() {
 // Redirect if already logged in
 document.addEventListener('DOMContentLoaded', async () => {
   await window.fastGetApp.authReadyPromise;
-  if (window.currentUser) {
+  const user = window.fastGetApp.currentUser;
+  if (user) {
     // Redirect based on role
-    if (window.currentUser.user_metadata && window.currentUser.user_metadata.role === 'store') {
+    if (user.user_metadata && user.user_metadata.role === 'store') {
       window.location.href = 'seller-dashboard.html';
     } else {
       window.location.href = 'index.html';
     }
   }
 });
+

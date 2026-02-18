@@ -108,8 +108,10 @@ async function removeItem(itemId) {
 }
 
 // Proceed to checkout
-function proceedToCheckout() {
-  if (!window.currentUser) {
+async function proceedToCheckout() {
+  await window.fastGetApp.authReadyPromise;
+  const user = window.fastGetApp.currentUser;
+  if (!user) {
     alert('Please login first');
     window.location.href = 'login.html';
     return;
@@ -117,6 +119,8 @@ function proceedToCheckout() {
 
   window.location.href = 'checkout.html';
 }
+
+
 
 // Handle logout
 async function handleLogout() {
