@@ -723,6 +723,7 @@ window.fastGetApp = {
   processPayment,
   getDeliveryTracking,
   calculateDistance,
+  calculateDeliveryFee,
   checkAuthStatus,
   authReadyPromise,
   get currentUser() { return currentUser; },

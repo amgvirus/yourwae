@@ -22,9 +22,16 @@ async function handleLogin(event) {
   if (result.success) {
     successMsg.textContent = 'Login successful! Redirecting...';
     successMsg.style.display = 'block';
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, 1500);
+
+    // Check role from result or checkAuthStatus
+    setTimeout(async () => {
+      await window.fastGetApp.checkAuthStatus();
+      if (window.fastGetApp.currentUserRole === 'store') {
+        window.location.href = 'seller-dashboard.html';
+      } else {
+        window.location.href = 'index.html';
+      }
+    }, 1000);
   } else {
     errorMsg.textContent = 'Error: ' + result.error;
     errorMsg.style.display = 'block';
