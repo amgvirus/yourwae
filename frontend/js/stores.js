@@ -6,18 +6,44 @@ let selectedTown = null;
 
 // Load stores
 async function loadStores() {
+  const storesContainer = document.getElementById('storesContainer');
   try {
     const result = await window.fastGetApp.getStores(50);
-    let stores = result.success ? result.data : [];
 
-    allStores = stores;
-    filteredStores = [...allStores];
-    displayStores();
+    if (result.success) {
+      allStores = result.data;
+      applyFilters(); // This function will now handle setting filteredStores and calling displayStores
+    } else {
+      const errorMsg = result.error || 'Check your internet connection or project configuration.';
+      storesContainer.innerHTML = `
+        <div class="error-message">
+          <p><strong>Unable to load stores.</strong></p>
+          <p style="font-size: 14px; color: #666;">${errorMsg}</p>
+          <button class="btn btn-primary btn-sm" onclick="loadStores()" style="margin-top: 10px;">Retry</button>
+        </div>`;
+    }
   } catch (error) {
     console.error('Error loading stores:', error);
-    document.getElementById('storesContainer').innerHTML =
+    storesContainer.innerHTML =
       `<p style="grid-column: 1/-1; text-align: center; color: red;">Error loading stores</p>`;
   }
+}
+
+// Apply current filters to allStores and then display them
+function applyFilters() {
+  const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+  const category = document.getElementById('categoryFilter').value;
+
+  filteredStores = allStores.filter(store => {
+    const matchesSearch = store.store_name.toLowerCase().includes(searchTerm) ||
+      (store.store_description && store.store_description.toLowerCase().includes(searchTerm));
+    const matchesCategory = !category || store.category === category;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  currentPage = 1;
+  displayStores();
 }
 
 // Display stores with pagination

@@ -6,6 +6,33 @@ const SUPABASE_ANON_KEY = 'sb_publishable_twMoDMVTH-QJY_jIiZIpQQ_0IA8M1bk'; // R
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Credential Validation
+if (SUPABASE_ANON_KEY.startsWith('sb_publishable_')) {
+  console.warn('%c⚠️ YourWae Configuration Error: SUPABASE_ANON_KEY appears to be a Stripe Publishable Key instead of a Supabase Anon Key. Supabase features (Login, Order Tracking) will not work. Falling back to Local REST API for browsing.', 'color: orange; font-weight: bold; font-size: 14px;');
+}
+
+function isSupabaseFunctional() {
+  return !SUPABASE_ANON_KEY.startsWith('sb_publishable_') && SUPABASE_URL !== 'https://your-project.supabase.co';
+}
+
+function normalizeData(item) {
+  if (!item) return null;
+  // Map camelCase (REST API) to snake_case (App logic/Supabase)
+  return {
+    ...item,
+    store_name: item.storeName || item.store_name,
+    store_description: item.storeDescription || item.store_description,
+    store_image: item.storeImage || item.store_image,
+    operating_hours: item.operatingHours || item.operating_hours,
+    base_delivery_fee: item.baseDeliveryFee || item.base_delivery_fee,
+    delivery_fee_per_km: item.deliveryFeePerKm || item.delivery_fee_per_km,
+    minimum_order_value: item.minimumOrderValue || item.minimum_order_value,
+    total_reviews: item.totalReviews || item.total_reviews,
+    is_verified: item.isVerified !== undefined ? item.isVerified : item.is_verified,
+    is_active: item.isActive !== undefined ? item.isActive : item.is_active,
+  };
+}
+
 // Authentication State
 let currentUser = null;
 let currentUserRole = null;
@@ -68,6 +95,11 @@ async function fetchUserRole(userId) {
 // Check authentication status
 async function checkAuthStatus() {
   try {
+    if (!isSupabaseFunctional()) {
+      updateUIForLoggedOutUser();
+      return;
+    }
+
     // Try fast session check first
     const { data: { session } } = await supabaseClient.auth.getSession();
 
@@ -225,15 +257,25 @@ async function logout() {
 // Get all stores
 async function getStores(limit = 20, offset = 0) {
   try {
-    const { data, error } = await supabaseClient
-      .from('stores')
-      .select('*')
-      .eq('is_active', true)
-      .eq('is_verified', true)
-      .range(offset, offset + limit - 1);
+    if (isSupabaseFunctional()) {
+      const { data, error } = await supabaseClient
+        .from('stores')
+        .select('*')
+        .eq('is_active', true)
+        .eq('is_verified', true)
+        .range(offset, offset + limit - 1);
 
-    if (error) throw error;
-    return { success: true, data };
+      if (!error) return { success: true, data: data.map(normalizeData) };
+      console.warn('Supabase fetch failed, trying REST API fallback...', error);
+    }
+
+    // Fallback to REST API
+    if (typeof storeAPI !== 'undefined') {
+      const data = await storeAPI.getAllStores();
+      return { success: true, data: data.map(normalizeData) };
+    }
+
+    return { success: false, error: 'No data source available' };
   } catch (error) {
     console.error('Error fetching stores:', error);
     return { success: false, error: error.message };
@@ -243,14 +285,24 @@ async function getStores(limit = 20, offset = 0) {
 // Get store by ID
 async function getStoreById(storeId) {
   try {
-    const { data, error } = await supabaseClient
-      .from('stores')
-      .select('*')
-      .eq('id', storeId)
-      .single();
+    if (isSupabaseFunctional()) {
+      const { data, error } = await supabaseClient
+        .from('stores')
+        .select('*')
+        .eq('id', storeId)
+        .single();
 
-    if (error) throw error;
-    return { success: true, data };
+      if (!error) return { success: true, data: normalizeData(data) };
+      console.warn('Supabase fetch failed, trying REST API fallback...', error);
+    }
+
+    // Fallback to REST API
+    if (typeof storeAPI !== 'undefined') {
+      const data = await storeAPI.getStoreById(storeId);
+      return { success: true, data: normalizeData(data) };
+    }
+
+    return { success: false, error: 'No data source available' };
   } catch (error) {
     console.error('Error fetching store:', error);
     return { success: false, error: error.message };
@@ -260,15 +312,23 @@ async function getStoreById(storeId) {
 // Get products by store
 async function getProductsByStore(storeId, limit = 50) {
   try {
-    const { data, error } = await supabaseClient
-      .from('products')
-      .select('*')
-      .eq('store_id', storeId)
-      .eq('is_active', true)
-      .limit(limit);
+    if (isSupabaseFunctional()) {
+      const { data, error } = await supabaseClient
+        .from('products')
+        .select('*')
+        .eq('store_id', storeId)
+        .eq('is_active', true)
+        .limit(limit);
 
-    if (error) throw error;
-    return { success: true, data };
+      if (!error) return { success: true, data };
+      console.warn('Supabase fetch failed, trying REST API fallback...', error);
+    }
+
+    // Note: REST API doesn't have a direct getProductsByStore, 
+    // but in a real fallback scenario we might call a specific endpoint or handle it.
+    // For now, if Supabase is down, product viewing might still be limited without a backend fix.
+
+    return { success: false, error: 'Supabase unavailable and no REST fallback for products' };
   } catch (error) {
     console.error('Error fetching products:', error);
     return { success: false, error: error.message };
