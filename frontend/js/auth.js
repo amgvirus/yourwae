@@ -47,9 +47,10 @@ async function handleGoogleLogin() {
 document.addEventListener('DOMContentLoaded', async () => {
   await window.fastGetApp.authReadyPromise;
   const user = window.fastGetApp.currentUser;
+  const role = window.fastGetApp.currentUserRole;
   if (user) {
     // Redirect based on role
-    if (user.user_metadata && user.user_metadata.role === 'store') {
+    if (role === 'store') {
       window.location.href = 'seller-dashboard.html';
     } else {
       window.location.href = 'index.html';

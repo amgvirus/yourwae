@@ -30,6 +30,10 @@ function setupAuthListener() {
       if (session?.user) {
         currentUser = session.user;
         window.currentUser = session.user;
+        // Sync role from metadata immediately if available
+        if (session.user.user_metadata?.role) {
+          currentUserRole = session.user.user_metadata.role;
+        }
         await fetchUserRole(session.user.id);
         updateUIForLoggedInUser();
       }
@@ -70,7 +74,9 @@ async function checkAuthStatus() {
     if (session?.user) {
       currentUser = session.user;
       window.currentUser = session.user;
-      updateUIForLoggedInUser();
+      if (session.user.user_metadata?.role) {
+        currentUserRole = session.user.user_metadata.role;
+      }
       await fetchUserRole(session.user.id);
       updateUIForLoggedInUser();
     } else {
@@ -79,7 +85,9 @@ async function checkAuthStatus() {
       if (user) {
         currentUser = user;
         window.currentUser = user;
-        updateUIForLoggedInUser();
+        if (user.user_metadata?.role) {
+          currentUserRole = user.user_metadata.role;
+        }
         await fetchUserRole(user.id);
         updateUIForLoggedInUser();
       } else {

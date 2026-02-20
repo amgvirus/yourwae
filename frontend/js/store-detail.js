@@ -57,8 +57,13 @@ function displayStoreDetails(store) {
   document.getElementById('storeRating').innerHTML = `${'⭐'.repeat(Math.floor(store.rating || 0))} (${store.rating || 0})`;
   document.getElementById('storeReviews').textContent = `${store.total_reviews} reviews`;
   document.getElementById('storeAddress').textContent = store.address?.street || 'Address unavailable';
-  document.getElementById('deliveryFee').textContent = `GH₵${store.base_delivery_fee}`;
-  document.getElementById('minOrder').textContent = `GH₵${store.minimum_order_value}`;
+
+  // Dynamic delivery fee GH₵
+  const selectedTown = window.fastGetApp.townManager.getSelectedTown();
+  const fee = window.fastGetApp.calculateDeliveryFee(selectedTown?.id);
+  document.getElementById('deliveryFee').textContent = `₵${fee.toFixed(2)}`;
+
+  document.getElementById('minOrder').textContent = `₵${store.minimum_order_value}`;
   document.getElementById('deliveryRadius').textContent = `${store.delivery_radius} km`;
 }
 
@@ -295,6 +300,42 @@ async function handleLogout() {
   }
 }
 
+// Handle town selection
+function handleTownChange() {
+  const select = document.getElementById('townSelect');
+  const townValue = select.value;
+
+  if (townValue) {
+    window.fastGetApp.townManager.setSelectedTown(townValue, select.options[select.selectedIndex].text);
+    // Refresh header to update fee
+    loadStore();
+  }
+}
+
+// Initialize town selector
+async function initializeTownSelector() {
+  const select = document.getElementById('townSelect');
+  if (!select) return;
+
+  // Clear existing options except the first one
+  select.innerHTML = '<option value="">Select Town</option>';
+
+  // Add town options
+  const townsList = window.fastGetApp.getTowns();
+  townsList.forEach(town => {
+    const option = document.createElement('option');
+    option.value = town.id;
+    option.textContent = town.name;
+    select.appendChild(option);
+  });
+
+  // Restore previously selected town
+  const selectedTown = window.fastGetApp.townManager.getSelectedTown();
+  if (selectedTown) {
+    select.value = selectedTown.id;
+  }
+}
+
 // Close modal when clicking outside
 window.onclick = function (event) {
   const modal = document.getElementById('productModal');
@@ -306,6 +347,7 @@ window.onclick = function (event) {
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
   await window.fastGetApp.authReadyPromise;
+  await initializeTownSelector();
   loadStore();
   document.getElementById('searchProducts').addEventListener('input', filterProducts);
 });

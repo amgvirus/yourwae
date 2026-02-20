@@ -48,6 +48,11 @@
         <input type="text" id="navSearchInput" placeholder="Search products...">
       </div>
       <div class="navbar-menu">
+        <div class="town-selector">
+          <select id="townSelect" class="town-dropdown" onchange="handleTownChange()">
+            <option value="">Select Town</option>
+          </select>
+        </div>
         <a href="stores.html" class="nav-link">Stores</a>
         <a href="cart.html" class="nav-link">🛒 Cart</a>
         <button id="loginBtn" class="nav-btn btn-primary" onclick="window.location.href='login.html'">Login</button>
