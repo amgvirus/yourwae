@@ -600,6 +600,37 @@ async function getDeliveryTracking(orderId) {
   }
 }
 
+// Local Storage for selected town
+const townManager = {
+  setSelectedTown(townId, townName) {
+    localStorage.setItem('selectedTown', JSON.stringify({ id: townId, name: townName }));
+  },
+
+  getSelectedTown() {
+    const town = localStorage.getItem('selectedTown');
+    return town ? JSON.parse(town) : null;
+  },
+
+  clearSelectedTown() {
+    localStorage.removeItem('selectedTown');
+  },
+};
+
+// Towns List (Standardized)
+const TOWNS = [
+  { id: 'hohoe', name: 'Hohoe' },
+  { id: 'dzodze', name: 'Dzodze' },
+  { id: 'anloga', name: 'Anloga' },
+  { id: 'akpafu', name: 'Akpafu' },
+  { id: 'sanko', name: 'Sanko' },
+  { id: 'likpe', name: 'Likpe' },
+  { id: 'lolobi', name: 'Lolobi' },
+  { id: 'fodome', name: 'Fodome' },
+  { id: 'wli', name: 'Wli' },
+  { id: 've', name: 'Ve' },
+  { id: 'alavanyo', name: 'Alavanyo' }
+];
+
 // Calculate distance using Haversine formula
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Radius of the Earth in km
@@ -726,6 +757,8 @@ window.fastGetApp = {
   calculateDeliveryFee,
   checkAuthStatus,
   authReadyPromise,
+  townManager,
+  getTowns: () => TOWNS,
   get currentUser() { return currentUser; },
   get currentUserRole() { return currentUserRole; },
   getStoreInitials(name) {

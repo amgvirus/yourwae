@@ -7,9 +7,9 @@ async function loadFeaturedStores() {
     let stores = result.success ? result.data : [];
 
     // Filter by selected town if available
-    const selectedTown = townManager.getSelectedTown();
+    const selectedTown = window.fastGetApp.townManager.getSelectedTown();
     if (selectedTown && selectedTown.id) {
-      // Assuming 'id' is verified or we just show all for now if no town mapping exist
+      // Filter logic can be added here if stores have town_id
     }
 
     // Limit to 6 stores
@@ -54,7 +54,7 @@ async function handleTownChange() {
   const townValue = select.value;
 
   if (townValue) {
-    townManager.setSelectedTown(townValue, select.options[select.selectedIndex].text);
+    window.fastGetApp.townManager.setSelectedTown(townValue, select.options[select.selectedIndex].text);
     loadFeaturedStores();
   }
 }
@@ -65,21 +65,20 @@ async function initializeTownSelector() {
   if (!select) return;
 
   try {
-    const towns = await townAPI.getAllTowns();
-
     // Clear existing options except the first one
     select.innerHTML = '<option value="">Select Town</option>';
 
     // Add town options
-    towns.forEach(town => {
+    const townsList = window.fastGetApp.getTowns();
+    townsList.forEach(town => {
       const option = document.createElement('option');
-      option.value = town._id;
+      option.value = town.id;
       option.textContent = town.name;
       select.appendChild(option);
     });
 
     // Restore previously selected town
-    const selectedTown = townManager.getSelectedTown();
+    const selectedTown = window.fastGetApp.townManager.getSelectedTown();
     if (selectedTown) {
       select.value = selectedTown.id;
     }

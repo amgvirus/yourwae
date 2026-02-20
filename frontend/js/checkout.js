@@ -31,8 +31,19 @@ function setupLocationListeners() {
   const citySelect = document.getElementById('city');
   if (citySelect) {
     citySelect.addEventListener('change', () => {
+      const townId = citySelect.value;
+      const townName = citySelect.options[citySelect.selectedIndex].text;
+      if (townId) {
+        window.fastGetApp.townManager.setSelectedTown(townId, townName);
+      }
       displayOrderSummary(cartItems);
     });
+
+    // Auto-select town if already in townManager
+    const selectedTown = window.fastGetApp.townManager.getSelectedTown();
+    if (selectedTown) {
+      citySelect.value = selectedTown.id;
+    }
   }
 }
 

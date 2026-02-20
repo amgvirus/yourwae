@@ -96,8 +96,8 @@ function filterStores() {
   const category = document.getElementById('categoryFilter').value;
 
   filteredStores = allStores.filter(store => {
-    const matchesSearch = store.storeName.toLowerCase().includes(searchTerm) ||
-      store.storeDescription?.toLowerCase().includes(searchTerm);
+    const matchesSearch = store.store_name.toLowerCase().includes(searchTerm) ||
+      (store.store_description && store.store_description.toLowerCase().includes(searchTerm));
     const matchesCategory = !category || store.category === category;
 
     return matchesSearch && matchesCategory;
@@ -113,7 +113,7 @@ function handleTownChange() {
   const townValue = select.value;
 
   if (townValue) {
-    townManager.setSelectedTown(townValue, select.options[select.selectedIndex].text);
+    window.fastGetApp.townManager.setSelectedTown(townValue, select.options[select.selectedIndex].text);
     currentPage = 1;
     loadStores();
   }
@@ -125,22 +125,20 @@ async function initializeTownSelector() {
   if (!select) return;
 
   try {
-    const towns = await townAPI.getAllTowns();
-
     // Clear existing options except the first one
     select.innerHTML = '<option value="">Select Town</option>';
 
-    // Add town options (using town names directly for now)
-    const townNames = ['Hohoe', 'Dzodze', 'Anloga'];
-    townNames.forEach(name => {
+    // Add town options
+    const townsList = window.fastGetApp.getTowns();
+    townsList.forEach(town => {
       const option = document.createElement('option');
-      option.value = name.toLowerCase();
-      option.textContent = name;
+      option.value = town.id;
+      option.textContent = town.name;
       select.appendChild(option);
     });
 
     // Restore previously selected town
-    const selectedTown = townManager.getSelectedTown();
+    const selectedTown = window.fastGetApp.townManager.getSelectedTown();
     if (selectedTown) {
       select.value = selectedTown.id;
     }
