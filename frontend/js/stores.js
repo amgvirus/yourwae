@@ -12,13 +12,27 @@ async function loadStores() {
 
     if (result.success) {
       allStores = result.data;
-      applyFilters(); // This function will now handle setting filteredStores and calling displayStores
+      if (allStores.length === 0) {
+        storesContainer.innerHTML = `
+          <div class="error-message">
+            <p><strong>No stores found.</strong></p>
+            <p style="font-size: 14px; color: #666;">The database table might be empty or your filters are too restrictive.</p>
+            <button class="btn btn-primary btn-sm" onclick="loadStores()" style="margin-top: 10px;">Refresh</button>
+          </div>`;
+      } else {
+        applyFilters();
+      }
     } else {
-      const errorMsg = result.error || 'Check your internet connection or project configuration.';
+      const errorMsg = result.error || 'Unknown database error.';
       storesContainer.innerHTML = `
         <div class="error-message">
-          <p><strong>Unable to load stores.</strong></p>
-          <p style="font-size: 14px; color: #666;">${errorMsg}</p>
+          <p><strong>Database Connection Issue</strong></p>
+          <p style="font-size: 14px; color: #d9534f; background: #f9f2f4; padding: 10px; border-radius: 4px; font-family: monospace; overflow-x: auto;">
+            Error: ${errorMsg}
+          </p>
+          <p style="font-size: 12px; color: #666; margin-top: 10px;">
+            Check the browser console (F12) for more details.
+          </p>
           <button class="btn btn-primary btn-sm" onclick="loadStores()" style="margin-top: 10px;">Retry</button>
         </div>`;
     }

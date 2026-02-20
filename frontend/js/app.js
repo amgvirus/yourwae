@@ -6,15 +6,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_twMoDMVTH-QJY_jIiZIpQQ_0IA8M1bk'; // R
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Credential Validation
-if (SUPABASE_ANON_KEY.startsWith('sb_publishable_')) {
-  console.warn('%c⚠️ YourWae Configuration Error: SUPABASE_ANON_KEY appears to be a Stripe Publishable Key instead of a Supabase Anon Key. Supabase features (Login, Order Tracking) will not work. Falling back to Local REST API for browsing.', 'color: orange; font-weight: bold; font-size: 14px;');
-}
-
-function isSupabaseFunctional() {
-  return !SUPABASE_ANON_KEY.startsWith('sb_publishable_') && SUPABASE_URL !== 'https://your-project.supabase.co';
-}
-
+// Normalization helper (can stay)
 function normalizeData(item) {
   if (!item) return null;
   // Map camelCase (REST API) to snake_case (App logic/Supabase)
@@ -95,11 +87,6 @@ async function fetchUserRole(userId) {
 // Check authentication status
 async function checkAuthStatus() {
   try {
-    if (!isSupabaseFunctional()) {
-      updateUIForLoggedOutUser();
-      return;
-    }
-
     // Try fast session check first
     const { data: { session } } = await supabaseClient.auth.getSession();
 
@@ -211,30 +198,41 @@ async function signup(email, password, firstName, lastName, phone, role = 'custo
 // Login function
 async function login(email, password) {
   try {
+    console.log('Attempting login for:', email);
     const { data, error } = await supabaseClient.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase Login Error:', error);
+      throw error;
+    }
+
+    console.log('Login success data:', data);
 
     currentUser = data.user;
     window.currentUser = data.user; // Sync
 
-    // Get user role
-    const { data: userData } = await supabaseClient
+    // Get user role with explicit logging
+    const { data: userData, error: roleError } = await supabaseClient
       .from('users')
       .select('role')
       .eq('id', data.user.id)
       .single();
 
+    if (roleError) {
+      console.warn('Login success but role fetch failed:', roleError);
+    }
+
     if (userData) {
+      console.log('User role fetched:', userData.role);
       currentUserRole = userData.role;
     }
 
     return { success: true, user: data.user };
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Comprehensive Login Error:', error);
     return { success: false, error: error.message };
   }
 }
@@ -257,27 +255,29 @@ async function logout() {
 // Get all stores
 async function getStores(limit = 20, offset = 0) {
   try {
-    if (isSupabaseFunctional()) {
-      const { data, error } = await supabaseClient
-        .from('stores')
-        .select('*')
-        .eq('is_active', true)
-        .eq('is_verified', true)
-        .range(offset, offset + limit - 1);
+    console.log('Fetching stores from Supabase...');
+    const { data, error } = await supabaseClient
+      .from('stores')
+      .select('*')
+      .eq('is_active', true)
+      .eq('is_verified', true)
+      .range(offset, offset + limit - 1);
 
-      if (!error) return { success: true, data: data.map(normalizeData) };
-      console.warn('Supabase fetch failed, trying REST API fallback...', error);
+    if (error) {
+      console.warn('Supabase getStores failed:', error);
+      // Fallback to REST API
+      if (typeof storeAPI !== 'undefined') {
+        console.log('Trying REST API fallback for stores...');
+        const apiData = await storeAPI.getAllStores();
+        return { success: true, data: apiData.map(normalizeData) };
+      }
+      throw error;
     }
 
-    // Fallback to REST API
-    if (typeof storeAPI !== 'undefined') {
-      const data = await storeAPI.getAllStores();
-      return { success: true, data: data.map(normalizeData) };
-    }
-
-    return { success: false, error: 'No data source available' };
+    console.log('Successfully fetched stores:', data?.length || 0);
+    return { success: true, data: (data || []).map(normalizeData) };
   } catch (error) {
-    console.error('Error fetching stores:', error);
+    console.error('Comprehensive getStores Error:', error);
     return { success: false, error: error.message };
   }
 }
@@ -285,26 +285,27 @@ async function getStores(limit = 20, offset = 0) {
 // Get store by ID
 async function getStoreById(storeId) {
   try {
-    if (isSupabaseFunctional()) {
-      const { data, error } = await supabaseClient
-        .from('stores')
-        .select('*')
-        .eq('id', storeId)
-        .single();
+    console.log('Fetching store details for:', storeId);
+    const { data, error } = await supabaseClient
+      .from('stores')
+      .select('*')
+      .eq('id', storeId)
+      .single();
 
-      if (!error) return { success: true, data: normalizeData(data) };
-      console.warn('Supabase fetch failed, trying REST API fallback...', error);
+    if (error) {
+      console.warn('Supabase getStoreById failed:', error);
+      // Fallback to REST API
+      if (typeof storeAPI !== 'undefined') {
+        console.log('Trying REST API fallback for store details...');
+        const apiData = await storeAPI.getStoreById(storeId);
+        return { success: true, data: normalizeData(apiData) };
+      }
+      throw error;
     }
 
-    // Fallback to REST API
-    if (typeof storeAPI !== 'undefined') {
-      const data = await storeAPI.getStoreById(storeId);
-      return { success: true, data: normalizeData(data) };
-    }
-
-    return { success: false, error: 'No data source available' };
+    return { success: true, data: normalizeData(data) };
   } catch (error) {
-    console.error('Error fetching store:', error);
+    console.error('Comprehensive getStoreById Error:', error);
     return { success: false, error: error.message };
   }
 }
@@ -312,25 +313,23 @@ async function getStoreById(storeId) {
 // Get products by store
 async function getProductsByStore(storeId, limit = 50) {
   try {
-    if (isSupabaseFunctional()) {
-      const { data, error } = await supabaseClient
-        .from('products')
-        .select('*')
-        .eq('store_id', storeId)
-        .eq('is_active', true)
-        .limit(limit);
+    console.log('Fetching products for store:', storeId);
+    const { data, error } = await supabaseClient
+      .from('products')
+      .select('*')
+      .eq('store_id', storeId)
+      .eq('is_active', true)
+      .limit(limit);
 
-      if (!error) return { success: true, data };
-      console.warn('Supabase fetch failed, trying REST API fallback...', error);
+    if (error) {
+      console.error('Supabase getProductsByStore Error:', error);
+      throw error;
     }
 
-    // Note: REST API doesn't have a direct getProductsByStore, 
-    // but in a real fallback scenario we might call a specific endpoint or handle it.
-    // For now, if Supabase is down, product viewing might still be limited without a backend fix.
-
-    return { success: false, error: 'Supabase unavailable and no REST fallback for products' };
+    console.log('Successfully fetched products:', data?.length || 0);
+    return { success: true, data };
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error('Comprehensive getProductsByStore Error:', error);
     return { success: false, error: error.message };
   }
 }
