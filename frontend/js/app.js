@@ -65,23 +65,48 @@ function setupAuthListener() {
   });
 }
 
-// Fetch user role separately
-async function fetchUserRole(userId) {
-  try {
-    const { data, error } = await supabaseClient
-      .from('users')
-      .select('role')
-      .eq('id', userId)
-      .single();
+// Fetch user role separately (with retry for trigger delay)
+async function fetchUserRole(userId, retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const { data, error } = await supabaseClient
+        .from('users')
+        .select('role')
+        .eq('id', userId)
+        .single();
 
-    if (data) {
-      currentUserRole = data.role;
-    } else {
-      console.error(`User profile missing in public.users for ID: ${userId}`);
+      if (error) {
+        console.warn(`fetchUserRole attempt ${attempt}/${retries} error:`, error.message);
+        if (attempt < retries) {
+          await new Promise(r => setTimeout(r, 1000 * attempt));
+          continue;
+        }
+      }
+
+      if (data) {
+        currentUserRole = data.role;
+        return data.role;
+      } else {
+        console.warn(`User profile not yet in public.users for ID: ${userId} (attempt ${attempt})`);
+        if (attempt < retries) {
+          await new Promise(r => setTimeout(r, 1000 * attempt));
+          continue;
+        }
+      }
+    } catch (error) {
+      console.warn(`fetchUserRole attempt ${attempt} exception:`, error);
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 1000 * attempt));
+      }
     }
-  } catch (error) {
-    console.warn('Could not fetch user role:', error);
   }
+  // Fallback: use role from auth metadata if DB fetch keeps failing
+  if (currentUser?.user_metadata?.role) {
+    console.warn('Using role from user_metadata as fallback:', currentUser.user_metadata.role);
+    currentUserRole = currentUser.user_metadata.role;
+    return currentUserRole;
+  }
+  return null;
 }
 
 // Check authentication status
@@ -181,12 +206,21 @@ async function signup(email, password, firstName, lastName, phone, role = 'custo
       }
     });
 
-
     if (authError) throw authError;
 
+    // Check if email confirmation is required
+    if (authData.user && !authData.session) {
+      console.warn('Signup: email confirmation may be required. User created but no session.');
+      return { success: true, user: authData.user, needsConfirmation: true };
+    }
+
     currentUser = authData.user;
-    window.currentUser = authData.user; // Sync
+    window.currentUser = authData.user;
     currentUserRole = role;
+
+    // Wait for the database trigger to complete, then verify user row exists
+    await new Promise(r => setTimeout(r, 2000));
+    await fetchUserRole(authData.user.id, 3);
 
     return { success: true, user: authData.user };
   } catch (error) {
@@ -205,34 +239,33 @@ async function login(email, password) {
     });
 
     if (error) {
-      console.error('Supabase Login Error:', error);
+      console.error('Supabase Login Error:', JSON.stringify(error));
       throw error;
     }
 
-    console.log('Login success data:', data);
+    console.log('Login success, user id:', data.user?.id);
 
     currentUser = data.user;
-    window.currentUser = data.user; // Sync
+    window.currentUser = data.user;
 
-    // Get user role with explicit logging
-    const { data: userData, error: roleError } = await supabaseClient
-      .from('users')
-      .select('role')
-      .eq('id', data.user.id)
-      .single();
+    // Fetch role with retry (trigger may still be running for new users)
+    const fetchedRole = await fetchUserRole(data.user.id, 3);
 
-    if (roleError) {
-      console.warn('Login success but role fetch failed:', roleError);
-    }
-
-    if (userData) {
-      console.log('User role fetched:', userData.role);
-      currentUserRole = userData.role;
+    if (!fetchedRole) {
+      // Last resort fallback: use metadata role
+      const metaRole = data.user.user_metadata?.role;
+      if (metaRole) {
+        console.warn('Using metadata role as final fallback:', metaRole);
+        currentUserRole = metaRole;
+      } else {
+        console.warn('No role found anywhere, defaulting to customer');
+        currentUserRole = 'customer';
+      }
     }
 
     return { success: true, user: data.user };
   } catch (error) {
-    console.error('Comprehensive Login Error:', error);
+    console.error('Login Error:', error.message || error);
     return { success: false, error: error.message };
   }
 }
@@ -256,7 +289,10 @@ async function logout() {
 async function getStores(limit = 20, offset = 0) {
   try {
     console.log('Fetching stores from Supabase...');
-    const { data, error } = await supabaseClient
+    console.log('Using URL:', SUPABASE_URL);
+
+    // First try without filters to check basic connectivity
+    const { data, error, status, statusText } = await supabaseClient
       .from('stores')
       .select('*')
       .eq('is_active', true)
@@ -264,7 +300,28 @@ async function getStores(limit = 20, offset = 0) {
       .range(offset, offset + limit - 1);
 
     if (error) {
-      console.warn('Supabase getStores failed:', error);
+      console.error('Supabase getStores error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        httpStatus: status
+      });
+
+      // If RLS or permissions issue, try fetching without verified filter
+      if (error.code === '42501' || error.message?.includes('permission')) {
+        console.log('Permission error - trying broader query...');
+        const { data: fallbackData, error: fallbackError } = await supabaseClient
+          .from('stores')
+          .select('*')
+          .range(offset, offset + limit - 1);
+
+        if (!fallbackError && fallbackData) {
+          console.log('Fallback query succeeded:', fallbackData.length, 'stores');
+          return { success: true, data: (fallbackData || []).map(normalizeData) };
+        }
+      }
+
       // Fallback to REST API
       if (typeof storeAPI !== 'undefined') {
         console.log('Trying REST API fallback for stores...');
@@ -277,8 +334,8 @@ async function getStores(limit = 20, offset = 0) {
     console.log('Successfully fetched stores:', data?.length || 0);
     return { success: true, data: (data || []).map(normalizeData) };
   } catch (error) {
-    console.error('Comprehensive getStores Error:', error);
-    return { success: false, error: error.message };
+    console.error('getStores Error:', error.message || error);
+    return { success: false, error: error.message || 'Failed to load stores. Check browser console (F12) for details.' };
   }
 }
 

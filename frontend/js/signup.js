@@ -60,15 +60,24 @@ async function handleSignup(event) {
 
 
   if (result.success) {
-    alert('Signup successful! Redirecting...');
-    // Small delay to allow trigger to complete
-    setTimeout(() => {
-      if (role === 'store') {
-        window.location.href = 'seller-dashboard.html';
-      } else {
-        window.location.href = 'index.html';
-      }
-    }, 1500);
+    if (result.needsConfirmation) {
+      successMsg.textContent = 'Account created! Please check your email to confirm your account, then log in.';
+      successMsg.style.display = 'block';
+      // Redirect to login after a moment
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 3000);
+    } else {
+      successMsg.textContent = 'Signup successful! Redirecting...';
+      successMsg.style.display = 'block';
+      setTimeout(() => {
+        if (role === 'store') {
+          window.location.href = 'seller-dashboard.html';
+        } else {
+          window.location.href = 'index.html';
+        }
+      }, 1500);
+    }
   } else {
     errorMsg.textContent = 'Error: ' + result.error;
     errorMsg.style.display = 'block';
