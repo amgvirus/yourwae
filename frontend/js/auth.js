@@ -40,36 +40,43 @@ async function handleLogin(event) {
 
   // Show loading overlay and disable form
   if (loadingOverlay) loadingOverlay.classList.add('active');
-  if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Signing in...'; }
+  if (loginBtn) {
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Signing in...';
+  }
 
   try {
     await window.fastGetApp.authReadyPromise;
     const result = await window.fastGetApp.login(email, password);
 
     if (result.success) {
-      if (loadingOverlay) loadingOverlay.classList.remove('active');
-      if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Login'; }
-
-      // Show animated success overlay
+      // Update success overlay message based on role
       const overlay = document.getElementById('loginSuccessOverlay');
-      const successSub = overlay ? overlay.querySelector('.success-sub') : null;
+      const successSub = overlay?.querySelector('.success-sub');
       const role = window.fastGetApp.currentUserRole;
       const isStore = role === 'store';
 
       if (successSub) {
-        successSub.textContent = isStore ? 'Taking you to your seller dashboard...' : 'Taking you to explore stores...';
+        successSub.textContent = isStore
+          ? 'Taking you to your seller dashboard...'
+          : 'Taking you to explore stores...';
       }
+
+      // Hide loading, show success overlay
+      if (loadingOverlay) loadingOverlay.classList.remove('active');
       if (overlay) overlay.classList.add('active');
 
       sessionStorage.setItem('fromLogin', '1');
 
       const dest = isStore ? 'seller-dashboard.html' : 'index.html';
-      setTimeout(() => { window.location.href = dest; }, 2200);
+      setTimeout(() => {
+        window.location.href = dest;
+      }, 2200);
     } else {
-      // Check for email-not-confirmed error
       const errText = result.error || '';
       if (errText.toLowerCase().includes('email not confirmed')) {
-        errorMsg.textContent = 'Please check your email and click the confirmation link, then try logging in again.';
+        errorMsg.textContent =
+          'Please check your email and click the confirmation link, then try logging in again.';
       } else if (errText.toLowerCase().includes('invalid login credentials')) {
         errorMsg.textContent = 'Wrong email or password. Please try again.';
       } else {
@@ -87,7 +94,10 @@ async function handleLogin(event) {
     setTimeout(() => errorMsg.classList.remove('shake'), 500);
   } finally {
     if (loadingOverlay) loadingOverlay.classList.remove('active');
-    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Login'; }
+    if (loginBtn) {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Login';
+    }
   }
 }
 
@@ -98,7 +108,6 @@ async function handleGoogleLogin() {
 
 // Redirect if already logged in
 document.addEventListener('DOMContentLoaded', async () => {
-  // Wait for app.js auth to be ready
   if (!window.fastGetApp) {
     let waited = 0;
     while (!window.fastGetApp && waited < 5000) {
