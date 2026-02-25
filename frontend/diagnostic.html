@@ -4,254 +4,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YourWae Full Test</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>YourWae - Auth Diagnostic Tool</title>
     <style>
-        .debug-panel {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 99999;
-            background: #000;
-            color: #0f0;
-            font-family: monospace;
-            font-size: 12px;
-            padding: 10px;
-            max-height: 50vh;
-            overflow-y: auto;
-            border-bottom: 2px solid #0f0;
-        }
-
-        .debug-panel .err {
-            color: #f55;
-        }
-
-        .debug-panel .warn {
-            color: #ff0;
-        }
-
-        .debug-panel .ok {
-            color: #0f0;
-        }
-
-        .debug-panel .info {
-            color: #5af;
-        }
-
         body {
-            padding-top: 200px;
+            font-family: -apple-system, sans-serif;
+            padding: 20px;
+            background: #f0f2f5;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #1a73e8;
+            margin-top: 0;
+        }
+
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .success {
+            background: #e6f4ea;
+            color: #1e8e3e;
+        }
+
+        .error {
+            background: #fce8e6;
+            color: #d93025;
+        }
+
+        .warning {
+            background: #fef7e0;
+            color: #f9ab00;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #d93025;
+            color: white;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Debug Panel -->
-    <div class="debug-panel" id="debugPanel">
-        <strong>🔍 DEBUG CONSOLE — Errors will appear here</strong><br>
+    <div class="card">
+        <h1>🔍 Auth Diagnostic Tool (v1.1)</h1>
+        <p>This tool helps diagnose why your Navbar still shows "Login" after sign-in.</p>
+        <button class="btn btn-primary" onclick="window.location.reload()">Refresh Diagnostic</button>
+        <button class="btn" onclick="window.location.href='index.html'">Go to Home</button>
+        <button class="btn" onclick="window.location.href='login.html'">Go to Login</button>
+        <button class="btn btn-danger" onclick="handleLogout()">Test Logout</button>
     </div>
 
-    <!-- Mobile Menu Elements (app.js expects these) -->
-    <div class="mobile-menu-overlay" id="menuOverlay" onclick="closeMobileMenu()"></div>
-    <nav class="mobile-menu" id="mobileMenu">
-        <div class="mobile-menu-header">
-            <div class="user-avatar" id="mobileUserAvatar">👤</div>
-            <div class="user-info">
-                <div class="user-name" id="mobileUserName">Welcome</div>
-                <div class="user-email" id="mobileUserEmail">Sign in to your account</div>
-            </div>
+    <div class="grid">
+        <div class="card">
+            <h2>Current State</h2>
+            <div id="authState">Checking...</div>
+            <h3>Supabase Client</h3>
+            <div id="supabaseStatus">Checking...</div>
+            <h3>Navbar Elements</h3>
+            <div id="navbarStatus">Checking...</div>
         </div>
-        <ul class="mobile-menu-links">
-            <li><a href="login.html" id="mobileLoginLink"><span class="menu-icon">🔑</span> Login</a></li>
-            <li id="mobileLogoutItem" style="display:none;"><a href="#"><span class="menu-icon">🚪</span> Logout</a>
-            </li>
-        </ul>
-    </nav>
-
-    <!-- Navbar (app.js expects these) -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()">
-                <span></span><span></span><span></span>
-            </button>
-            <div class="navbar-logo">
-                <a href="index.html"><strong>Your<span class="brand-wae">Wae</span></strong></a>
-            </div>
-            <div class="navbar-search">
-                <input type="text" id="searchInput" placeholder="Search stores...">
-            </div>
-            <div class="navbar-menu">
-                <div class="town-selector">
-                    <select id="townSelect">
-                        <option value="">Select Town</option>
-                    </select>
-                </div>
-                <button id="loginBtn" class="nav-btn btn-primary"
-                    onclick="window.location.href='login.html'">Login</button>
-                <div id="userMenu" style="display: none;">
-                    <button id="logoutBtn" class="nav-btn btn-danger" onclick="handleLogout()">Logout</button>
-                </div>
-            </div>
+        <div class="card">
+            <h2>Raw Data (fastGetApp)</h2>
+            <pre id="rawData">Loading...</pre>
         </div>
-    </nav>
+    </div>
 
-    <!-- Stores section -->
-    <section class="stores-section">
-        <div class="container">
-            <h1>Browse Stores (Test Page)</h1>
-            <div class="filters">
-                <input type="text" id="storeSearchInput" placeholder="Search..." class="search-input">
-                <select id="categoryFilter" class="filter-select">
-                    <option value="">All Categories</option>
-                </select>
-            </div>
-            <div id="storesContainer" class="stores-grid">
-                <div class="loading">Loading stores...</div>
-            </div>
-            <div class="pagination">
-                <button id="prevBtn" style="display:none;">Previous</button>
-                <span id="pageInfo"></span>
-                <button id="nextBtn" style="display:none;">Next</button>
-            </div>
-        </div>
-    </section>
+    <div class="card">
+        <h2>Auth Logs</h2>
+        <div id="logs" style="max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+    </div>
 
-    <!-- Bottom Nav (app.js expects these) -->
-    <nav class="bottom-nav">
-        <div class="bottom-nav-items">
-            <a href="login.html" class="bottom-nav-item" id="bottomNavAccount">
-                <span class="nav-icon">👤</span>
-                <span>Account</span>
-            </a>
-        </div>
-    </nav>
-
-    <!-- Error Catching FIRST -->
-    <script>
-        const dbg = document.getElementById('debugPanel');
-        function dlog(msg, cls) {
-            const d = document.createElement('div');
-            d.className = cls || 'info';
-            d.textContent = '[' + new Date().toISOString().split('T')[1].split('.')[0] + '] ' + msg;
-            dbg.appendChild(d);
-            dbg.scrollTop = dbg.scrollHeight;
-            console.log(msg);
-        }
-
-        window.onerror = function (message, source, lineno, colno, error) {
-            const file = source ? source.split('/').pop() : 'unknown';
-            dlog(`ERROR in ${file}:${lineno}:${colno} — ${message}`, 'err');
-            if (error && error.stack) dlog('Stack: ' + error.stack, 'err');
-            return false;
-        };
-        window.addEventListener('unhandledrejection', function (event) {
-            dlog('PROMISE REJECT: ' + (event.reason ? (event.reason.message || event.reason) : 'Unknown'), 'err');
-        });
-        dlog('Debug panel ready', 'ok');
-    </script>
-
-    <!-- Load scripts in SAME order as stores.html -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>dlog('Supabase CDN loaded: typeof supabase = ' + typeof supabase, typeof supabase === 'object' ? 'ok' : 'err');</script>
-
-    <script src="js/api.js"></script>
-    <script>dlog('api.js loaded: typeof storeAPI = ' + typeof storeAPI + ', API_BASE_URL = ' + (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'UNDEFINED'), typeof storeAPI !== 'undefined' ? 'ok' : 'err');</script>
-
     <script src="js/app.js"></script>
-    <script>dlog('app.js loaded: typeof window.fastGetApp = ' + typeof window.fastGetApp, typeof window.fastGetApp !== 'undefined' ? 'ok' : 'err');</script>
-
-    <script src="js/stores.js"></script>
-    <script>dlog('stores.js loaded: typeof loadStores = ' + typeof loadStores, typeof loadStores !== 'undefined' ? 'ok' : 'err');</script>
-
-    <!-- Test runner -->
     <script>
-        async function runFullTest() {
-            dlog('=== RUNNING FULL TEST SUITE ===', 'info');
+        // Override console.log to capture logs
+        const logContainer = document.getElementById('logs');
+        const oldLog = console.log;
+        const oldWarn = console.warn;
+        const oldErr = console.error;
 
-            // Test 1: Check all globals
-            dlog('Test 1: Checking globals...', 'info');
-            const checks = [
-                ['supabase', typeof supabase],
-                ['supabaseClient', typeof supabaseClient],
-                ['window.fastGetApp', typeof window.fastGetApp],
-                ['storeAPI', typeof storeAPI],
-                ['loadStores', typeof loadStores],
-            ];
-            checks.forEach(([name, type]) => {
-                dlog(`  ${name} = ${type}`, type !== 'undefined' ? 'ok' : 'err');
-            });
-
-            // Test 2: Direct Supabase query
-            dlog('Test 2: Direct Supabase stores query...', 'info');
-            try {
-                const { data, error, status } = await supabaseClient
-                    .from('stores')
-                    .select('id, store_name, is_active, is_verified')
-                    .limit(5);
-                if (error) {
-                    dlog('  Supabase error: ' + JSON.stringify(error), 'err');
-                } else {
-                    dlog('  Found ' + (data ? data.length : 0) + ' stores: ' + JSON.stringify(data), 'ok');
-                }
-            } catch (e) {
-                dlog('  Exception: ' + e.message, 'err');
-            }
-
-            // Test 3: Via getStores
-            dlog('Test 3: Via window.fastGetApp.getStores()...', 'info');
-            try {
-                const result = await window.fastGetApp.getStores(5);
-                if (result.success) {
-                    dlog('  getStores succeeded: ' + result.data.length + ' stores', 'ok');
-                } else {
-                    dlog('  getStores failed: ' + result.error, 'err');
-                }
-            } catch (e) {
-                dlog('  Exception: ' + e.message, 'err');
-            }
-
-            // Test 4: Test signup with a unique email
-            const testEmail = 'test_' + Date.now() + '@test.com';
-            dlog('Test 4: Signup test with ' + testEmail + '...', 'info');
-            try {
-                const result = await window.fastGetApp.signup(
-                    testEmail, 'TestPass1!@#', 'Test', 'User', '0551234567', 'customer'
-                );
-                if (result.success) {
-                    dlog('  Signup result: SUCCESS' + (result.needsConfirmation ? ' (needs email confirmation)' : ''), 'ok');
-                } else {
-                    dlog('  Signup result: FAILED — ' + result.error, 'err');
-                }
-            } catch (e) {
-                dlog('  Signup exception: ' + e.message, 'err');
-            }
-
-            // Test 5: Test login (will fail with test creds, that's expected)
-            dlog('Test 5: Login test (expected to fail with invalid creds)...', 'info');
-            try {
-                const result = await window.fastGetApp.login('nonexistent@test.com', 'FakePass1!@#');
-                if (result.success) {
-                    dlog('  Login succeeded (unexpected!)', 'warn');
-                } else {
-                    dlog('  Login failed as expected: ' + result.error, 'ok');
-                }
-            } catch (e) {
-                dlog('  Login exception: ' + e.message, 'err');
-            }
-
-            // Test 6: Check what stores.js loadStores does
-            dlog('Test 6: Check storesContainer after loadStores runs...', 'info');
-            await new Promise(r => setTimeout(r, 3000)); // Wait for DOMContentLoaded
-            const container = document.getElementById('storesContainer');
-            dlog('  storesContainer innerHTML length: ' + container.innerHTML.length, 'info');
-            dlog('  First 200 chars: ' + container.innerHTML.substring(0, 200),
-                container.innerHTML.includes('error') || container.innerHTML.includes('Error') ? 'err' : 'ok');
-
-            dlog('=== TESTS COMPLETE ===', 'info');
+        function addLog(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.style.borderBottom = '1px solid #eee';
+            div.style.padding = '4px 0';
+            if (type === 'error') div.style.color = 'red';
+            if (type === 'warning') div.style.color = 'orange';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logContainer.prepend(div);
         }
 
-        // Run after all DOMContentLoaded handlers fire
-        setTimeout(runFullTest, 4000);
+        console.log = (...args) => { oldLog(...args); addLog(args.join(' ')); };
+        console.warn = (...args) => { oldWarn(...args); addLog(args.join(' '), 'warning'); };
+        console.error = (...args) => { oldErr(...args); addLog(args.join(' '), 'error'); };
+
+        window.onload = async () => {
+            addLog('Diagnostic page loaded');
+
+            // Check state
+            const app = window.fastGetApp;
+            if (!app) {
+                document.getElementById('authState').innerHTML = '<span class="status error">CRITICAL: window.fastGetApp not found!</span>';
+                return;
+            }
+
+            try {
+                await app.authReadyPromise;
+                addLog('authReadyPromise resolved');
+
+                const user = app.currentUser;
+                const role = app.currentUserRole;
+
+                document.getElementById('authState').innerHTML = user
+                    ? `<span class="status success">Logged In as ${user.email}</span>`
+                    : '<span class="status warning">Logged Out</span>';
+
+                document.getElementById('authState').innerHTML += `<p>Role: <strong>${role || 'None'}</strong></p>`;
+
+                // check Supabase
+                const { data: { session } } = await app.supabase.auth.getSession();
+                document.getElementById('supabaseStatus').innerHTML = session
+                    ? `<span class="status success">Active Session in Supabase SDK</span>`
+                    : '<span class="status warning">No Session in Supabase SDK</span>';
+
+                // Navbar check
+                const loginBtn = document.getElementById('loginBtn');
+                const userMenu = document.getElementById('userMenu');
+                const logoutBtn = document.getElementById('logoutBtn');
+
+                let html = '<ul>';
+                html += `<li>loginBtn found: ${!!loginBtn} (Visible: ${loginBtn ? (window.getComputedStyle(loginBtn).display !== 'none') : 'N/A'})</li>`;
+                html += `<li>userMenu found: ${!!userMenu} (Visible: ${userMenu ? (window.getComputedStyle(userMenu).display !== 'none') : 'N/A'})</li>`;
+                html += `<li>logoutBtn found: ${!!logoutBtn}</li>`;
+                html += '</ul>';
+                document.getElementById('navbarStatus').innerHTML = html;
+
+                document.getElementById('rawData').textContent = JSON.stringify({
+                    currentUser: app.currentUser ? { id: app.currentUser.id, email: app.currentUser.email } : null,
+                    currentUserRole: app.currentUserRole,
+                    authInitialized: !!app.authReadyPromise
+                }, null, 2);
+
+            } catch (err) {
+                addLog('Diagnostic failed: ' + err.message, 'error');
+            }
+        };
     </script>
 </body>
 
