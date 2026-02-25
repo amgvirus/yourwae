@@ -118,6 +118,12 @@ async function handleSearch() {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
+  // Entrance animation when coming from login
+  if (sessionStorage.getItem('fromLogin')) {
+    document.body.classList.add('from-login');
+    sessionStorage.removeItem('fromLogin');
+  }
+
   await initializeTownSelector();
   await loadFeaturedStores();
 

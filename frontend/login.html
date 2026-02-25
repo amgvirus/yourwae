@@ -10,7 +10,7 @@
 
 <body>
   <!-- Top Navbar -->
-  <nav class="navbar">
+  <nav class="navbar auth-navbar">
     <div class="navbar-container">
       <div class="navbar-logo">
         <a href="index.html"><strong>Your<span class="brand-wae">Wae</span></strong></a>
@@ -19,6 +19,17 @@
   </nav>
 
   <!-- Login Form -->
+  <!-- Login success overlay (hidden by default) -->
+  <div class="login-success-overlay" id="loginSuccessOverlay">
+    <div class="login-success-check">
+      <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 27 l8 8 16 -16" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <p class="success-text">Welcome back!</p>
+    <p class="success-sub">Taking you to your dashboard...</p>
+  </div>
+
   <section class="auth-section">
     <div class="auth-container">
       <div class="auth-box">

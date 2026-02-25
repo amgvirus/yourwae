@@ -1179,12 +1179,19 @@ textarea {
 
 /* ============== AUTHENTICATION ============== */
 .auth-section {
-  background: var(--bg-light);
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
+  background-size: 200% 200%;
   padding: 40px 16px;
   min-height: calc(100vh - var(--nav-height));
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: authBgShift 8s ease-in-out infinite;
+}
+
+@keyframes authBgShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .auth-container {
@@ -1196,11 +1203,29 @@ textarea {
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-xl);
+  animation: authContainerEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+  transform: translateY(30px) scale(0.96);
+}
+
+@keyframes authContainerEntrance {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.auth-container {
+  transition: box-shadow 0.4s ease, transform 0.4s ease;
+}
+.auth-container:hover {
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(246,139,30,0.08);
 }
 
 .auth-box {
   background: var(--bg-white);
   padding: 36px 32px;
+  position: relative;
 }
 
 .auth-box h1 {
@@ -1208,16 +1233,46 @@ textarea {
   margin-bottom: 4px;
   font-size: 1.5rem;
   font-weight: 700;
+  animation: authFadeInUp 0.6s ease 0.2s both;
 }
 
 .subtitle {
   color: var(--text-muted);
   margin-bottom: 24px;
   font-size: 0.9rem;
+  animation: authFadeInUp 0.6s ease 0.3s both;
+}
+
+@keyframes authFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .form-group {
   margin-bottom: 16px;
+  animation: authFadeInUp 0.5s ease both;
+}
+
+.auth-box form .form-group:nth-child(1) { animation-delay: 0.35s; }
+.auth-box form .form-group:nth-child(2) { animation-delay: 0.4s; }
+.auth-box form button[type="submit"] { animation: authFadeInUp 0.5s ease 0.5s both; }
+.auth-box .divider { animation: authFadeInUp 0.5s ease 0.55s both; }
+.auth-box .btn-secondary { animation: authFadeInUp 0.5s ease 0.6s both; }
+.auth-box .auth-footer { animation: authFadeInUp 0.5s ease 0.65s both; }
+
+.auth-navbar {
+  animation: authFadeInUp 0.5s ease both;
+}
+
+.auth-box #errorMessage,
+.auth-box #successMessage {
+  animation: authFadeInUp 0.4s ease both;
 }
 
 .form-group label {
@@ -1244,7 +1299,8 @@ textarea {
 .form-group select:focus,
 .form-group textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(246, 139, 30, 0.1);
+  box-shadow: 0 0 0 3px rgba(246, 139, 30, 0.15);
+  transform: translateY(-1px);
 }
 
 .form-row {
@@ -1317,6 +1373,133 @@ textarea {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  animation: authFadeInUp 0.7s ease 0.4s both;
+}
+
+.auth-info .features li {
+  animation: authFadeInUp 0.5s ease both;
+}
+.auth-info .features li:nth-child(1) { animation-delay: 0.5s; }
+.auth-info .features li:nth-child(2) { animation-delay: 0.55s; }
+.auth-info .features li:nth-child(3) { animation-delay: 0.6s; }
+.auth-info .features li:nth-child(4) { animation-delay: 0.65s; }
+
+/* Login success overlay & transition */
+.login-success-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: linear-gradient(135deg, var(--primary) 0%, #e65100 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.login-success-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.login-success-check {
+  width: 80px;
+  height: 80px;
+  border: 4px solid rgba(255,255,255,0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  transform: scale(0.5);
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+}
+
+.login-success-overlay.active .login-success-check {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.login-success-check svg path {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: checkDraw 0.6s ease 0.3s forwards;
+}
+
+@keyframes checkDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+.login-success-overlay .success-text {
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: successTextIn 0.5s ease 0.6s forwards;
+}
+
+.login-success-overlay .success-sub {
+  color: rgba(255,255,255,0.9);
+  font-size: 0.95rem;
+  opacity: 0;
+  animation: successTextIn 0.5s ease 0.75s forwards;
+}
+
+@keyframes successTextIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Page exit transition (login → main) */
+body.login-exit .auth-section,
+body.login-exit .navbar {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.98);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Page entrance (main menu after login) */
+body.from-login .hero,
+body.from-login .category-strip,
+body.from-login .promo-banners,
+body.from-login .featured-stores,
+body.from-login .how-it-works {
+  animation: pageSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+body.from-login .navbar { animation: pageSlideUp 0.5s ease both; }
+body.from-login .hero { animation-delay: 0.1s; }
+body.from-login .category-strip { animation-delay: 0.15s; }
+body.from-login .promo-banners { animation-delay: 0.2s; }
+body.from-login .featured-stores { animation-delay: 0.25s; }
+body.from-login .how-it-works { animation-delay: 0.3s; }
+
+/* Seller dashboard entrance (when from login) */
+body.from-login .dashboard-grid,
+body.from-login .stats-container,
+body.from-login .seller-section {
+  animation: pageSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+body.from-login .stats-container { animation-delay: 0.1s; }
+body.from-login .dashboard-grid { animation-delay: 0.15s; }
+body.from-login .seller-section { animation-delay: 0.2s; }
+
+@keyframes pageSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .auth-info h2 {
@@ -1365,6 +1548,18 @@ textarea {
   margin-bottom: 12px;
   border: 1px solid #ffcdd2;
   font-size: 0.9rem;
+}
+
+.error-message.shake {
+  animation: errorShake 0.5s ease;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(4px); }
 }
 
 .success-message {

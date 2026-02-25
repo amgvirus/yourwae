@@ -45,11 +45,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 function setupAuthListener() {
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     console.log('Auth event:', event);
-    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+    // Handle sign-in (including INITIAL_SESSION when page loads with existing session)
+    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
       if (session?.user) {
         currentUser = session.user;
         window.currentUser = session.user;
-        // Sync role from metadata immediately if available
         if (session.user.user_metadata?.role) {
           currentUserRole = session.user.user_metadata.role;
         }
@@ -144,6 +144,10 @@ async function checkAuthStatus() {
   } finally {
     authInitialized = true;
     if (authReadyPromiseResolver) authReadyPromiseResolver();
+    // Delayed UI update as fallback (handles race conditions on redirect from login/signup)
+    if (currentUser) {
+      setTimeout(() => updateUIForLoggedInUser(), 150);
+    }
   }
 }
 
@@ -822,7 +826,7 @@ function updateUIForLoggedInUser() {
   const mobileUserEmail = document.getElementById('mobileUserEmail');
   const bottomNavAccount = document.getElementById('bottomNavAccount');
 
-  if (mobileLoginLink) mobileLoginLink.parentElement.style.display = 'none';
+  if (mobileLoginLink?.parentElement) mobileLoginLink.parentElement.style.display = 'none';
   if (mobileLogoutItem) mobileLogoutItem.style.display = 'block';
 
   // Update mobile menu "My Orders" link based on role
@@ -845,12 +849,13 @@ function updateUIForLoggedInUser() {
   }
 
   if (bottomNavAccount) {
+    const label = bottomNavAccount.querySelector('span:last-child');
     if (currentUserRole === 'store') {
       bottomNavAccount.href = 'seller-dashboard.html';
-      bottomNavAccount.querySelector('span:last-child').textContent = 'Dashboard';
+      if (label) label.textContent = 'Dashboard';
     } else {
       bottomNavAccount.href = 'orders.html';
-      bottomNavAccount.querySelector('span:last-child').textContent = 'Orders';
+      if (label) label.textContent = 'Orders';
     }
   }
 }
@@ -873,13 +878,14 @@ function updateUIForLoggedOutUser() {
   const mobileUserEmail = document.getElementById('mobileUserEmail');
   const bottomNavAccount = document.getElementById('bottomNavAccount');
 
-  if (mobileLoginLink) mobileLoginLink.parentElement.style.display = 'block';
+  if (mobileLoginLink?.parentElement) mobileLoginLink.parentElement.style.display = 'block';
   if (mobileLogoutItem) mobileLogoutItem.style.display = 'none';
   if (mobileUserName) mobileUserName.textContent = 'Welcome';
   if (mobileUserEmail) mobileUserEmail.textContent = 'Sign in to your account';
   if (bottomNavAccount) {
     bottomNavAccount.href = 'login.html';
-    bottomNavAccount.querySelector('span:last-child').textContent = 'Account';
+    const label = bottomNavAccount.querySelector('span:last-child');
+    if (label) label.textContent = 'Account';
   }
 }
 

@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    if (sessionStorage.getItem('fromLogin')) {
+        document.body.classList.add('from-login');
+        sessionStorage.removeItem('fromLogin');
+    }
+
     await window.fastGetApp.authReadyPromise;
 
     if (!window.fastGetApp.currentUser || window.fastGetApp.currentUserRole !== 'store') {

@@ -105,9 +105,10 @@ async function handleSignup(event) {
           window.location.href = 'login.html';
         }, 3000);
       } else {
-        // Auto-login succeeded — redirect immediately
+        // Auto-login succeeded — signal for entrance animation and redirect
         successMsg.textContent = 'Account created! Redirecting...';
         successMsg.style.display = 'block';
+        sessionStorage.setItem('fromLogin', '1');
         if (role === 'store') {
           window.location.href = 'seller-dashboard.html';
         } else {
