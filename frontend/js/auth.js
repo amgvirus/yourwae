@@ -6,6 +6,9 @@ async function handleLogin(event) {
   const password = document.getElementById('password').value;
   const errorMsg = document.getElementById('errorMessage');
   const successMsg = document.getElementById('successMessage');
+  const loginForm = document.getElementById('loginForm');
+  const loginBtn = loginForm?.querySelector('button[type="submit"]');
+  const loadingOverlay = document.getElementById('loginLoadingOverlay');
 
   // Hide previous messages
   errorMsg.style.display = 'none';
@@ -35,10 +38,18 @@ async function handleLogin(event) {
     errorMsg.style.display = 'none';
   }
 
+  // Show loading overlay and disable form
+  if (loadingOverlay) loadingOverlay.classList.add('active');
+  if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Signing in...'; }
+
   try {
+    await window.fastGetApp.authReadyPromise;
     const result = await window.fastGetApp.login(email, password);
 
     if (result.success) {
+      if (loadingOverlay) loadingOverlay.classList.remove('active');
+      if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Login'; }
+
       // Show animated success overlay
       const overlay = document.getElementById('loginSuccessOverlay');
       const successSub = overlay ? overlay.querySelector('.success-sub') : null;
@@ -48,18 +59,12 @@ async function handleLogin(event) {
       if (successSub) {
         successSub.textContent = isStore ? 'Taking you to your seller dashboard...' : 'Taking you to explore stores...';
       }
-      if (overlay) {
-        overlay.classList.add('active');
-      }
+      if (overlay) overlay.classList.add('active');
 
-      // Signal that we're coming from login (for entrance animation on destination page)
       sessionStorage.setItem('fromLogin', '1');
 
-      // Redirect after smooth transition
       const dest = isStore ? 'seller-dashboard.html' : 'index.html';
-      setTimeout(() => {
-        window.location.href = dest;
-      }, 2200);
+      setTimeout(() => { window.location.href = dest; }, 2200);
     } else {
       // Check for email-not-confirmed error
       const errText = result.error || '';
@@ -80,6 +85,9 @@ async function handleLogin(event) {
     errorMsg.style.display = 'block';
     errorMsg.classList.add('shake');
     setTimeout(() => errorMsg.classList.remove('shake'), 500);
+  } finally {
+    if (loadingOverlay) loadingOverlay.classList.remove('active');
+    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Login'; }
   }
 }
 
