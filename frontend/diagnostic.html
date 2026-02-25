@@ -4,126 +4,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YourWae Diagnostic v2</title>
+    <title>YourWae Full Test</title>
+    <link rel="stylesheet" href="css/styles.css">
     <style>
-        body {
+        .debug-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 99999;
+            background: #000;
+            color: #0f0;
             font-family: monospace;
-            padding: 20px;
-            background: #1a1a2e;
-            color: #e0e0e0;
-        }
-
-        .test {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .pass {
-            background: #0f5132;
-            border: 1px solid #0a3622;
-        }
-
-        .fail {
-            background: #842029;
-            border: 1px solid #58151c;
-        }
-
-        .info {
-            background: #0c4a6e;
-            border: 1px solid #075985;
-        }
-
-        h1 {
-            color: #fff;
-        }
-
-        pre {
-            white-space: pre-wrap;
-            word-break: break-all;
             font-size: 12px;
+            padding: 10px;
+            max-height: 50vh;
+            overflow-y: auto;
+            border-bottom: 2px solid #0f0;
+        }
+
+        .debug-panel .err {
+            color: #f55;
+        }
+
+        .debug-panel .warn {
+            color: #ff0;
+        }
+
+        .debug-panel .ok {
+            color: #0f0;
+        }
+
+        .debug-panel .info {
+            color: #5af;
+        }
+
+        body {
+            padding-top: 200px;
         }
     </style>
 </head>
 
 <body>
-    <h1>🔍 YourWae Diagnostic v2 — app.js Error Catcher</h1>
-    <p>This page loads app.js and catches the exact error.</p>
-    <div id="results"></div>
-
-    <!-- Elements that app.js expects to find -->
-    <div style="display:none">
-        <button id="loginBtn"></button>
-        <button id="logoutBtn"></button>
-        <div id="userMenu"></div>
-        <div id="mobileMenu"></div>
-        <div id="menuOverlay"></div>
-        <div id="hamburgerBtn"></div>
-        <a id="mobileLoginLink"><span></span></a>
-        <div id="mobileLogoutItem"></div>
-        <div id="mobileUserName"></div>
-        <div id="mobileUserEmail"></div>
-        <a id="bottomNavAccount"><span></span><span></span></a>
+    <!-- Debug Panel -->
+    <div class="debug-panel" id="debugPanel">
+        <strong>🔍 DEBUG CONSOLE — Errors will appear here</strong><br>
     </div>
 
+    <!-- Mobile Menu Elements (app.js expects these) -->
+    <div class="mobile-menu-overlay" id="menuOverlay" onclick="closeMobileMenu()"></div>
+    <nav class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <div class="user-avatar" id="mobileUserAvatar">👤</div>
+            <div class="user-info">
+                <div class="user-name" id="mobileUserName">Welcome</div>
+                <div class="user-email" id="mobileUserEmail">Sign in to your account</div>
+            </div>
+        </div>
+        <ul class="mobile-menu-links">
+            <li><a href="login.html" id="mobileLoginLink"><span class="menu-icon">🔑</span> Login</a></li>
+            <li id="mobileLogoutItem" style="display:none;"><a href="#"><span class="menu-icon">🚪</span> Logout</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Navbar (app.js expects these) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="navbar-logo">
+                <a href="index.html"><strong>Your<span class="brand-wae">Wae</span></strong></a>
+            </div>
+            <div class="navbar-search">
+                <input type="text" id="searchInput" placeholder="Search stores...">
+            </div>
+            <div class="navbar-menu">
+                <div class="town-selector">
+                    <select id="townSelect">
+                        <option value="">Select Town</option>
+                    </select>
+                </div>
+                <button id="loginBtn" class="nav-btn btn-primary"
+                    onclick="window.location.href='login.html'">Login</button>
+                <div id="userMenu" style="display: none;">
+                    <button id="logoutBtn" class="nav-btn btn-danger" onclick="handleLogout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Stores section -->
+    <section class="stores-section">
+        <div class="container">
+            <h1>Browse Stores (Test Page)</h1>
+            <div class="filters">
+                <input type="text" id="storeSearchInput" placeholder="Search..." class="search-input">
+                <select id="categoryFilter" class="filter-select">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            <div id="storesContainer" class="stores-grid">
+                <div class="loading">Loading stores...</div>
+            </div>
+            <div class="pagination">
+                <button id="prevBtn" style="display:none;">Previous</button>
+                <span id="pageInfo"></span>
+                <button id="nextBtn" style="display:none;">Next</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Nav (app.js expects these) -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-items">
+            <a href="login.html" class="bottom-nav-item" id="bottomNavAccount">
+                <span class="nav-icon">👤</span>
+                <span>Account</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Error Catching FIRST -->
     <script>
-        const results = document.getElementById('results');
-        function log(id, status, msg) {
-            let el = document.createElement('div');
-            el.className = 'test ' + status;
-            el.innerHTML = `<strong>${id}:</strong> ${msg}`;
-            results.appendChild(el);
+        const dbg = document.getElementById('debugPanel');
+        function dlog(msg, cls) {
+            const d = document.createElement('div');
+            d.className = cls || 'info';
+            d.textContent = '[' + new Date().toISOString().split('T')[1].split('.')[0] + '] ' + msg;
+            dbg.appendChild(d);
+            dbg.scrollTop = dbg.scrollHeight;
+            console.log(msg);
         }
 
-        // Catch ALL errors globally
         window.onerror = function (message, source, lineno, colno, error) {
-            log('RUNTIME ERROR', 'fail',
-                `❌ <strong>${message}</strong><br>` +
-                `File: ${source}<br>` +
-                `Line: ${lineno}, Col: ${colno}<br>` +
-                `<pre>${error ? error.stack : 'No stack trace'}</pre>`
-            );
-            return false; // Don't suppress
+            const file = source ? source.split('/').pop() : 'unknown';
+            dlog(`ERROR in ${file}:${lineno}:${colno} — ${message}`, 'err');
+            if (error && error.stack) dlog('Stack: ' + error.stack, 'err');
+            return false;
         };
-
         window.addEventListener('unhandledrejection', function (event) {
-            log('PROMISE ERROR', 'fail',
-                `❌ Unhandled promise rejection: <pre>${event.reason ? (event.reason.stack || event.reason.message || event.reason) : 'Unknown'}</pre>`
-            );
+            dlog('PROMISE REJECT: ' + (event.reason ? (event.reason.message || event.reason) : 'Unknown'), 'err');
         });
+        dlog('Debug panel ready', 'ok');
     </script>
 
-    <!-- Load in same order as actual pages -->
+    <!-- Load scripts in SAME order as stores.html -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        log('cdn', 'pass', '✅ Supabase CDN loaded. typeof supabase = ' + typeof supabase);
-    </script>
+    <script>dlog('Supabase CDN loaded: typeof supabase = ' + typeof supabase, typeof supabase === 'object' ? 'ok' : 'err');</script>
+
+    <script src="js/api.js"></script>
+    <script>dlog('api.js loaded: typeof storeAPI = ' + typeof storeAPI + ', API_BASE_URL = ' + (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'UNDEFINED'), typeof storeAPI !== 'undefined' ? 'ok' : 'err');</script>
+
     <script src="js/app.js"></script>
+    <script>dlog('app.js loaded: typeof window.fastGetApp = ' + typeof window.fastGetApp, typeof window.fastGetApp !== 'undefined' ? 'ok' : 'err');</script>
+
+    <script src="js/stores.js"></script>
+    <script>dlog('stores.js loaded: typeof loadStores = ' + typeof loadStores, typeof loadStores !== 'undefined' ? 'ok' : 'err');</script>
+
+    <!-- Test runner -->
     <script>
-        if (typeof window.fastGetApp !== 'undefined') {
-            const keys = Object.keys(window.fastGetApp);
-            log('appjs', 'pass', '✅ app.js loaded! window.fastGetApp has: ' + keys.join(', '));
-        } else {
-            log('appjs', 'fail', '❌ app.js failed to load — window.fastGetApp is undefined. Check the RUNTIME ERROR above.');
-        }
-    </script>
-    <script>
-        // Test stores if app.js loaded
-        setTimeout(async () => {
-            if (window.fastGetApp) {
-                log('stores', 'info', '⏳ Testing getStores...');
-                try {
-                    const result = await window.fastGetApp.getStores(5);
-                    if (result.success) {
-                        log('stores_result', 'pass', `✅ Stores loaded: ${result.data.length} stores`);
-                    } else {
-                        log('stores_result', 'fail', `❌ Stores error: ${result.error}`);
-                    }
-                } catch (e) {
-                    log('stores_result', 'fail', `❌ Exception: ${e.message}`);
+        async function runFullTest() {
+            dlog('=== RUNNING FULL TEST SUITE ===', 'info');
+
+            // Test 1: Check all globals
+            dlog('Test 1: Checking globals...', 'info');
+            const checks = [
+                ['supabase', typeof supabase],
+                ['supabaseClient', typeof supabaseClient],
+                ['window.fastGetApp', typeof window.fastGetApp],
+                ['storeAPI', typeof storeAPI],
+                ['loadStores', typeof loadStores],
+            ];
+            checks.forEach(([name, type]) => {
+                dlog(`  ${name} = ${type}`, type !== 'undefined' ? 'ok' : 'err');
+            });
+
+            // Test 2: Direct Supabase query
+            dlog('Test 2: Direct Supabase stores query...', 'info');
+            try {
+                const { data, error, status } = await supabaseClient
+                    .from('stores')
+                    .select('id, store_name, is_active, is_verified')
+                    .limit(5);
+                if (error) {
+                    dlog('  Supabase error: ' + JSON.stringify(error), 'err');
+                } else {
+                    dlog('  Found ' + (data ? data.length : 0) + ' stores: ' + JSON.stringify(data), 'ok');
                 }
+            } catch (e) {
+                dlog('  Exception: ' + e.message, 'err');
             }
-        }, 3000);
+
+            // Test 3: Via getStores
+            dlog('Test 3: Via window.fastGetApp.getStores()...', 'info');
+            try {
+                const result = await window.fastGetApp.getStores(5);
+                if (result.success) {
+                    dlog('  getStores succeeded: ' + result.data.length + ' stores', 'ok');
+                } else {
+                    dlog('  getStores failed: ' + result.error, 'err');
+                }
+            } catch (e) {
+                dlog('  Exception: ' + e.message, 'err');
+            }
+
+            // Test 4: Test signup with a unique email
+            const testEmail = 'test_' + Date.now() + '@test.com';
+            dlog('Test 4: Signup test with ' + testEmail + '...', 'info');
+            try {
+                const result = await window.fastGetApp.signup(
+                    testEmail, 'TestPass1!@#', 'Test', 'User', '0551234567', 'customer'
+                );
+                if (result.success) {
+                    dlog('  Signup result: SUCCESS' + (result.needsConfirmation ? ' (needs email confirmation)' : ''), 'ok');
+                } else {
+                    dlog('  Signup result: FAILED — ' + result.error, 'err');
+                }
+            } catch (e) {
+                dlog('  Signup exception: ' + e.message, 'err');
+            }
+
+            // Test 5: Test login (will fail with test creds, that's expected)
+            dlog('Test 5: Login test (expected to fail with invalid creds)...', 'info');
+            try {
+                const result = await window.fastGetApp.login('nonexistent@test.com', 'FakePass1!@#');
+                if (result.success) {
+                    dlog('  Login succeeded (unexpected!)', 'warn');
+                } else {
+                    dlog('  Login failed as expected: ' + result.error, 'ok');
+                }
+            } catch (e) {
+                dlog('  Login exception: ' + e.message, 'err');
+            }
+
+            // Test 6: Check what stores.js loadStores does
+            dlog('Test 6: Check storesContainer after loadStores runs...', 'info');
+            await new Promise(r => setTimeout(r, 3000)); // Wait for DOMContentLoaded
+            const container = document.getElementById('storesContainer');
+            dlog('  storesContainer innerHTML length: ' + container.innerHTML.length, 'info');
+            dlog('  First 200 chars: ' + container.innerHTML.substring(0, 200),
+                container.innerHTML.includes('error') || container.innerHTML.includes('Error') ? 'err' : 'ok');
+
+            dlog('=== TESTS COMPLETE ===', 'info');
+        }
+
+        // Run after all DOMContentLoaded handlers fire
+        setTimeout(runFullTest, 4000);
     </script>
 </body>
 
