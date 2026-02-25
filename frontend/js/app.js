@@ -100,36 +100,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Setup reactive auth listener
 function setupAuthListener() {
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    console.log('Auth event:', event, '| user:', session?.user?.email ?? 'none');
+    console.log('[AUTH] Event:', event, '| user:', session?.user?.email ?? 'none');
 
     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
       if (session?.user) {
         currentUser = session.user;
         window.currentUser = session.user;
+
+        // Grab role from metadata IMMEDIATELY (fast, no network call)
         if (session.user.user_metadata?.role) {
           currentUserRole = session.user.user_metadata.role;
         }
-        await fetchUserRole(session.user.id);
 
-        // If the DOM is still loading when INITIAL_SESSION fires (common on redirect
-        // from login), defer the UI update until DOMContentLoaded completes.
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', () => updateUIForLoggedInUser(), { once: true });
-        } else {
-          updateUIForLoggedInUser();
-          // Belt-and-braces: a second refresh 300 ms later catches any race with
-          // page-specific scripts that render extra navbar elements.
-          setTimeout(() => updateUIForLoggedInUser(), 300);
-        }
+        // ★ Update UI RIGHT NOW — don't wait for DB role fetch
+        console.log('[AUTH] Updating UI immediately (role from metadata:', currentUserRole, ')');
+        try { updateUIForLoggedInUser(); } catch (e) { console.warn('[AUTH] UI update error:', e); }
+
+        // Then fetch the proper role from DB in background (don't block UI)
+        fetchUserRole(session.user.id).then(() => {
+          console.log('[AUTH] Role fetched from DB:', currentUserRole, '- refreshing UI');
+          try { updateUIForLoggedInUser(); } catch (e) { console.warn('[AUTH] UI refresh error:', e); }
+        });
       } else {
         // INITIAL_SESSION with no user = logged out
-        updateUIForLoggedOutUser();
+        try { updateUIForLoggedOutUser(); } catch (e) { console.warn('[AUTH] UI update error:', e); }
       }
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       window.currentUser = null;
       currentUserRole = null;
-      updateUIForLoggedOutUser();
+      try { updateUIForLoggedOutUser(); } catch (e) { console.warn('[AUTH] UI update error:', e); }
     }
   });
 }
@@ -181,7 +181,6 @@ async function fetchUserRole(userId, retries = 3) {
 // Check authentication status
 async function checkAuthStatus() {
   try {
-    // Try fast session check first
     const { data: { session } } = await supabaseClient.auth.getSession();
 
     if (session?.user) {
@@ -190,8 +189,16 @@ async function checkAuthStatus() {
       if (session.user.user_metadata?.role) {
         currentUserRole = session.user.user_metadata.role;
       }
-      await fetchUserRole(session.user.id);
-      try { updateUIForLoggedInUser(); } catch (e) { console.warn('updateUIForLoggedInUser error:', e); }
+
+      // ★ Update UI IMMEDIATELY — before DB role fetch
+      console.log('[AUTH] checkAuthStatus: session found, updating UI now');
+      try { updateUIForLoggedInUser(); } catch (e) { console.warn('[AUTH] UI update error:', e); }
+
+      // Fetch real role from DB (background, don't block)
+      fetchUserRole(session.user.id).then(() => {
+        console.log('[AUTH] checkAuthStatus: role from DB:', currentUserRole);
+        try { updateUIForLoggedInUser(); } catch (e) { console.warn('[AUTH] UI refresh error:', e); }
+      });
     } else {
       const { data: { user } } = await supabaseClient.auth.getUser();
       if (user) {
@@ -200,24 +207,25 @@ async function checkAuthStatus() {
         if (user.user_metadata?.role) {
           currentUserRole = user.user_metadata.role;
         }
-        await fetchUserRole(user.id);
-        try { updateUIForLoggedInUser(); } catch (e) { console.warn('updateUIForLoggedInUser error:', e); }
+
+        // ★ Update UI IMMEDIATELY
+        console.log('[AUTH] checkAuthStatus: user found via getUser, updating UI now');
+        try { updateUIForLoggedInUser(); } catch (e) { console.warn('[AUTH] UI update error:', e); }
+
+        fetchUserRole(user.id).then(() => {
+          try { updateUIForLoggedInUser(); } catch (e) { console.warn('[AUTH] UI refresh error:', e); }
+        });
       } else {
-        try { updateUIForLoggedOutUser(); } catch (e) { console.warn('updateUIForLoggedOutUser error:', e); }
+        console.log('[AUTH] checkAuthStatus: no session, showing logged-out UI');
+        try { updateUIForLoggedOutUser(); } catch (e) { console.warn('[AUTH] UI update error:', e); }
       }
     }
   } catch (error) {
-    console.error('Error checking auth status:', error);
-    try { updateUIForLoggedOutUser(); } catch (e) { console.warn('updateUIForLoggedOutUser error:', e); }
+    console.error('[AUTH] Error checking auth status:', error);
+    try { updateUIForLoggedOutUser(); } catch (e) { console.warn('[AUTH] UI update error:', e); }
   } finally {
     authInitialized = true;
     if (authReadyPromiseResolver) authReadyPromiseResolver();
-    // Delayed UI updates — belt-and-braces for race conditions on redirect from login.
-    // Two retries: 500 ms (fast networks) and 1000 ms (slow networks / DB role fetch).
-    if (currentUser) {
-      setTimeout(() => updateUIForLoggedInUser(), 500);
-      setTimeout(() => updateUIForLoggedInUser(), 1000);
-    }
   }
 }
 
@@ -902,6 +910,8 @@ function updateUIForLoggedInUser() {
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
   const userMenu = document.getElementById('userMenu');
+
+  console.log('[AUTH] updateUIForLoggedInUser() called | loginBtn:', !!loginBtn, '| userMenu:', !!userMenu, '| role:', currentUserRole);
 
   if (loginBtn) loginBtn.style.display = 'none';
   if (logoutBtn) logoutBtn.style.display = 'block';
