@@ -206,12 +206,37 @@ async function signup(email, password, firstName, lastName, phone, role = 'custo
       }
     });
 
-    if (authError) throw authError;
+    if (authError) {
+      // Check for "User already registered" error
+      if (authError.message && authError.message.toLowerCase().includes('already registered')) {
+        return { success: false, error: 'This email is already registered. Please log in instead.', alreadyRegistered: true };
+      }
+      throw authError;
+    }
 
-    // Check if email confirmation is required
+    // Supabase may return user but no session (email confirmation mode)
+    // Auto-login the user with their credentials right after signup
     if (authData.user && !authData.session) {
-      console.warn('Signup: email confirmation may be required. User created but no session.');
-      return { success: true, user: authData.user, needsConfirmation: true };
+      console.log('Signup: No session returned. Attempting auto-login...');
+
+      // Wait a moment for the user to be fully created
+      await new Promise(r => setTimeout(r, 1500));
+
+      // Try to login with the same credentials
+      const loginResult = await login(email, password);
+      if (loginResult.success) {
+        console.log('Auto-login after signup succeeded');
+        currentUserRole = role; // Ensure role is set to what they selected
+        return { success: true, user: loginResult.user, role: role };
+      } else {
+        // If auto-login fails, it might need email confirmation
+        console.warn('Auto-login failed:', loginResult.error);
+        if (loginResult.error && loginResult.error.toLowerCase().includes('email not confirmed')) {
+          return { success: true, user: authData.user, needsConfirmation: true };
+        }
+        // Still consider signup successful, just redirect to login
+        return { success: true, user: authData.user, needsConfirmation: true };
+      }
     }
 
     currentUser = authData.user;
@@ -222,7 +247,7 @@ async function signup(email, password, firstName, lastName, phone, role = 'custo
     await new Promise(r => setTimeout(r, 2000));
     await fetchUserRole(authData.user.id, 3);
 
-    return { success: true, user: authData.user };
+    return { success: true, user: authData.user, role: role };
   } catch (error) {
     console.error('Signup error:', error);
     return { success: false, error: error.message };

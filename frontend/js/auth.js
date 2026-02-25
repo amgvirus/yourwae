@@ -40,17 +40,23 @@ async function handleLogin(event) {
       successMsg.textContent = 'Login successful! Redirecting...';
       successMsg.style.display = 'block';
 
-      // Check role from result or checkAuthStatus
-      setTimeout(async () => {
-        await window.fastGetApp.checkAuthStatus();
-        if (window.fastGetApp.currentUserRole === 'store') {
-          window.location.href = 'seller-dashboard.html';
-        } else {
-          window.location.href = 'index.html';
-        }
-      }, 1000);
+      // Redirect immediately based on role (app.js already sets the role during login)
+      const role = window.fastGetApp.currentUserRole;
+      if (role === 'store') {
+        window.location.href = 'seller-dashboard.html';
+      } else {
+        window.location.href = 'index.html';
+      }
     } else {
-      errorMsg.textContent = 'Error: ' + result.error;
+      // Check for email-not-confirmed error
+      const errText = result.error || '';
+      if (errText.toLowerCase().includes('email not confirmed')) {
+        errorMsg.textContent = 'Please check your email and click the confirmation link, then try logging in again.';
+      } else if (errText.toLowerCase().includes('invalid login credentials')) {
+        errorMsg.textContent = 'Wrong email or password. Please try again.';
+      } else {
+        errorMsg.textContent = 'Error: ' + errText;
+      }
       errorMsg.style.display = 'block';
     }
   } catch (e) {
@@ -74,19 +80,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       await new Promise(r => setTimeout(r, 100));
       waited += 100;
     }
-    if (!window.fastGetApp) return; // App didn't load, just show login form
+    if (!window.fastGetApp) return;
   }
 
-  await window.fastGetApp.authReadyPromise;
-  const user = window.fastGetApp.currentUser;
-  const role = window.fastGetApp.currentUserRole;
-  if (user) {
-    // Redirect based on role
-    if (role === 'store') {
-      window.location.href = 'seller-dashboard.html';
-    } else {
-      window.location.href = 'index.html';
+  try {
+    await window.fastGetApp.authReadyPromise;
+    const user = window.fastGetApp.currentUser;
+    const role = window.fastGetApp.currentUserRole;
+    if (user) {
+      if (role === 'store') {
+        window.location.href = 'seller-dashboard.html';
+      } else {
+        window.location.href = 'index.html';
+      }
     }
+  } catch (e) {
+    console.error('Auth check error:', e);
   }
 });
-

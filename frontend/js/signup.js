@@ -89,34 +89,44 @@ async function handleSignup(event) {
   const storeName = role === 'store' ? document.getElementById('storeName').value.trim() : '';
   const storeCategory = role === 'store' ? document.getElementById('storeCategory').value : '';
 
+  // Show loading state
+  successMsg.textContent = 'Creating your account...';
+  successMsg.style.display = 'block';
+
   try {
     const result = await window.fastGetApp.signup(email, password, firstName, lastName, phone, role, storeName, storeCategory);
 
     if (result.success) {
       if (result.needsConfirmation) {
+        // Email confirmation actually needed
         successMsg.textContent = 'Account created! Please check your email to confirm your account, then log in.';
         successMsg.style.display = 'block';
-        // Redirect to login after a moment
         setTimeout(() => {
           window.location.href = 'login.html';
         }, 3000);
       } else {
-        successMsg.textContent = 'Signup successful! Redirecting...';
+        // Auto-login succeeded — redirect immediately
+        successMsg.textContent = 'Account created! Redirecting...';
         successMsg.style.display = 'block';
-        setTimeout(() => {
-          if (role === 'store') {
-            window.location.href = 'seller-dashboard.html';
-          } else {
-            window.location.href = 'index.html';
-          }
-        }, 1500);
+        if (role === 'store') {
+          window.location.href = 'seller-dashboard.html';
+        } else {
+          window.location.href = 'index.html';
+        }
       }
     } else {
-      errorMsg.textContent = 'Error: ' + result.error;
+      successMsg.style.display = 'none';
+      // Handle "already registered" with a helpful message + login link
+      if (result.alreadyRegistered) {
+        errorMsg.innerHTML = 'This email is already registered. <a href="login.html" style="color: #007bff; text-decoration: underline;">Click here to log in</a>';
+      } else {
+        errorMsg.textContent = 'Error: ' + result.error;
+      }
       errorMsg.style.display = 'block';
     }
   } catch (e) {
     console.error('Signup handler error:', e);
+    successMsg.style.display = 'none';
     errorMsg.textContent = 'Signup failed: ' + (e.message || 'Unknown error');
     errorMsg.style.display = 'block';
   }
@@ -134,12 +144,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!window.fastGetApp) return;
   }
 
-  await window.fastGetApp.authReadyPromise;
-  if (window.fastGetApp.currentUser) {
-    if (window.fastGetApp.currentUserRole === 'store') {
-      window.location.href = 'seller-dashboard.html';
-    } else {
-      window.location.href = 'index.html';
+  try {
+    await window.fastGetApp.authReadyPromise;
+    if (window.fastGetApp.currentUser) {
+      if (window.fastGetApp.currentUserRole === 'store') {
+        window.location.href = 'seller-dashboard.html';
+      } else {
+        window.location.href = 'index.html';
+      }
     }
+  } catch (e) {
+    console.error('Auth check error:', e);
   }
 });
