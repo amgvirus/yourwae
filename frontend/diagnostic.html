@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YourWae Diagnostic v2</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #e0e0e0;
+        }
+
+        .test {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .pass {
+            background: #0f5132;
+            border: 1px solid #0a3622;
+        }
+
+        .fail {
+            background: #842029;
+            border: 1px solid #58151c;
+        }
+
+        .info {
+            background: #0c4a6e;
+            border: 1px solid #075985;
+        }
+
+        h1 {
+            color: #fff;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 YourWae Diagnostic v2 — app.js Error Catcher</h1>
+    <p>This page loads app.js and catches the exact error.</p>
+    <div id="results"></div>
+
+    <!-- Elements that app.js expects to find -->
+    <div style="display:none">
+        <button id="loginBtn"></button>
+        <button id="logoutBtn"></button>
+        <div id="userMenu"></div>
+        <div id="mobileMenu"></div>
+        <div id="menuOverlay"></div>
+        <div id="hamburgerBtn"></div>
+        <a id="mobileLoginLink"><span></span></a>
+        <div id="mobileLogoutItem"></div>
+        <div id="mobileUserName"></div>
+        <div id="mobileUserEmail"></div>
+        <a id="bottomNavAccount"><span></span><span></span></a>
+    </div>
+
+    <script>
+        const results = document.getElementById('results');
+        function log(id, status, msg) {
+            let el = document.createElement('div');
+            el.className = 'test ' + status;
+            el.innerHTML = `<strong>${id}:</strong> ${msg}`;
+            results.appendChild(el);
+        }
+
+        // Catch ALL errors globally
+        window.onerror = function (message, source, lineno, colno, error) {
+            log('RUNTIME ERROR', 'fail',
+                `❌ <strong>${message}</strong><br>` +
+                `File: ${source}<br>` +
+                `Line: ${lineno}, Col: ${colno}<br>` +
+                `<pre>${error ? error.stack : 'No stack trace'}</pre>`
+            );
+            return false; // Don't suppress
+        };
+
+        window.addEventListener('unhandledrejection', function (event) {
+            log('PROMISE ERROR', 'fail',
+                `❌ Unhandled promise rejection: <pre>${event.reason ? (event.reason.stack || event.reason.message || event.reason) : 'Unknown'}</pre>`
+            );
+        });
+    </script>
+
+    <!-- Load in same order as actual pages -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        log('cdn', 'pass', '✅ Supabase CDN loaded. typeof supabase = ' + typeof supabase);
+    </script>
+    <script src="js/app.js"></script>
+    <script>
+        if (typeof window.fastGetApp !== 'undefined') {
+            const keys = Object.keys(window.fastGetApp);
+            log('appjs', 'pass', '✅ app.js loaded! window.fastGetApp has: ' + keys.join(', '));
+        } else {
+            log('appjs', 'fail', '❌ app.js failed to load — window.fastGetApp is undefined. Check the RUNTIME ERROR above.');
+        }
+    </script>
+    <script>
+        // Test stores if app.js loaded
+        setTimeout(async () => {
+            if (window.fastGetApp) {
+                log('stores', 'info', '⏳ Testing getStores...');
+                try {
+                    const result = await window.fastGetApp.getStores(5);
+                    if (result.success) {
+                        log('stores_result', 'pass', `✅ Stores loaded: ${result.data.length} stores`);
+                    } else {
+                        log('stores_result', 'fail', `❌ Stores error: ${result.error}`);
+                    }
+                } catch (e) {
+                    log('stores_result', 'fail', `❌ Exception: ${e.message}`);
+                }
+            }
+        }, 3000);
+    </script>
+</body>
+
+</html>
