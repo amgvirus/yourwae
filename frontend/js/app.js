@@ -100,8 +100,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Setup reactive auth listener
 function setupAuthListener() {
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    console.log('Auth event:', event);
-    // Handle sign-in (including INITIAL_SESSION when page loads with existing session)
+    console.log('Auth event:', event, '| user:', session?.user?.email ?? 'none');
+
     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
       if (session?.user) {
         currentUser = session.user;
@@ -110,7 +110,20 @@ function setupAuthListener() {
           currentUserRole = session.user.user_metadata.role;
         }
         await fetchUserRole(session.user.id);
-        updateUIForLoggedInUser();
+
+        // If the DOM is still loading when INITIAL_SESSION fires (common on redirect
+        // from login), defer the UI update until DOMContentLoaded completes.
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => updateUIForLoggedInUser(), { once: true });
+        } else {
+          updateUIForLoggedInUser();
+          // Belt-and-braces: a second refresh 300 ms later catches any race with
+          // page-specific scripts that render extra navbar elements.
+          setTimeout(() => updateUIForLoggedInUser(), 300);
+        }
+      } else {
+        // INITIAL_SESSION with no user = logged out
+        updateUIForLoggedOutUser();
       }
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
@@ -199,9 +212,11 @@ async function checkAuthStatus() {
   } finally {
     authInitialized = true;
     if (authReadyPromiseResolver) authReadyPromiseResolver();
-    // Delayed UI update as fallback (handles race conditions on redirect from login/signup)
+    // Delayed UI updates — belt-and-braces for race conditions on redirect from login.
+    // Two retries: 500 ms (fast networks) and 1000 ms (slow networks / DB role fetch).
     if (currentUser) {
-      setTimeout(() => updateUIForLoggedInUser(), 150);
+      setTimeout(() => updateUIForLoggedInUser(), 500);
+      setTimeout(() => updateUIForLoggedInUser(), 1000);
     }
   }
 }
@@ -368,12 +383,33 @@ async function logout() {
   try {
     await supabaseClient.auth.signOut();
     currentUser = null;
-    window.currentUser = null; // Sync
+    window.currentUser = null;
     currentUserRole = null;
     return { success: true };
   } catch (error) {
     console.error('Logout error:', error);
     return { success: false, error: error.message };
+  }
+}
+
+// Global logout handler — called by onclick="handleLogout()" in every page's HTML
+async function handleLogout() {
+  try {
+    const btn = document.getElementById('logoutBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Signing out...'; }
+
+    await supabaseClient.auth.signOut();
+    currentUser = null;
+    window.currentUser = null;
+    currentUserRole = null;
+
+    // Redirect to login page after logout
+    window.location.href = 'login.html';
+  } catch (error) {
+    console.error('Logout error:', error);
+    alert('Could not sign out. Please try again.');
+    const btn = document.getElementById('logoutBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Logout'; }
   }
 }
 
