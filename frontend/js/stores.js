@@ -7,6 +7,26 @@ let selectedTown = null;
 // Load stores
 async function loadStores() {
   const storesContainer = document.getElementById('storesContainer');
+
+  // Wait for app.js to be ready
+  if (!window.fastGetApp) {
+    storesContainer.innerHTML = '<div class="loading">Initializing...</div>';
+    let waited = 0;
+    while (!window.fastGetApp && waited < 5000) {
+      await new Promise(r => setTimeout(r, 100));
+      waited += 100;
+    }
+    if (!window.fastGetApp) {
+      storesContainer.innerHTML = `
+        <div class="error-message">
+          <p><strong>App failed to initialize</strong></p>
+          <p style="font-size: 14px; color: #666;">Please refresh the page or check your internet connection.</p>
+          <button class="btn btn-primary btn-sm" onclick="location.reload()" style="margin-top: 10px;">Refresh</button>
+        </div>`;
+      return;
+    }
+  }
+
   try {
     const result = await window.fastGetApp.getStores(50);
 
@@ -39,7 +59,7 @@ async function loadStores() {
   } catch (error) {
     console.error('Error loading stores:', error);
     storesContainer.innerHTML =
-      `<p style="grid-column: 1/-1; text-align: center; color: red;">Error loading stores</p>`;
+      `<div class="error-message"><p>Error loading stores: ${error.message || 'Unknown error'}</p><button class="btn btn-primary btn-sm" onclick="loadStores()" style="margin-top: 10px;">Retry</button></div>`;
   }
 }
 

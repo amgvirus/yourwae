@@ -1,7 +1,7 @@
 // API Configuration
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000/api'
-  : 'https://your-production-backend.vercel.app/api'; 
+  : (window.location.origin + '/api'); // Use same origin for production
 
 
 // Town API

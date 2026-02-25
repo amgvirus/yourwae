@@ -41,8 +41,25 @@ async function handleSignup(event) {
     return;
   }
 
-  if (password.length < 6) {
-    errorMsg.textContent = 'Password must be at least 6 characters';
+  if (password.length < 8) {
+    errorMsg.textContent = 'Password must be at least 8 characters';
+    errorMsg.style.display = 'block';
+    return;
+  }
+
+  // Strong password validation (required by Supabase)
+  const hasLowercase = /[a-z]/.test(password);
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasDigit = /[0-9]/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"|<>?,./`~]/.test(password);
+
+  if (!hasLowercase || !hasUppercase || !hasDigit || !hasSpecial) {
+    let missing = [];
+    if (!hasLowercase) missing.push('a lowercase letter');
+    if (!hasUppercase) missing.push('an uppercase letter');
+    if (!hasDigit) missing.push('a number');
+    if (!hasSpecial) missing.push('a special character (!@#$%^&*)');
+    errorMsg.textContent = 'Password must include: ' + missing.join(', ');
     errorMsg.style.display = 'block';
     return;
   }
@@ -53,39 +70,70 @@ async function handleSignup(event) {
     return;
   }
 
+  // Wait for app.js to be ready
+  if (!window.fastGetApp) {
+    errorMsg.textContent = 'App is loading, please wait...';
+    errorMsg.style.display = 'block';
+    let waited = 0;
+    while (!window.fastGetApp && waited < 5000) {
+      await new Promise(r => setTimeout(r, 100));
+      waited += 100;
+    }
+    if (!window.fastGetApp) {
+      errorMsg.textContent = 'App failed to load. Please refresh the page.';
+      return;
+    }
+    errorMsg.style.display = 'none';
+  }
+
   const storeName = role === 'store' ? document.getElementById('storeName').value.trim() : '';
   const storeCategory = role === 'store' ? document.getElementById('storeCategory').value : '';
 
-  const result = await window.fastGetApp.signup(email, password, firstName, lastName, phone, role, storeName, storeCategory);
+  try {
+    const result = await window.fastGetApp.signup(email, password, firstName, lastName, phone, role, storeName, storeCategory);
 
-
-  if (result.success) {
-    if (result.needsConfirmation) {
-      successMsg.textContent = 'Account created! Please check your email to confirm your account, then log in.';
-      successMsg.style.display = 'block';
-      // Redirect to login after a moment
-      setTimeout(() => {
-        window.location.href = 'login.html';
-      }, 3000);
+    if (result.success) {
+      if (result.needsConfirmation) {
+        successMsg.textContent = 'Account created! Please check your email to confirm your account, then log in.';
+        successMsg.style.display = 'block';
+        // Redirect to login after a moment
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 3000);
+      } else {
+        successMsg.textContent = 'Signup successful! Redirecting...';
+        successMsg.style.display = 'block';
+        setTimeout(() => {
+          if (role === 'store') {
+            window.location.href = 'seller-dashboard.html';
+          } else {
+            window.location.href = 'index.html';
+          }
+        }, 1500);
+      }
     } else {
-      successMsg.textContent = 'Signup successful! Redirecting...';
-      successMsg.style.display = 'block';
-      setTimeout(() => {
-        if (role === 'store') {
-          window.location.href = 'seller-dashboard.html';
-        } else {
-          window.location.href = 'index.html';
-        }
-      }, 1500);
+      errorMsg.textContent = 'Error: ' + result.error;
+      errorMsg.style.display = 'block';
     }
-  } else {
-    errorMsg.textContent = 'Error: ' + result.error;
+  } catch (e) {
+    console.error('Signup handler error:', e);
+    errorMsg.textContent = 'Signup failed: ' + (e.message || 'Unknown error');
     errorMsg.style.display = 'block';
   }
 }
 
 // Redirect if already logged in
 document.addEventListener('DOMContentLoaded', async () => {
+  // Wait for app.js to be ready
+  if (!window.fastGetApp) {
+    let waited = 0;
+    while (!window.fastGetApp && waited < 5000) {
+      await new Promise(r => setTimeout(r, 100));
+      waited += 100;
+    }
+    if (!window.fastGetApp) return;
+  }
+
   await window.fastGetApp.authReadyPromise;
   if (window.fastGetApp.currentUser) {
     if (window.fastGetApp.currentUserRole === 'store') {

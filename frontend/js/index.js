@@ -2,6 +2,19 @@
 async function loadFeaturedStores() {
   const container = document.getElementById('storesContainer');
 
+  // Wait for app.js to be ready
+  if (!window.fastGetApp) {
+    let waited = 0;
+    while (!window.fastGetApp && waited < 5000) {
+      await new Promise(r => setTimeout(r, 100));
+      waited += 100;
+    }
+    if (!window.fastGetApp) {
+      container.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Please refresh the page</p>';
+      return;
+    }
+  }
+
   try {
     const result = await window.fastGetApp.getStores();
     let stores = result.success ? result.data : [];

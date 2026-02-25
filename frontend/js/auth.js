@@ -17,23 +17,45 @@ async function handleLogin(event) {
     return;
   }
 
-  const result = await window.fastGetApp.login(email, password);
+  // Wait for app.js to be ready
+  if (!window.fastGetApp) {
+    errorMsg.textContent = 'App is still loading, please wait...';
+    errorMsg.style.display = 'block';
+    let waited = 0;
+    while (!window.fastGetApp && waited < 5000) {
+      await new Promise(r => setTimeout(r, 100));
+      waited += 100;
+    }
+    if (!window.fastGetApp) {
+      errorMsg.textContent = 'App failed to load. Please refresh the page.';
+      return;
+    }
+    errorMsg.style.display = 'none';
+  }
 
-  if (result.success) {
-    successMsg.textContent = 'Login successful! Redirecting...';
-    successMsg.style.display = 'block';
+  try {
+    const result = await window.fastGetApp.login(email, password);
 
-    // Check role from result or checkAuthStatus
-    setTimeout(async () => {
-      await window.fastGetApp.checkAuthStatus();
-      if (window.fastGetApp.currentUserRole === 'store') {
-        window.location.href = 'seller-dashboard.html';
-      } else {
-        window.location.href = 'index.html';
-      }
-    }, 1000);
-  } else {
-    errorMsg.textContent = 'Error: ' + result.error;
+    if (result.success) {
+      successMsg.textContent = 'Login successful! Redirecting...';
+      successMsg.style.display = 'block';
+
+      // Check role from result or checkAuthStatus
+      setTimeout(async () => {
+        await window.fastGetApp.checkAuthStatus();
+        if (window.fastGetApp.currentUserRole === 'store') {
+          window.location.href = 'seller-dashboard.html';
+        } else {
+          window.location.href = 'index.html';
+        }
+      }, 1000);
+    } else {
+      errorMsg.textContent = 'Error: ' + result.error;
+      errorMsg.style.display = 'block';
+    }
+  } catch (e) {
+    console.error('Login handler error:', e);
+    errorMsg.textContent = 'Login failed: ' + (e.message || 'Unknown error');
     errorMsg.style.display = 'block';
   }
 }
@@ -45,6 +67,16 @@ async function handleGoogleLogin() {
 
 // Redirect if already logged in
 document.addEventListener('DOMContentLoaded', async () => {
+  // Wait for app.js auth to be ready
+  if (!window.fastGetApp) {
+    let waited = 0;
+    while (!window.fastGetApp && waited < 5000) {
+      await new Promise(r => setTimeout(r, 100));
+      waited += 100;
+    }
+    if (!window.fastGetApp) return; // App didn't load, just show login form
+  }
+
   await window.fastGetApp.authReadyPromise;
   const user = window.fastGetApp.currentUser;
   const role = window.fastGetApp.currentUserRole;
