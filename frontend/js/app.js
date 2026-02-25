@@ -1,10 +1,59 @@
+// ============================================================
 // Supabase Configuration
-const SUPABASE_URL = 'https://dzphgpikqxfeiautsnbm.supabase.co'; // Replace with your Supabase URL
-const SUPABASE_ANON_KEY = 'sb_publishable_twMoDMVTH-QJY_jIiZIpQQ_0IA8M1bk'; // Replace with your Supabase anon key
+// ⚠️  IMPORTANT: Replace SUPABASE_ANON_KEY with your real key.
+// Get it from: Supabase Dashboard → Project Settings → API
+//              → Project API keys → "anon public"
+// The key MUST start with "eyJ..." (it is a JWT).
+// ============================================================
+const SUPABASE_URL = 'https://dzphgpikqxfeiautsnbm.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_twMoDMVTH-QJY_jIiZIpQQ_0IA8M1bk'; // ← REPLACE THIS
+
+// Validate key format before initialising
+if (!SUPABASE_ANON_KEY.startsWith('eyJ')) {
+  console.error(
+    '%c⛔ YOURWAE LOGIN BROKEN — Invalid Supabase anon key! %c\n\n' +
+    'The key currently set in app.js is:\n  "' + SUPABASE_ANON_KEY + '"\n\n' +
+    'This is NOT a valid Supabase JWT key.\n' +
+    'A valid key starts with "eyJ...".\n\n' +
+    'Fix: Go to Supabase Dashboard → Project Settings → API\n' +
+    '     Copy the "anon public" key and paste it into app.js line 9.',
+    'background:#c0392b;color:#fff;font-size:14px;padding:4px 8px;border-radius:4px;',
+    'color:inherit;'
+  );
+}
 
 // Initialize Supabase
 const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabaseClient;
+try {
+  supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch (initErr) {
+  console.error('Supabase createClient failed:', initErr.message);
+  // Create a stub client so downstream code doesn't throw ReferenceErrors
+  supabaseClient = {
+    auth: {
+      getSession: async () => ({ data: { session: null }, error: new Error('Supabase not initialised — check anon key') }),
+      getUser: async () => ({ data: { user: null }, error: new Error('Supabase not initialised — check anon key') }),
+      signInWithPassword: async () => ({ data: null, error: new Error('Supabase not initialised — check anon key in app.js') }),
+      signUp: async () => ({ data: null, error: new Error('Supabase not initialised — check anon key in app.js') }),
+      signOut: async () => ({}),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => { } } } }),
+    },
+    from: () => ({
+      select: function () { return this; },
+      eq: function () { return this; },
+      single: async () => ({ data: null, error: new Error('Supabase not initialised') }),
+      insert: async () => ({ data: null, error: new Error('Supabase not initialised') }),
+      update: async () => ({ data: null, error: new Error('Supabase not initialised') }),
+      delete: async () => ({ data: null, error: new Error('Supabase not initialised') }),
+      maybeSingle: async () => ({ data: null, error: null }),
+      range: function () { return this; },
+      or: function () { return this; },
+      limit: function () { return this; },
+      order: function () { return this; },
+    }),
+  };
+}
 
 // Normalization helper (can stay)
 function normalizeData(item) {
