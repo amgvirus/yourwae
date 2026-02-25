@@ -46,8 +46,18 @@ async function handleLogin(event) {
   }
 
   try {
-    await window.fastGetApp.authReadyPromise;
-    const result = await window.fastGetApp.login(email, password);
+    // Wait for auth ready (max 8s) then login (max 20s) - prevent indefinite hang
+    const authReady = window.fastGetApp.authReadyPromise;
+    const authTimeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Auth initialization timed out. Please refresh and try again.')), 8000)
+    );
+    await Promise.race([authReady, authTimeout]);
+
+    const loginPromise = window.fastGetApp.login(email, password);
+    const loginTimeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Login timed out. Check your connection and try again.')), 20000)
+    );
+    const result = await Promise.race([loginPromise, loginTimeout]);
 
     if (result.success) {
       // Update success overlay message based on role

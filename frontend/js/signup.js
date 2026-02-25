@@ -88,24 +88,28 @@ async function handleSignup(event) {
 
   const storeName = role === 'store' ? document.getElementById('storeName').value.trim() : '';
   const storeCategory = role === 'store' ? document.getElementById('storeCategory').value : '';
+  const signupBtn = document.querySelector('#signupForm button[type="submit"]');
+  const loadingOverlay = document.getElementById('signupLoadingOverlay');
 
-  // Show loading state
-  successMsg.textContent = 'Creating your account...';
-  successMsg.style.display = 'block';
+  // Show loading overlay and disable form
+  if (loadingOverlay) loadingOverlay.classList.add('active');
+  if (signupBtn) { signupBtn.disabled = true; signupBtn.textContent = 'Creating...'; }
 
   try {
-    const result = await window.fastGetApp.signup(email, password, firstName, lastName, phone, role, storeName, storeCategory);
+    const signupPromise = window.fastGetApp.signup(email, password, firstName, lastName, phone, role, storeName, storeCategory);
+    const signupTimeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Signup timed out. Please check your connection and try again.')), 35000)
+    );
+    const result = await Promise.race([signupPromise, signupTimeout]);
 
     if (result.success) {
+      if (loadingOverlay) loadingOverlay.classList.remove('active');
+      if (signupBtn) { signupBtn.disabled = false; signupBtn.textContent = 'Create Account'; }
       if (result.needsConfirmation) {
-        // Email confirmation actually needed
         successMsg.textContent = 'Account created! Please check your email to confirm your account, then log in.';
         successMsg.style.display = 'block';
-        setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 3000);
+        setTimeout(() => { window.location.href = 'login.html'; }, 3000);
       } else {
-        // Auto-login succeeded — signal for entrance animation and redirect
         successMsg.textContent = 'Account created! Redirecting...';
         successMsg.style.display = 'block';
         sessionStorage.setItem('fromLogin', '1');
@@ -116,8 +120,6 @@ async function handleSignup(event) {
         }
       }
     } else {
-      successMsg.style.display = 'none';
-      // Handle "already registered" with a helpful message + login link
       if (result.alreadyRegistered) {
         errorMsg.innerHTML = 'This email is already registered. <a href="login.html" style="color: #007bff; text-decoration: underline;">Click here to log in</a>';
       } else {
@@ -127,9 +129,11 @@ async function handleSignup(event) {
     }
   } catch (e) {
     console.error('Signup handler error:', e);
-    successMsg.style.display = 'none';
     errorMsg.textContent = 'Signup failed: ' + (e.message || 'Unknown error');
     errorMsg.style.display = 'block';
+  } finally {
+    if (loadingOverlay) loadingOverlay.classList.remove('active');
+    if (signupBtn) { signupBtn.disabled = false; signupBtn.textContent = 'Create Account'; }
   }
 }
 

@@ -36,8 +36,15 @@ const authReadyPromise = new Promise(resolve => {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
-  setupAuthListener(); // Start listening early
-  await checkAuthStatus();
+  setupAuthListener();
+  // Resolve authReadyPromise within 6s even if checkAuthStatus hangs (e.g. Supabase unreachable)
+  const timeoutMs = 6000;
+  const timeoutPromise = new Promise(resolve => setTimeout(() => {
+    console.warn('Auth check timed out, resolving anyway');
+    if (authReadyPromiseResolver) authReadyPromiseResolver();
+    resolve();
+  }, timeoutMs));
+  await Promise.race([checkAuthStatus(), timeoutPromise]);
   initMobileMenu();
 });
 
@@ -122,9 +129,8 @@ async function checkAuthStatus() {
         currentUserRole = session.user.user_metadata.role;
       }
       await fetchUserRole(session.user.id);
-      updateUIForLoggedInUser();
+      try { updateUIForLoggedInUser(); } catch (e) { console.warn('updateUIForLoggedInUser error:', e); }
     } else {
-      // If no session, try definitive check (can restore session if cookies exist)
       const { data: { user } } = await supabaseClient.auth.getUser();
       if (user) {
         currentUser = user;
@@ -133,14 +139,14 @@ async function checkAuthStatus() {
           currentUserRole = user.user_metadata.role;
         }
         await fetchUserRole(user.id);
-        updateUIForLoggedInUser();
+        try { updateUIForLoggedInUser(); } catch (e) { console.warn('updateUIForLoggedInUser error:', e); }
       } else {
-        updateUIForLoggedOutUser();
+        try { updateUIForLoggedOutUser(); } catch (e) { console.warn('updateUIForLoggedOutUser error:', e); }
       }
     }
   } catch (error) {
     console.error('Error checking auth status:', error);
-    updateUIForLoggedOutUser();
+    try { updateUIForLoggedOutUser(); } catch (e) { console.warn('updateUIForLoggedOutUser error:', e); }
   } finally {
     authInitialized = true;
     if (authReadyPromiseResolver) authReadyPromiseResolver();
@@ -277,8 +283,17 @@ async function login(email, password) {
     currentUser = data.user;
     window.currentUser = data.user;
 
-    // Fetch role with retry (trigger may still be running for new users)
-    const fetchedRole = await fetchUserRole(data.user.id, 3);
+    // Fetch role (with timeout - don't block login for slow DB)
+    const rolePromise = fetchUserRole(data.user.id, 3);
+    const roleTimeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Role fetch timeout')), 5000)
+    );
+    let fetchedRole = null;
+    try {
+      fetchedRole = await Promise.race([rolePromise, roleTimeout]);
+    } catch (_) {
+      console.warn('fetchUserRole timed out or failed, using metadata');
+    }
 
     if (!fetchedRole) {
       // Last resort fallback: use metadata role
