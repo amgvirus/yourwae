@@ -150,28 +150,32 @@ function setupAuthListener() {
 
 // Global UI Sync function
 function refreshAuthUI() {
-  console.log('[AUTH v1.4] Scaling refreshAuthUI | currentUser:', !!currentUser);
+  const user = currentUser || window.currentUser;
+  console.log('[AUTH v1.5] Aggressive refreshAuthUI | user:', !!user);
 
-  // Apply "auto-visibility" classes with forced styles to override any stubborn display rules
+  // Apply "auto-visibility" classes with forced styles
   const loggedInOnly = document.querySelectorAll('.auth-user-only');
   const loggedOutOnly = document.querySelectorAll('.auth-guest-only');
 
   loggedInOnly.forEach(el => {
-    el.style.setProperty('display', currentUser ? 'block' : 'none', 'important');
-    if (el.tagName === 'LI' && currentUser) el.style.setProperty('display', 'list-item', 'important');
+    el.style.setProperty('display', user ? 'block' : 'none', 'important');
+    if (el.tagName === 'LI' && user) el.style.setProperty('display', 'list-item', 'important');
   });
 
   loggedOutOnly.forEach(el => {
-    el.style.setProperty('display', currentUser ? 'none' : 'block', 'important');
-    if (el.tagName === 'LI' && !currentUser) el.style.setProperty('display', 'list-item', 'important');
+    el.style.setProperty('display', user ? 'none' : 'block', 'important');
+    if (el.tagName === 'LI' && !user) el.style.setProperty('display', 'list-item', 'important');
   });
 
-  if (currentUser) {
+  if (user) {
     updateUIForLoggedInUser();
   } else {
     updateUIForLoggedOutUser();
   }
 }
+
+// Aggressive watchdog to ensure UI stays synced
+setInterval(refreshAuthUI, 3000);
 
 
 // Fetch user role separately (with retry for trigger delay)
@@ -469,13 +473,13 @@ async function getStores(limit = 20, offset = 0) {
     console.log('Fetching stores from Supabase...');
     console.log('Using URL:', SUPABASE_URL);
 
-    // Loosen filters for now to ensure stores show up
-    const { data, error, status } = await supabaseClient
+    // Loosen filters completely to debug store display
+    console.log('Fetching stores with active=true range:', offset, '-', offset + limit - 1);
+    const { data, error, status, statusText } = await supabaseClient
       .from('stores')
       .select('*')
-      .eq('is_active', true)
-      // .eq('is_verified', true) // Temporarily disabled for onboarding
-      .range(offset, offset + limit - 1);
+      .limit(limit);
+    // .eq('is_active', true); // Temporarily commented out to SEE EVERYTHING
 
     if (error) {
       console.error('Supabase getStores error details:', {

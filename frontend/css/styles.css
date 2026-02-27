@@ -264,24 +264,15 @@ textarea {
 
 /* JUMIA HOME LAYOUT */
 .home-main {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 16px;
+  display: block;
+  /* Strict Jumia Full Width */
   margin-top: 16px;
   padding-bottom: 40px;
 }
 
-@media (max-width: 900px) {
-  .home-main {
-    grid-template-columns: 1fr;
-  }
-}
-
 .side-menu {
-  background: var(--bg-white);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-soft);
-  height: max-content;
+  display: none !important;
+  /* Hidden as requested */
 }
 
 .side-menu-list {
