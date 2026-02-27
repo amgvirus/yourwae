@@ -6,7 +6,7 @@
 // The key MUST start with "eyJ..." (it is a JWT).
 // ============================================================
 const SUPABASE_URL = 'https://dzphgpikqxfeiautsnbm.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_twMoDMVTH-QJY_jIiZIpQQ_0IA8M1bk'; // ← REPLACE THIS
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6cGhncGlrcXhmZWlhdXRzbmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5Mzk0NjMsImV4cCI6MjA4NjUxNTQ2M30.1S9aunKzGj8WvsETTtsCQhZHzNMrKfb5cBQYKsaN3cc'; // ← REPLACE THIS
 
 // Validate key format before initialising
 if (!SUPABASE_ANON_KEY.startsWith('eyJ')) {
@@ -289,7 +289,7 @@ function closeMobileMenu() {
 
 
 // Signup function
-async function signup(email, password, firstName, lastName, phone, role = 'customer', storeName = '', storeCategory = '') {
+async function signup(email, password, firstName, lastName, phone, role = 'customer', storeName = '', storeCategory = '', sellerMetadata = {}) {
   try {
     // Create auth user with metadata (trigger will handle public.users, wallets, and stores)
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
@@ -302,7 +302,8 @@ async function signup(email, password, firstName, lastName, phone, role = 'custo
           phone: phone,
           role: role,
           store_name: storeName,
-          store_category: storeCategory
+          store_category: storeCategory,
+          ...sellerMetadata
         }
       }
     });

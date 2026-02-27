@@ -112,6 +112,19 @@
                 </div>
               </div>
 
+              <!-- Premium Location Sharing -->
+              <div class="form-group" style="margin-top: 15px;">
+                <button type="button" class="btn btn-outline" id="locationBtn" onclick="shareMyLocation()"
+                  style="width: auto; padding: 10px 20px;">
+                  📍 Share My Location for Rider
+                </button>
+                <p id="locationStatus" style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+                  Allow location access so the rider can find you exactly.
+                </p>
+                <input type="hidden" id="latitude" value="0">
+                <input type="hidden" id="longitude" value="0">
+              </div>
+
               <div class="form-group">
                 <label for="specialInstructions">Special Instructions (Optional)</label>
                 <textarea id="specialInstructions" placeholder="Any special instructions for delivery"></textarea>

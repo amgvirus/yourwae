@@ -88,6 +88,16 @@ async function handleSignup(event) {
 
   const storeName = role === 'store' ? document.getElementById('storeName').value.trim() : '';
   const storeCategory = role === 'store' ? document.getElementById('storeCategory').value : '';
+  const storeLocation = role === 'store' ? document.getElementById('storeLocation').value.trim() : '';
+  const storeGPS = role === 'store' ? document.getElementById('storeGPS').value.trim() : '';
+
+  // Store owner specific validation
+  if (role === 'store' && (!storeName || !storeCategory || !storeLocation || !storeGPS)) {
+    errorMsg.textContent = 'Please fill in all store details including Location and GPS Address';
+    errorMsg.style.display = 'block';
+    return;
+  }
+
   const signupBtn = document.querySelector('#signupForm button[type="submit"]');
   const loadingOverlay = document.getElementById('signupLoadingOverlay');
 
@@ -96,7 +106,7 @@ async function handleSignup(event) {
   if (signupBtn) { signupBtn.disabled = true; signupBtn.textContent = 'Creating...'; }
 
   try {
-    const signupPromise = window.fastGetApp.signup(email, password, firstName, lastName, phone, role, storeName, storeCategory);
+    const signupPromise = window.fastGetApp.signup(email, password, firstName, lastName, phone, role, storeName, storeCategory, { location: storeLocation, gps: storeGPS });
     const signupTimeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Signup timed out. Please check your connection and try again.')), 35000)
     );

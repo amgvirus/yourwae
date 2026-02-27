@@ -123,8 +123,8 @@ async function placeOrder() {
     state,
     zip_code: zip,
     country: 'Ghana',
-    latitude: 0, // Would set real coordinates from Google Maps API
-    longitude: 0,
+    latitude: Number(document.getElementById('latitude').value) || 0,
+    longitude: Number(document.getElementById('longitude').value) || 0,
   };
 
   // Validate payment method
@@ -168,12 +168,56 @@ async function placeOrder() {
   }
 }
 
-// Handle logout
-async function handleLogout() {
-  const result = await window.fastGetApp.logout();
-  if (result.success) {
-    window.location.href = 'index.html';
+// Premium Geolocation System
+function shareMyLocation() {
+  const btn = document.getElementById('locationBtn');
+  const status = document.getElementById('locationStatus');
+
+  if (!navigator.geolocation) {
+    status.textContent = "Geolocation is not supported by your browser";
+    status.style.color = "red";
+    return;
   }
+
+  btn.disabled = true;
+  btn.textContent = "⌛ Locating...";
+  status.textContent = "Requesting your precise location...";
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+
+      document.getElementById('latitude').value = lat;
+      document.getElementById('longitude').value = lon;
+
+      btn.textContent = "✅ Location Shared";
+      btn.classList.remove('btn-outline');
+      btn.classList.add('btn-secondary');
+      status.textContent = `Location captured! Rider will be guided to ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+      status.style.color = "var(--success)";
+    },
+    (error) => {
+      btn.disabled = false;
+      btn.textContent = "📍 Share My Location for Rider";
+      status.style.color = "red";
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          status.textContent = "User denied the request for Geolocation. Please allow access.";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          status.textContent = "Location information is unavailable.";
+          break;
+        case error.TIMEOUT:
+          status.textContent = "The request to get user location timed out.";
+          break;
+        default:
+          status.textContent = "An unknown error occurred.";
+          break;
+      }
+    },
+    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+  );
 }
 
 // Load on page load

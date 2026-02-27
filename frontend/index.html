@@ -10,7 +10,11 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body>
+<body class="bg-page">
+  <!-- Announcement Bar -->
+  <div class="announcement-bar">
+    Hohoe, Dzodze and Anloga now live!
+  </div>
   <!-- Mobile Menu Overlay -->
   <div class="mobile-menu-overlay" id="menuOverlay" onclick="closeMobileMenu()"></div>
 
@@ -78,49 +82,41 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
-      <h1>Shop Local, Get It Fast ⚡</h1>
-      <p>Order from trusted local stores and get delivery in minutes</p>
+      <h1>We Bring Your Stores Closer to You</h1>
+      <p>Shop from local stores and get fast delivery in Hohoe, Dzodze and Anloga</p>
       <div class="hero-search">
-        <input type="text" placeholder="Search stores or products..." class="search-input"
+        <input type="text" placeholder="Search for products or stores" class="search-input"
           onclick="document.getElementById('searchInput').focus()">
         <button class="btn btn-primary" onclick="handleSearch()">Search</button>
       </div>
     </div>
   </section>
 
-  <!-- Category Strip -->
-  <div class="category-strip">
-    <div class="container">
-      <a href="stores.html?cat=grocery" class="category-item">
-        <span class="category-icon">🛒</span>
-        <span class="category-label">Grocery</span>
-      </a>
-      <a href="stores.html?cat=electronics" class="category-item">
-        <span class="category-icon">📱</span>
-        <span class="category-label">Electronics</span>
-      </a>
-      <a href="stores.html?cat=pharmacy" class="category-item">
-        <span class="category-icon">💊</span>
-        <span class="category-label">Pharmacy</span>
-      </a>
-      <a href="stores.html?cat=fashion" class="category-item">
-        <span class="category-icon">👗</span>
-        <span class="category-label">Fashion</span>
-      </a>
-      <a href="stores.html?cat=beauty" class="category-item">
-        <span class="category-icon">💄</span>
-        <span class="category-label">Beauty</span>
-      </a>
-      <a href="stores.html?cat=home" class="category-item">
-        <span class="category-icon">🏠</span>
-        <span class="category-label">Home</span>
-      </a>
-      <a href="stores.html?cat=food" class="category-item">
-        <span class="category-icon">🍔</span>
-        <span class="category-label">Food</span>
-      </a>
+  <!-- Category Grid -->
+  <section class="category-strip">
+    <div class="container category-grid">
+      <div class="category-node" onclick="filterByCategory('grocery')">
+        <div class="category-circle">🧺</div>
+        <span>Groceries</span>
+      </div>
+      <div class="category-node" onclick="filterByCategory('electronics')">
+        <div class="category-circle">💻</div>
+        <span>Electronics</span>
+      </div>
+      <div class="category-node" onclick="filterByCategory('fashion')">
+        <div class="category-circle">👕</div>
+        <span>Fashion</span>
+      </div>
+      <div class="category-node" onclick="filterByCategory('craft')">
+        <div class="category-circle">🏺</div>
+        <span>Local Craft</span>
+      </div>
+      <div class="category-node" onclick="filterByCategory('food')">
+        <div class="category-circle">🍱</div>
+        <span>Restaurants</span>
+      </div>
     </div>
-  </div>
+  </section>
 
   <!-- Promo Banners -->
   <section class="promo-banners">
@@ -135,12 +131,12 @@
   <!-- Featured Stores -->
   <section class="featured-stores">
     <div class="container">
-      <div class="section-header">
+      <div class="section-header-premium">
         <h2>Featured Stores</h2>
-        <a href="stores.html" class="see-all-link">See All →</a>
+        <a href="stores.html" class="nav-link">See All</a>
       </div>
       <div id="storesContainer" class="stores-grid">
-        <div class="loading">Loading stores...</div>
+        <div class="loading">Finding stores near you...</div>
       </div>
     </div>
   </section>
@@ -148,28 +144,38 @@
   <!-- How It Works -->
   <section class="how-it-works">
     <div class="container">
-      <h2>How It Works</h2>
-      <div class="steps">
-        <div class="step">
-          <div class="step-number">1</div>
-          <h3>Browse Stores</h3>
-          <p>Explore local stores near you</p>
+      <div class="section-header-premium" style="justify-content: center; margin-bottom: 24px;">
+        <h2>How It Works</h2>
+      </div>
+      <div class="how-grid">
+        <div class="how-node">
+          <div class="category-circle" style="margin: 0 auto 12px; background: #ebf8ff;">🏪</div>
+          <h4>Stores Join</h4>
+          <p>Stores register and are displayed on the platform</p>
         </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <h3>Add Items</h3>
-          <p>Add products to your cart</p>
+        <div class="how-node">
+          <div class="category-circle" style="margin: 0 auto 12px; background: #fffaf0;">🛒</div>
+          <h4>Shop & Pay</h4>
+          <p>Customer adds items to our shopping cart</p>
         </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <h3>Checkout</h3>
-          <p>Pay online securely</p>
+        <div class="how-node">
+          <div class="category-circle" style="margin: 0 auto 12px; background: #f0fff4;">🚚</div>
+          <h4>We Deliver Fast</h4>
+          <p>Your hyperlocal delivery is ready</p>
         </div>
-        <div class="step">
-          <div class="step-number">4</div>
-          <h3>Track Delivery</h3>
-          <p>Get real-time updates</p>
-        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seller CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-banner-premium">
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 8px;">For new businesses YourWae?</p>
+        <button class="btn btn-primary btn-full" onclick="window.location.href='signup.html?role=store'"
+          style="margin-bottom: 12px; height: 48px; font-size: 16px;">Register Your Store</button>
+        <a href="login.html" style="color: var(--text-primary); font-size: 13px; font-weight: 500;">Sign in for
+          customers via YourWae</a>
       </div>
     </div>
   </section>
@@ -177,32 +183,18 @@
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h4>Your<span class="brand-wae">Wae</span></h4>
-          <p>Your hyperlocal shopping platform</p>
+      <div class="footer-strip" style="margin-bottom: 20px;">
+        <div>
+          <span style="font-size: 18px;">💬</span>
+          <span>0599882214</span>
         </div>
-        <div class="footer-section">
-          <h4>Quick Links</h4>
-          <ul>
-            <li><a href="stores.html">Browse Stores</a></li>
-            <li><a href="#"
-                onclick="currentUser ? window.location.href='orders.html' : window.location.href='login.html'">My
-                Orders</a></li>
-            <li><a href="#" onclick="window.location.href='signup.html'">Become a Seller</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4>Support</h4>
-          <ul>
-            <li><a href="#">Contact Us</a></li>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Service</a></li>
-          </ul>
+        <div>
+          <span style="font-size: 18px;">✉️</span>
+          <span>zhilakcodes@gmail.com</span>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2026 ZhiLak Codes (Your<span class="brand-wae">Wae</span>). All rights reserved.</p>
+        <p>&copy; 2026 Your<span class="brand-wae">Wae</span>. All rights reserved.</p>
       </div>
     </div>
   </footer>
