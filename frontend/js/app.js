@@ -158,12 +158,25 @@ function refreshAuthUI() {
   const loggedOutOnly = document.querySelectorAll('.auth-guest-only');
 
   loggedInOnly.forEach(el => {
-    el.style.setProperty('display', user ? 'block' : 'none', 'important');
+    // Keep existing layout types (flex/inline/etc). Default to block if needed.
+    if (user) {
+      el.style.removeProperty('display');
+      el.style.removeProperty('visibility');
+      el.style.removeProperty('opacity');
+    } else {
+      el.style.setProperty('display', 'none', 'important');
+    }
     if (el.tagName === 'LI' && user) el.style.setProperty('display', 'list-item', 'important');
   });
 
   loggedOutOnly.forEach(el => {
-    el.style.setProperty('display', user ? 'none' : 'block', 'important');
+    if (user) {
+      el.style.setProperty('display', 'none', 'important');
+    } else {
+      el.style.removeProperty('display');
+      el.style.removeProperty('visibility');
+      el.style.removeProperty('opacity');
+    }
     if (el.tagName === 'LI' && !user) el.style.setProperty('display', 'list-item', 'important');
   });
 
@@ -330,40 +343,24 @@ async function signup(email, password, firstName, lastName, phone, role = 'custo
       throw authError;
     }
 
-    // Supabase may return user but no session (email confirmation mode)
-    // Auto-login the user with their credentials right after signup
-    if (authData.user && !authData.session) {
-      console.log('Signup: No session returned. Attempting auto-login...');
-
-      // Wait a moment for the user to be fully created
-      await new Promise(r => setTimeout(r, 1500));
-
-      // Try to login with the same credentials
-      const loginResult = await login(email, password);
-      if (loginResult.success) {
-        console.log('Auto-login after signup succeeded');
-        currentUserRole = role; // Ensure role is set to what they selected
-        return { success: true, user: loginResult.user, role: role };
-      } else {
-        // If auto-login fails, it might need email confirmation
-        console.warn('Auto-login failed:', loginResult.error);
-        if (loginResult.error && loginResult.error.toLowerCase().includes('email not confirmed')) {
-          return { success: true, user: authData.user, needsConfirmation: true };
-        }
-        // Still consider signup successful, just redirect to login
-        return { success: true, user: authData.user, needsConfirmation: true };
+    // IMPORTANT UX RULE:
+    // After registration, we do NOT keep the user signed in automatically.
+    // They must go to the login page and sign in with their new credentials.
+    if (authData?.session) {
+      try {
+        await supabaseClient.auth.signOut();
+      } catch (signOutErr) {
+        console.warn('Post-signup signOut failed:', signOutErr?.message || signOutErr);
       }
     }
 
-    currentUser = authData.user;
-    window.currentUser = authData.user;
-    currentUserRole = role;
+    currentUser = null;
+    window.currentUser = null;
+    currentUserRole = null;
+    refreshAuthUI();
 
-    // Wait for the database trigger to complete, then verify user row exists
-    await new Promise(r => setTimeout(r, 2000));
-    await fetchUserRole(authData.user.id, 3);
-
-    return { success: true, user: authData.user, role: role };
+    const needsConfirmation = !!(authData?.user && !authData?.session);
+    return { success: true, user: authData.user, needsConfirmation };
   } catch (error) {
     console.error('Signup error:', error);
     return { success: false, error: error.message };

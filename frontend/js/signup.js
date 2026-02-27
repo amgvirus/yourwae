@@ -156,14 +156,9 @@ async function handleSignup(event) {
         successMsg.style.display = 'block';
         setTimeout(() => { window.location.href = 'login.html'; }, 3000);
       } else {
-        successMsg.textContent = 'Account created! Redirecting...';
+        successMsg.textContent = 'Account created! Please login with your new details.';
         successMsg.style.display = 'block';
-        sessionStorage.setItem('fromLogin', '1');
-        if (role === 'store') {
-          window.location.href = 'seller-dashboard.html';
-        } else {
-          window.location.href = 'index.html';
-        }
+        setTimeout(() => { window.location.href = 'login.html'; }, 2500);
       }
     } else {
       if (result.alreadyRegistered) {
@@ -197,13 +192,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     await window.fastGetApp.authReadyPromise;
-    if (window.fastGetApp.currentUser) {
-      if (window.fastGetApp.currentUserRole === 'store') {
-        window.location.href = 'seller-dashboard.html';
-      } else {
-        window.location.href = 'index.html';
-      }
-    }
+    // If a user is already logged in, send them away from signup.
+    if (window.fastGetApp.currentUser) window.location.href = 'index.html';
   } catch (e) {
     console.error('Auth check error:', e);
   }
