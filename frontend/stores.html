@@ -23,9 +23,10 @@
     </div>
     <ul class="mobile-menu-links">
       <li><a href="index.html"><span class="menu-icon">🏠</span> Home</a></li>
-      <li><a href="stores.html" class="active"><span class="menu-icon">🏪</span> Stores</a></li>
-      <li><a href="cart.html"><span class="menu-icon">🛒</span> Cart</a></li>
-      <li><a href="orders.html"><span class="menu-icon">📦</span> My Orders</a></li>
+      <li><a href="categories.html"><span class="menu-icon">🗂️</span> Categories</a></li>
+      <li><a href="orders.html"><span class="menu-icon">📦</span> Orders</a></li>
+      <li class="auth-user-only" style="display:none;"><a href="profile.html"><span class="menu-icon">👤</span>
+          Account</a></li>
       <li class="auth-guest-only"><a href="login.html" id="mobileLoginLink"><span class="menu-icon">🔑</span> Login</a>
       </li>
       <li id="mobileLogoutItem" class="auth-user-only" style="display:none;"><a href="#" onclick="handleLogout()"><span
@@ -57,15 +58,16 @@
             <option value="anloga">Anloga</option>
           </select>
         </div>
-        <a href="stores.html" class="nav-link active">Stores</a>
-        <a href="cart.html" class="nav-link">🛒 Cart</a>
-        <button id="loginBtn" class="nav-btn btn-primary auth-guest-only"
-          onclick="window.location.href='login.html'">Login</button>
-        <div id="userMenu" style="display: none;" class="user-menu auth-user-only">
-          <button class="nav-btn btn-secondary" onclick="window.location.href='orders.html'">My Orders</button>
-          <button class="nav-btn btn-secondary" onclick="window.location.href='profile.html'">Profile</button>
-          <button id="logoutBtn" class="nav-btn btn-danger" onclick="handleLogout()">Logout</button>
-        </div>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="categories.html" class="nav-link">Categories</a>
+        <a href="orders.html" class="nav-link">Orders</a>
+        <a href="profile.html" class="nav-link auth-user-only" style="display:none;" id="topNavAccount">Account</a>
+        <a href="login.html" class="nav-link auth-guest-only" id="topNavLogin">Login</a>
+
+        <a href="cart.html" class="nav-cart" aria-label="Cart">
+          <span class="nav-icon">🛒</span>
+          <span class="cart-label">Cart</span>
+        </a>
       </div>
     </div>
   </nav>
@@ -118,13 +120,9 @@
         <span class="nav-icon">🏠</span>
         <span>Home</span>
       </a>
-      <a href="stores.html" class="bottom-nav-item active">
-        <span class="nav-icon">🏪</span>
-        <span>Stores</span>
-      </a>
-      <a href="cart.html" class="bottom-nav-item">
-        <span class="nav-icon">🛒</span>
-        <span>Cart</span>
+      <a href="categories.html" class="bottom-nav-item">
+        <span class="nav-icon">🗂️</span>
+        <span>Categories</span>
       </a>
       <a href="orders.html" class="bottom-nav-item">
         <span class="nav-icon">📦</span>

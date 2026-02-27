@@ -1092,6 +1092,12 @@ function updateUIForLoggedInUser() {
     userNameNav.textContent = `Hi, ${name}`;
   }
 
+  // New simplified nav: toggle top nav login/account links
+  const topNavLogin = document.getElementById('topNavLogin');
+  const topNavAccount = document.getElementById('topNavAccount');
+  if (topNavLogin) topNavLogin.style.display = 'none';
+  if (topNavAccount) topNavAccount.style.display = 'inline-flex';
+
   // Hide any signup buttons if they exist
   const signupBtns = document.querySelectorAll('.btn-signup, .signup-link');
   signupBtns.forEach(btn => btn.style.display = 'none');
@@ -1143,8 +1149,8 @@ function updateUIForLoggedInUser() {
       bottomNavAccount.href = 'seller-dashboard.html';
       if (label) label.textContent = 'Dashboard';
     } else {
-      bottomNavAccount.href = 'orders.html';
-      if (label) label.textContent = 'Orders';
+      bottomNavAccount.href = 'profile.html';
+      if (label) label.textContent = 'Account';
     }
   }
 
@@ -1185,6 +1191,12 @@ function updateUIForLoggedOutUser() {
     const label = bottomNavAccount.querySelector('span:last-child');
     if (label) label.textContent = 'Account';
   }
+
+  // New simplified nav: toggle top nav login/account links
+  const topNavLogin = document.getElementById('topNavLogin');
+  const topNavAccount = document.getElementById('topNavAccount');
+  if (topNavLogin) topNavLogin.style.display = 'inline-flex';
+  if (topNavAccount) topNavAccount.style.display = 'none';
 }
 
 // Export functions
