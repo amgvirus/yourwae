@@ -303,20 +303,22 @@ function closeMobileMenu() {
 // Signup function
 async function signup(email, password, firstName, lastName, phone, role = 'customer', storeName = '', storeCategory = '', sellerMetadata = {}) {
   try {
+    const metadata = {
+      first_name: firstName,
+      last_name: lastName,
+      phone: phone,
+      role: role,
+      store_name: storeName,
+      store_category: storeCategory,
+      ...sellerMetadata
+    };
+
     // Create auth user with metadata (trigger will handle public.users, wallets, and stores)
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
       email,
       password,
       options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone,
-          role: role,
-          store_name: storeName,
-          store_category: storeCategory,
-          ...sellerMetadata
-        }
+        data: metadata
       }
     });
 
@@ -678,6 +680,130 @@ async function getCartItems() {
     console.error('Error fetching cart:', error);
     return { success: false, error: error.message };
   }
+}
+
+// ============== PROFILE HELPERS ==============
+async function getProfile() {
+  try {
+    if (!currentUser) {
+      return { success: false, error: 'User not logged in' };
+    }
+
+    // Fetch row from public.users (RLS restricts to own row)
+    const { data, error } = await supabaseClient
+      .from('users')
+      .select('id, email, phone, first_name, last_name, avatar_url, role')
+      .eq('id', currentUser.id)
+      .single();
+
+    if (error) {
+      console.warn('getProfile users table error:', error.message);
+    }
+
+    const meta = currentUser.user_metadata || {};
+
+    return {
+      success: true,
+      profile: {
+        id: currentUser.id,
+        email: currentUser.email,
+        phone: data?.phone || meta.phone || '',
+        firstName: data?.first_name || meta.first_name || '',
+        lastName: data?.last_name || meta.last_name || '',
+        role: data?.role || meta.role || currentUserRole || 'customer',
+        avatarUrl: data?.avatar_url || meta.avatar_url || '',
+        dateOfBirth: meta.date_of_birth || ''
+      }
+    };
+  } catch (error) {
+    console.error('getProfile error:', error);
+    return { success: false, error: error.message || 'Failed to load profile' };
+  }
+}
+
+async function updateProfile({ firstName, lastName, phone, dateOfBirth }) {
+  try {
+    if (!currentUser) {
+      return { success: false, error: 'User not logged in' };
+    }
+
+    const updates = {};
+    if (firstName !== undefined) updates.first_name = firstName;
+    if (lastName !== undefined) updates.last_name = lastName;
+    if (phone !== undefined) updates.phone = phone;
+
+    let updatedRow = null;
+    if (Object.keys(updates).length > 0) {
+      const { data, error } = await supabaseClient
+        .from('users')
+        .update(updates)
+        .eq('id', currentUser.id)
+        .select('id, email, phone, first_name, last_name, avatar_url, role')
+        .single();
+
+      if (error) {
+        console.warn('updateProfile users table error:', error.message);
+      } else {
+        updatedRow = data;
+      }
+    }
+
+    const metaUpdates = {};
+    if (firstName !== undefined) metaUpdates.first_name = firstName;
+    if (lastName !== undefined) metaUpdates.last_name = lastName;
+    if (phone !== undefined) metaUpdates.phone = phone;
+    if (dateOfBirth !== undefined) metaUpdates.date_of_birth = dateOfBirth || null;
+
+    let updatedAuthUser = currentUser;
+    if (Object.keys(metaUpdates).length > 0) {
+      const { data, error } = await supabaseClient.auth.updateUser({
+        data: metaUpdates
+      });
+      if (error) {
+        console.warn('updateProfile auth metadata error:', error.message);
+      } else if (data?.user) {
+        updatedAuthUser = data.user;
+      }
+    }
+
+    currentUser = updatedAuthUser;
+    window.currentUser = updatedAuthUser;
+
+    refreshAuthUI();
+
+    return {
+      success: true,
+      profile: {
+        id: updatedAuthUser.id,
+        email: updatedAuthUser.email,
+        phone: updatedRow?.phone || updatedAuthUser.user_metadata?.phone || '',
+        firstName: updatedRow?.first_name || updatedAuthUser.user_metadata?.first_name || '',
+        lastName: updatedRow?.last_name || updatedAuthUser.user_metadata?.last_name || '',
+        role: updatedRow?.role || updatedAuthUser.user_metadata?.role || currentUserRole || 'customer',
+        avatarUrl: updatedRow?.avatar_url || updatedAuthUser.user_metadata?.avatar_url || '',
+        dateOfBirth: updatedAuthUser.user_metadata?.date_of_birth || ''
+      }
+    };
+  } catch (error) {
+    console.error('updateProfile error:', error);
+    return { success: false, error: error.message || 'Failed to update profile' };
+  }
+}
+
+function getUserAgeFromMetadata() {
+  const user = currentUser || window.currentUser;
+  const dob = user?.user_metadata?.date_of_birth;
+  if (!dob) return null;
+  const dobDate = new Date(dob);
+  if (Number.isNaN(dobDate.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - dobDate.getFullYear();
+  const m = today.getMonth() - dobDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+    age--;
+  }
+  if (age < 0 || age > 130) return null;
+  return age;
 }
 
 // Remove from cart
@@ -1085,6 +1211,9 @@ window.fastGetApp = {
   getDeliveryTracking,
   calculateDistance,
   calculateDeliveryFee,
+  getProfile,
+  updateProfile,
+  getUserAgeFromMetadata,
   checkAuthStatus,
   authReadyPromise,
   townManager,

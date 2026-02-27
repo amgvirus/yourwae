@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stores - YourWae</title>
+  <title>My Profile - YourWae</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -23,9 +23,11 @@
     </div>
     <ul class="mobile-menu-links">
       <li><a href="index.html"><span class="menu-icon">🏠</span> Home</a></li>
-      <li><a href="stores.html" class="active"><span class="menu-icon">🏪</span> Stores</a></li>
+      <li><a href="stores.html"><span class="menu-icon">🏪</span> Stores</a></li>
       <li><a href="cart.html"><span class="menu-icon">🛒</span> Cart</a></li>
       <li><a href="orders.html"><span class="menu-icon">📦</span> My Orders</a></li>
+      <li class="auth-user-only" style="display:none;"><a href="profile.html"><span class="menu-icon">👤</span> My
+          Profile</a></li>
       <li class="auth-guest-only"><a href="login.html" id="mobileLoginLink"><span class="menu-icon">🔑</span> Login</a>
       </li>
       <li id="mobileLogoutItem" class="auth-user-only" style="display:none;"><a href="#" onclick="handleLogout()"><span
@@ -46,18 +48,10 @@
       </div>
       <div class="navbar-search">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Search stores...">
+        <input type="text" placeholder="Search..." disabled>
       </div>
       <div class="navbar-menu">
-        <div class="town-selector">
-          <select id="townSelect" class="town-dropdown" onchange="handleTownChange()">
-            <option value="">Select Town</option>
-            <option value="hohoe">Hohoe</option>
-            <option value="dzodze">Dzodze</option>
-            <option value="anloga">Anloga</option>
-          </select>
-        </div>
-        <a href="stores.html" class="nav-link active">Stores</a>
+        <a href="stores.html" class="nav-link">Stores</a>
         <a href="cart.html" class="nav-link">🛒 Cart</a>
         <button id="loginBtn" class="nav-btn btn-primary auth-guest-only"
           onclick="window.location.href='login.html'">Login</button>
@@ -70,34 +64,64 @@
     </div>
   </nav>
 
-  <!-- Stores Section -->
-  <section class="stores-section">
+  <!-- Profile Section -->
+  <section class="checkout-section" style="padding-top: 24px;">
     <div class="container">
-      <div class="stores-header">
-        <h1>Browse Stores</h1>
-        <div class="filters">
-          <input type="text" id="storeSearchInput" placeholder="Search stores..." class="search-input">
-          <select id="categoryFilter" class="filter-select">
-            <option value="">All Categories</option>
-            <option value="grocery">Grocery</option>
-            <option value="electronics">Electronics</option>
-            <option value="pharmacy">Pharmacy</option>
-            <option value="fashion">Fashion</option>
-            <option value="beauty">Beauty</option>
-            <option value="home">Home</option>
-            <option value="food">Food</option>
-          </select>
+      <h1>👤 My Profile</h1>
+
+      <div class="checkout-content" style="grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);">
+        <div class="checkout-form">
+          <div id="profileError" class="error-message" style="display:none;"></div>
+          <div id="profileSuccess" class="success-message" style="display:none;"></div>
+
+          <div class="form-section">
+            <h2>Personal Details</h2>
+            <form id="profileForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="profileFirstName">First Name</label>
+                  <input type="text" id="profileFirstName" required>
+                </div>
+                <div class="form-group">
+                  <label for="profileLastName">Last Name</label>
+                  <input type="text" id="profileLastName" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="profileEmail">Email (cannot change here)</label>
+                <input type="email" id="profileEmail" disabled>
+              </div>
+
+              <div class="form-group">
+                <label for="profilePhone">Phone Number</label>
+                <input type="tel" id="profilePhone" required placeholder="10-digit phone number">
+              </div>
+
+              <div class="form-group">
+                <label for="profileDob">Date of Birth</label>
+                <input type="date" id="profileDob">
+                <small style="display:block;margin-top:4px;font-size:0.8rem;color:var(--text-muted);">
+                  We use this to make sure age‑restricted pharmacy items are only sold to customers 18+.
+                </small>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-full" id="saveProfileBtn">Save Changes</button>
+            </form>
+          </div>
         </div>
-      </div>
 
-      <div id="storesContainer" class="stores-grid">
-        <div class="loading">Loading stores...</div>
-      </div>
-
-      <div class="pagination">
-        <button id="prevBtn" class="btn btn-secondary" onclick="previousPage()" style="display: none;">Previous</button>
-        <span id="pageInfo"></span>
-        <button id="nextBtn" class="btn btn-secondary" onclick="nextPage()" style="display: none;">Next</button>
+        <div class="order-summary">
+          <h2>Account Snapshot</h2>
+          <div class="summary-content">
+            <p><strong>Role:</strong> <span id="profileRole">Customer</span></p>
+            <p><strong>Age Check:</strong> <span id="profileAgeInfo">Not set</span></p>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-top:12px;">
+              Setting your date of birth helps us automatically block under‑18 accounts from buying pharmacy and other
+              age‑restricted products, while keeping the rest of YourWae open for browsing.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -118,7 +142,7 @@
         <span class="nav-icon">🏠</span>
         <span>Home</span>
       </a>
-      <a href="stores.html" class="bottom-nav-item active">
+      <a href="stores.html" class="bottom-nav-item">
         <span class="nav-icon">🏪</span>
         <span>Stores</span>
       </a>
@@ -130,7 +154,7 @@
         <span class="nav-icon">📦</span>
         <span>Orders</span>
       </a>
-      <a href="login.html" class="bottom-nav-item" id="bottomNavAccount">
+      <a href="profile.html" class="bottom-nav-item" id="bottomNavAccount">
         <span class="nav-icon auth-guest-only">👤</span>
         <span class="nav-icon auth-user-only" style="display:none;">👤</span>
         <span>Account</span>
@@ -139,9 +163,9 @@
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/api.js"></script>
   <script src="js/app.js"></script>
-  <script src="js/stores.js"></script>
+  <script src="js/profile.js"></script>
 </body>
 
 </html>
+

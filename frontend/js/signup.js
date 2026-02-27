@@ -18,6 +18,7 @@ async function handleSignup(event) {
   const lastName = document.getElementById('lastName').value.trim();
   const email = document.getElementById('email').value.trim();
   const phone = document.getElementById('phone').value.trim();
+  const dateOfBirth = document.getElementById('dateOfBirth').value;
   const password = document.getElementById('password').value;
   const confirmPassword = document.getElementById('confirmPassword').value;
   const role = document.querySelector('input[name="role"]:checked').value;
@@ -29,8 +30,29 @@ async function handleSignup(event) {
   successMsg.style.display = 'none';
 
   // Validation
-  if (!firstName || !lastName || !email || !phone || !password || !confirmPassword) {
+  if (!firstName || !lastName || !email || !phone || !dateOfBirth || !password || !confirmPassword) {
     errorMsg.textContent = 'Please fill in all required fields';
+    errorMsg.style.display = 'block';
+    return;
+  }
+
+  // Basic DOB validation and friendly age feedback
+  const dobDate = dateOfBirth ? new Date(dateOfBirth) : null;
+  if (!dobDate || Number.isNaN(dobDate.getTime())) {
+    errorMsg.textContent = 'Please enter a valid date of birth';
+    errorMsg.style.display = 'block';
+    return;
+  }
+
+  const today = new Date();
+  let age = today.getFullYear() - dobDate.getFullYear();
+  const m = today.getMonth() - dobDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+    age--;
+  }
+
+  if (age < 0 || age > 120) {
+    errorMsg.textContent = 'Please double-check your date of birth';
     errorMsg.style.display = 'block';
     return;
   }
@@ -106,7 +128,21 @@ async function handleSignup(event) {
   if (signupBtn) { signupBtn.disabled = true; signupBtn.textContent = 'Creating...'; }
 
   try {
-    const signupPromise = window.fastGetApp.signup(email, password, firstName, lastName, phone, role, storeName, storeCategory, { location: storeLocation, gps: storeGPS });
+    const signupPromise = window.fastGetApp.signup(
+      email,
+      password,
+      firstName,
+      lastName,
+      phone,
+      role,
+      storeName,
+      storeCategory,
+      {
+        location: storeLocation,
+        gps: storeGPS,
+        date_of_birth: dateOfBirth
+      }
+    );
     const signupTimeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Signup timed out. Please check your connection and try again.')), 35000)
     );

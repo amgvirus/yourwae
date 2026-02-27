@@ -1,4 +1,5 @@
 let currentStoreId = null;
+let currentStore = null;
 let allProducts = [];
 let filteredProducts = [];
 let selectedProduct = null;
@@ -22,6 +23,7 @@ async function loadStore() {
 
   if (result.success) {
     const store = result.data;
+    currentStore = store;
     displayStoreDetails(store);
     loadProducts();
   } else {
@@ -212,6 +214,10 @@ async function addProductToCart() {
     return;
   }
 
+  if (!ensureAgeAllowedForCurrentStore()) {
+    return;
+  }
+
   // Check if all variations are selected
   if (selectedProduct.variations?.length > 0) {
     for (const v of selectedProduct.variations) {
@@ -253,6 +259,10 @@ async function directAddToCart(productId, event) {
     return;
   }
 
+  if (!ensureAgeAllowedForCurrentStore()) {
+    return;
+  }
+
   const btn = event.currentTarget;
   const originalText = btn.textContent;
 
@@ -276,6 +286,37 @@ async function directAddToCart(productId, event) {
     alert('Error: ' + err.message);
     btn.textContent = originalText;
     btn.disabled = false;
+  }
+}
+
+function ensureAgeAllowedForCurrentStore() {
+  try {
+    if (!currentStore) return true;
+    if (currentStore.category !== 'pharmacy') return true;
+
+    const user = window.fastGetApp.currentUser;
+    if (!user) return false;
+
+    const age = window.fastGetApp.getUserAgeFromMetadata();
+    if (age == null) {
+      const goProfile = confirm(
+        'To buy from a pharmacy store, we need your date of birth.\n\nWould you like to open your profile now to add it?'
+      );
+      if (goProfile) {
+        window.location.href = 'profile.html';
+      }
+      return false;
+    }
+
+    if (age < 18) {
+      alert('You must be at least 18 years old to purchase medicines and other pharmacy items on YourWae.');
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.warn('ensureAgeAllowedForCurrentStore failed:', err);
+    return true;
   }
 }
 
