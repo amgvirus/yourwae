@@ -11,15 +11,22 @@ const SUPABASE_ANON_KEY = 'sb_publishable_twMoDMVTH-QJY_jIiZIpQQ_0IA8M1bk'; // �
 // Validate key format before initialising
 if (!SUPABASE_ANON_KEY.startsWith('eyJ')) {
   console.error(
-    '%c⛔ YOURWAE LOGIN BROKEN — Invalid Supabase anon key! %c\n\n' +
+    '%c⛔ YOURWAE CONFIG BROKEN — Invalid Supabase anon key! %c\n\n' +
     'The key currently set in app.js is:\n  "' + SUPABASE_ANON_KEY + '"\n\n' +
-    'This is NOT a valid Supabase JWT key.\n' +
-    'A valid key starts with "eyJ...".\n\n' +
+    'This is NOT a valid Supabase JWT key. It looks like a Stripe key.\n' +
+    'A valid Supabase key starts with "eyJ...".\n\n' +
     'Fix: Go to Supabase Dashboard → Project Settings → API\n' +
     '     Copy the "anon public" key and paste it into app.js line 9.',
     'background:#c0392b;color:#fff;font-size:14px;padding:4px 8px;border-radius:4px;',
     'color:inherit;'
   );
+  // Optional: alert the user once per session if the key is broken
+  if (!sessionStorage.getItem('notified_broken_key')) {
+    setTimeout(() => {
+      alert('⚠️ Critical Configuration Error: The Supabase API key in app.js is invalid. Stores and data will not load correctly.');
+      sessionStorage.setItem('notified_broken_key', '1');
+    }, 1000);
+  }
 }
 
 // Initialize Supabase
@@ -143,11 +150,19 @@ function setupAuthListener() {
 
 // Global UI Sync function
 function refreshAuthUI() {
+  console.log('[AUTH v1.3] refreshAuthUI | currentUser:', !!currentUser);
   if (currentUser) {
     updateUIForLoggedInUser();
   } else {
     updateUIForLoggedOutUser();
   }
+
+  // Apply "auto-visibility" classes
+  const loggedInOnly = document.querySelectorAll('.auth-user-only');
+  const loggedOutOnly = document.querySelectorAll('.auth-guest-only');
+
+  loggedInOnly.forEach(el => el.style.display = currentUser ? '' : 'none');
+  loggedOutOnly.forEach(el => el.style.display = currentUser ? 'none' : '');
 }
 
 
@@ -934,6 +949,10 @@ function updateUIForLoggedInUser() {
   if (logoutBtn) logoutBtn.style.display = 'block';
   if (userMenu) userMenu.style.display = 'flex';
 
+  // Hide any signup buttons if they exist
+  const signupBtns = document.querySelectorAll('.btn-signup, .signup-link');
+  signupBtns.forEach(btn => btn.style.display = 'none');
+
   // Role-based button update in navbar
   const myOrdersBtn = userMenu?.querySelector('button:first-child');
   if (myOrdersBtn) {
@@ -985,6 +1004,15 @@ function updateUIForLoggedInUser() {
       if (label) label.textContent = 'Orders';
     }
   }
+
+  // Final cleanup: ensure "Login" text is gone from any generic buttons
+  document.querySelectorAll('.nav-btn, .nav-link').forEach(el => {
+    if (el.textContent.includes('Login') && !currentUser) {
+      // stays visible
+    } else if (el.textContent.includes('Login') && currentUser) {
+      if (el.id !== 'loginBtn') el.style.display = 'none';
+    }
+  });
 }
 
 

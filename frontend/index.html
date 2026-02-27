@@ -28,8 +28,9 @@
       <li><a href="stores.html"><span class="menu-icon">🏪</span> Stores</a></li>
       <li><a href="cart.html"><span class="menu-icon">🛒</span> Cart</a></li>
       <li><a href="orders.html"><span class="menu-icon">📦</span> My Orders</a></li>
-      <li><a href="login.html" id="mobileLoginLink"><span class="menu-icon">🔑</span> Login</a></li>
-      <li id="mobileLogoutItem" style="display:none;"><a href="#" onclick="handleLogout()"><span
+      <li class="auth-guest-only"><a href="login.html" id="mobileLoginLink"><span class="menu-icon">🔑</span> Login</a>
+      </li>
+      <li id="mobileLogoutItem" class="auth-user-only" style="display:none;"><a href="#" onclick="handleLogout()"><span
             class="menu-icon">🚪</span> Logout</a></li>
     </ul>
   </nav>
@@ -64,8 +65,9 @@
           <span class="cart-icon">🛒</span>
           Cart
         </a>
-        <button id="loginBtn" class="nav-btn btn-primary" onclick="window.location.href='login.html'">Login</button>
-        <div id="userMenu" style="display: none;" class="user-menu">
+        <button id="loginBtn" class="nav-btn btn-primary auth-guest-only"
+          onclick="window.location.href='login.html'">Login</button>
+        <div id="userMenu" style="display: none;" class="user-menu auth-user-only">
           <button class="nav-btn btn-secondary" onclick="window.location.href='orders.html'">My Orders</button>
           <button id="logoutBtn" class="nav-btn btn-danger" onclick="handleLogout()">Logout</button>
         </div>
@@ -225,7 +227,8 @@
         <span>Orders</span>
       </a>
       <a href="login.html" class="bottom-nav-item" id="bottomNavAccount">
-        <span class="nav-icon">👤</span>
+        <span class="nav-icon auth-guest-only">👤</span>
+        <span class="nav-icon auth-user-only" style="display:none;">👤</span>
         <span>Account</span>
       </a>
     </div>

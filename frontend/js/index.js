@@ -57,7 +57,13 @@ async function loadFeaturedStores() {
 
   } catch (error) {
     console.error('Error loading stores:', error);
-    container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: red;">Error loading stores</p>`;
+    const isConfigError = error.message?.includes('initialised') || error.message?.includes('anon key');
+    container.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 20px; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px;">
+        <p style="color: #c53030; font-weight: bold; margin-bottom: 8px;">Error loading stores</p>
+        <p style="color: #742a2a; font-size: 14px;">${isConfigError ? 'The Supabase configuration in app.js appears to be invalid.' : error.message || 'Check your connection.'}</p>
+        <button class="btn btn-sm btn-outline" onclick="location.reload()" style="margin-top: 10px;">Retry</button>
+      </div>`;
   }
 }
 

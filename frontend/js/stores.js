@@ -44,16 +44,17 @@ async function loadStores() {
       }
     } else {
       const errorMsg = result.error || 'Unknown database error.';
+      const isConfigError = errorMsg.toLowerCase().includes('anon key') || errorMsg.toLowerCase().includes('initialised');
       storesContainer.innerHTML = `
-        <div class="error-message">
-          <p><strong>Database Connection Issue</strong></p>
-          <p style="font-size: 14px; color: #d9534f; background: #f9f2f4; padding: 10px; border-radius: 4px; font-family: monospace; overflow-x: auto;">
-            Error: ${errorMsg}
+        <div class="error-message" style="border: 1px solid #f5c6cb; background: #f8d7da; padding: 20px; border-radius: 8px;">
+          <p><strong>${isConfigError ? '⚠️ Configuration Error' : 'Database Connection Issue'}</strong></p>
+          <p style="font-size: 14px; color: #721c24; margin-top: 5px;">
+            ${isConfigError ? 'The Supabase API key in app.js is invalid (starts with "sb_publishable" but should start with "eyJ").' : 'Error: ' + errorMsg}
           </p>
           <p style="font-size: 12px; color: #666; margin-top: 10px;">
-            Check the browser console (F12) for more details.
+            Please update line 9 in <code>frontend/js/app.js</code> with your actual Supabase Anon Key.
           </p>
-          <button class="btn btn-primary btn-sm" onclick="loadStores()" style="margin-top: 10px;">Retry</button>
+          <button class="btn btn-primary btn-sm" onclick="loadStores()" style="margin-top: 15px;">Retry</button>
         </div>`;
     }
   } catch (error) {
