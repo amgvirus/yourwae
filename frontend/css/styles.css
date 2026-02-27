@@ -1,36 +1,41 @@
 /* ============== IMPORTS ============== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* ============== DESIGN TOKENS ============== */
+/* ============== DESIGN TOKENS (Jumia Style) ============== */
 :root {
   --primary: #f68b1e;
-  --primary-dark: #e07c15;
+  /* Official Jumia Orange */
+  --primary-dark: #cc7013;
   --primary-light: #fff4e6;
-  --secondary: #004e89;
-  --brand-blue: #2196F3;
+  --secondary: #081627;
+  /* Dark Navy/Grey */
+  --brand-blue: #004e89;
   --brand-dark: #003366;
-  --success: #00a854;
-  --danger: #e53935;
+  --success: #48a44c;
+  --danger: #e61601;
   --warning: #ff9800;
-  --star-color: #ffc107;
-  --text-primary: #1a1a1a;
+  --star-color: #f68b1e;
+  --text-primary: #1c1c1c;
   --text-secondary: #4a4a4a;
-  --text-muted: #888888;
+  --text-muted: #75757a;
   --bg-white: #ffffff;
-  --bg-light: #f8f9fa;
-  --bg-page: #f4f6f8;
-  --border: #e1e4e8;
+  --bg-light: #f5f5f5;
+  --bg-page: #f1f1f2;
+  /* Jumia's off-white background */
+  --border: #dfdfdf;
   --border-light: #f0f2f5;
-  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.04);
-  --shadow-premium: 0 10px 30px rgba(0, 0, 0, 0.08);
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 30px;
+  --shadow-soft: 0 2px 5px rgba(0, 0, 0, 0.1);
+  --shadow-premium: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --radius-sm: 2px;
+  /* Jumia uses sharp or very slightly rounded edges */
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
   --radius-full: 9999px;
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --nav-height: 64px;
+  --transition-smooth: all 0.2s ease;
+  --nav-height: 72px;
   --bottom-nav-height: 60px;
+  --container-max: 1184px;
 }
 
 /* ============== RESET & BASE ============== */
@@ -48,10 +53,10 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--text-primary);
   background-color: var(--bg-page);
-  line-height: 1.5;
+  line-height: 1.4;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   padding-bottom: 0;
@@ -186,98 +191,193 @@ textarea {
   transform: rotate(-45deg) translate(5px, -5px);
 }
 
-/* Navbar search */
+/* Jumia Header (Overhaul) */
 .navbar-search {
   flex: 1;
-  max-width: 600px;
   position: relative;
+  display: flex;
 }
 
 .navbar-search input {
   width: 100%;
-  padding: 10px 16px 10px 40px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-full);
-  font-size: 0.9rem;
-  background: var(--bg-light);
-  transition: var(--transition);
+  padding: 10px 100px 10px 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: var(--bg-white);
+  transition: var(--transition-smooth);
 }
 
-.navbar-search input:focus {
-  border-color: var(--primary);
-  background: var(--bg-white);
-  box-shadow: 0 0 0 3px rgba(246, 139, 30, 0.1);
+.navbar-search .search-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  padding: 0 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  font-weight: 700;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-search .search-icon {
   position: absolute;
-  left: 14px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
-  font-size: 1rem;
 }
 
-/* Navbar menu */
 .navbar-menu {
   display: flex;
-  gap: 8px;
   align-items: center;
-  margin-left: auto;
+  gap: 16px;
 }
 
-.nav-link {
-  color: var(--text-primary);
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.9rem;
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 12px;
-  border-radius: var(--radius-md);
-  transition: var(--transition);
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.nav-link:hover,
-.nav-link.active {
-  color: var(--primary);
-  background: var(--primary-light);
-}
-
-.cart-icon {
-  position: relative;
-  font-size: 1.1rem;
-}
-
-.cart-badge {
-  position: absolute;
-  top: -6px;
-  right: -8px;
-  background: var(--danger);
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 700;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 4px;
-}
-
-/* Nav buttons */
-.nav-btn {
-  padding: 8px 18px;
-  border: none;
-  border-radius: var(--radius-full);
-  font-size: 0.85rem;
   cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-smooth);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  background: var(--bg-light);
+  color: var(--primary);
+}
+
+.nav-item .nav-icon {
+  font-size: 20px;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  margin-left: 2px;
+}
+
+/* JUMIA HOME LAYOUT */
+.home-main {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 16px;
+  margin-top: 16px;
+  padding-bottom: 40px;
+}
+
+@media (max-width: 900px) {
+  .home-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+.side-menu {
+  background: var(--bg-white);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-soft);
+  height: max-content;
+}
+
+.side-menu-list {
+  list-style: none;
+}
+
+.side-menu-list li a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.side-menu-list li a:hover {
+  background: var(--bg-light);
+  color: var(--primary);
+}
+
+.hero-carousel {
+  height: 384px;
+  background: var(--bg-white);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 24px;
+}
+
+.featured-stores {
+  background: var(--bg-white);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.section-header-jumia {
+  background: var(--primary);
+  color: white;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-header-jumia h2 {
+  font-size: 14px;
   font-weight: 600;
-  transition: var(--transition);
+  text-transform: uppercase;
+}
+
+.section-header-jumia a {
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+}
+
+.stores-grid-jumia {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+  padding: 8px;
+}
+
+.store-card-jumia {
+  background: var(--bg-white);
+  border: 1px solid transparent;
+  padding: 8px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.store-card-jumia:hover {
+  box-shadow: var(--shadow-premium);
+  transform: scale(1.02);
+  z-index: 5;
+}
+
+.store-card-jumia img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.store-details h3 {
+  font-size: 13px;
+  font-weight: 400;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.store-details .price {
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .btn-primary {

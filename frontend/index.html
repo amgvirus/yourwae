@@ -39,107 +39,93 @@
     </ul>
   </nav>
 
-  <!-- Top Navbar -->
+  <!-- Top Navbar (Jumia Style) -->
   <nav class="navbar">
     <div class="navbar-container">
       <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()">
-        <span></span>
-        <span></span>
-        <span></span>
+        <span></span><span></span><span></span>
       </button>
+
       <div class="navbar-logo">
         <a href="index.html"><strong>Your<span class="brand-wae">Wae</span></strong></a>
       </div>
+
       <div class="navbar-search">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Search stores or products...">
+        <input type="text" id="searchInput" placeholder="Search products, brands and categories">
+        <button class="search-btn" onclick="handleSearch()">SEARCH</button>
       </div>
+
       <div class="navbar-menu">
-        <!-- Town Selector -->
-        <div class="town-selector">
-          <select id="townSelect" class="town-dropdown" onchange="handleTownChange()">
-            <option value="">Select Town</option>
-            <option value="hohoe">Hohoe</option>
-            <option value="dzodze">Dzodze</option>
-            <option value="anloga">Anloga</option>
-          </select>
+        <!-- Account Dropdown -->
+        <div class="nav-item dropdown" id="accountDropdown">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label auth-guest-only" onclick="window.location.href='login.html'">Login</span>
+          <span class="nav-label auth-user-only" style="display:none;" id="userNameNav">Hi, User</span>
+          <span class="dropdown-arrow">▼</span>
         </div>
-        <a href="stores.html" class="nav-link">Stores</a>
-        <a href="cart.html" class="nav-link" id="cartLink">
-          <span class="cart-icon">🛒</span>
-          Cart
+
+        <div class="nav-item">
+          <span class="nav-icon">❓</span>
+          <span class="nav-label">Help</span>
+          <span class="dropdown-arrow">▼</span>
+        </div>
+
+        <a href="cart.html" class="nav-item">
+          <span class="nav-icon">🛒</span>
+          <span class="nav-label">Cart</span>
         </a>
-        <button id="loginBtn" class="nav-btn btn-primary auth-guest-only"
-          onclick="window.location.href='login.html'">Login</button>
-        <div id="userMenu" style="display: none;" class="user-menu auth-user-only">
-          <button class="nav-btn btn-secondary" onclick="window.location.href='orders.html'">My Orders</button>
-          <button id="logoutBtn" class="nav-btn btn-danger" onclick="handleLogout()">Logout</button>
-        </div>
       </div>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1>We Bring Your Stores Closer to You</h1>
-      <p>Shop from local stores and get fast delivery in Hohoe, Dzodze and Anloga</p>
-      <div class="hero-search">
-        <input type="text" placeholder="Search for products or stores" class="search-input"
-          onclick="document.getElementById('searchInput').focus()">
-        <button class="btn btn-primary" onclick="handleSearch()">Search</button>
-      </div>
-    </div>
-  </section>
+  <!-- Main Home Layout -->
+  <main class="home-main container">
+    <!-- Sidebar Categories (Desktop) -->
+    <aside class="side-menu">
+      <ul class="side-menu-list">
+        <li><a href="stores.html?cat=grocery"><span>🧺</span> Supermarket</a></li>
+        <li><a href="stores.html?cat=pharmacy"><span>💊</span> Health & Beauty</a></li>
+        <li><a href="stores.html?cat=home"><span>🏠</span> Home & Office</a></li>
+        <li><a href="stores.html?cat=electronics"><span>💻</span> Phone & Tablets</a></li>
+        <li><a href="stores.html?cat=electronics"><span>📺</span> Computing</a></li>
+        <li><a href="stores.html?cat=electronics"><span>🎧</span> Electronics</a></li>
+        <li><a href="stores.html?cat=fashion"><span>👗</span> Fashion</a></li>
+        <li><a href="stores.html?cat=food"><span>🍔</span> Restaurants</a></li>
+        <li><a href="stores.html?cat=grocery"><span>🍼</span> Baby Products</a></li>
+        <li><a href="stores.html?cat=grocery"><span>🎮</span> Gaming</a></li>
+        <li><a href="stores.html?cat=grocery"><span>⚽</span> Sporting Goods</a></li>
+        <li><a href="stores.html?cat=grocery"><span>🚗</span> Automobile</a></li>
+      </ul>
+    </aside>
 
-  <!-- Category Grid -->
-  <section class="category-strip">
-    <div class="container category-grid">
-      <div class="category-node" onclick="filterByCategory('grocery')">
-        <div class="category-circle">🧺</div>
-        <span>Groceries</span>
-      </div>
-      <div class="category-node" onclick="filterByCategory('electronics')">
-        <div class="category-circle">💻</div>
-        <span>Electronics</span>
-      </div>
-      <div class="category-node" onclick="filterByCategory('fashion')">
-        <div class="category-circle">👕</div>
-        <span>Fashion</span>
-      </div>
-      <div class="category-node" onclick="filterByCategory('craft')">
-        <div class="category-circle">🏺</div>
-        <span>Local Craft</span>
-      </div>
-      <div class="category-node" onclick="filterByCategory('food')">
-        <div class="category-circle">🍱</div>
-        <span>Restaurants</span>
-      </div>
-    </div>
-  </section>
+    <!-- Main Content Area -->
+    <div class="home-content">
+      <!-- Top Carousel Section -->
+      <section class="carousel-section">
+        <div class="hero-carousel">
+          <div class="carousel-slide active" style="background: var(--primary-light);">
+            <div class="slide-info">
+              <h1>We Bring Your Stores Closer to You</h1>
+              <p>Shop from local stores and get fast delivery in Hohoe, Dzodze and Anloga</p>
+            </div>
+            <div class="slide-image">📦</div>
+          </div>
+        </div>
+      </section>
 
-  <!-- Promo Banners -->
-  <section class="promo-banners">
-    <div class="container">
-      <div class="promo-card blue">
-        <h3>💎 Become a Seller</h3>
-        <p>List your store and reach more customers</p>
-      </div>
+      <!-- Featured Stores Grid -->
+      <section class="featured-stores">
+        <div class="section-header-jumia">
+          <h2>Featured Stores</h2>
+          <a href="stores.html">SEE ALL ></a>
+        </div>
+        <div id="storesContainer" class="stores-grid-jumia">
+          <div class="loading">Finding stores...</div>
+        </div>
+      </section>
     </div>
-  </section>
-
-  <!-- Featured Stores -->
-  <section class="featured-stores">
-    <div class="container">
-      <div class="section-header-premium">
-        <h2>Featured Stores</h2>
-        <a href="stores.html" class="nav-link">See All</a>
-      </div>
-      <div id="storesContainer" class="stores-grid">
-        <div class="loading">Finding stores near you...</div>
-      </div>
-    </div>
-  </section>
+  </main>
 
   <!-- How It Works -->
   <section class="how-it-works">

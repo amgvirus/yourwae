@@ -150,19 +150,27 @@ function setupAuthListener() {
 
 // Global UI Sync function
 function refreshAuthUI() {
-  console.log('[AUTH v1.3] refreshAuthUI | currentUser:', !!currentUser);
+  console.log('[AUTH v1.4] Scaling refreshAuthUI | currentUser:', !!currentUser);
+
+  // Apply "auto-visibility" classes with forced styles to override any stubborn display rules
+  const loggedInOnly = document.querySelectorAll('.auth-user-only');
+  const loggedOutOnly = document.querySelectorAll('.auth-guest-only');
+
+  loggedInOnly.forEach(el => {
+    el.style.setProperty('display', currentUser ? 'block' : 'none', 'important');
+    if (el.tagName === 'LI' && currentUser) el.style.setProperty('display', 'list-item', 'important');
+  });
+
+  loggedOutOnly.forEach(el => {
+    el.style.setProperty('display', currentUser ? 'none' : 'block', 'important');
+    if (el.tagName === 'LI' && !currentUser) el.style.setProperty('display', 'list-item', 'important');
+  });
+
   if (currentUser) {
     updateUIForLoggedInUser();
   } else {
     updateUIForLoggedOutUser();
   }
-
-  // Apply "auto-visibility" classes
-  const loggedInOnly = document.querySelectorAll('.auth-user-only');
-  const loggedOutOnly = document.querySelectorAll('.auth-guest-only');
-
-  loggedInOnly.forEach(el => el.style.display = currentUser ? '' : 'none');
-  loggedOutOnly.forEach(el => el.style.display = currentUser ? 'none' : '');
 }
 
 
@@ -461,12 +469,12 @@ async function getStores(limit = 20, offset = 0) {
     console.log('Fetching stores from Supabase...');
     console.log('Using URL:', SUPABASE_URL);
 
-    // First try without filters to check basic connectivity
-    const { data, error, status, statusText } = await supabaseClient
+    // Loosen filters for now to ensure stores show up
+    const { data, error, status } = await supabaseClient
       .from('stores')
       .select('*')
       .eq('is_active', true)
-      .eq('is_verified', true)
+      // .eq('is_verified', true) // Temporarily disabled for onboarding
       .range(offset, offset + limit - 1);
 
     if (error) {
@@ -949,6 +957,13 @@ function updateUIForLoggedInUser() {
   if (loginBtn) loginBtn.style.display = 'none';
   if (logoutBtn) logoutBtn.style.display = 'block';
   if (userMenu) userMenu.style.display = 'flex';
+
+  // Jumia Header Support
+  const userNameNav = document.getElementById('userNameNav');
+  if (userNameNav && currentUser) {
+    const name = currentUser.user_metadata?.first_name || currentUser.email.split('@')[0];
+    userNameNav.textContent = `Hi, ${name}`;
+  }
 
   // Hide any signup buttons if they exist
   const signupBtns = document.querySelectorAll('.btn-signup, .signup-link');

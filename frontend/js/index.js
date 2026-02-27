@@ -34,21 +34,19 @@ async function loadFeaturedStores() {
     }
 
     container.innerHTML = stores.map(store => `
-      <div class="store-card" onclick="window.location.href='store-detail.html?id=${store.id}'">
-        ${store.store_image ?
-        `<img src="${store.store_image}" alt="${store.store_name}">` :
-        `<div class="store-initials-logo">${window.fastGetApp.getStoreInitials(store.store_name)}</div>`
+      <div class="store-card-jumia" onclick="window.location.href='store-detail.html?id=${store.id}'">
+        <div class="image-wrapper">
+          ${store.store_image ?
+        `<img src="${store.store_image}" alt="${store.store_name}" loading="lazy">` :
+        `<div class="placeholder-img" style="background:var(--bg-light); display:flex; align-items:center; justify-content:center; aspect-ratio:1/1;">🏪</div>`
       }
-        <div class="store-info">
+        </div>
+        <div class="store-details">
           <h3>${store.store_name}</h3>
-          <p class="category">${store.category}</p>
-          <div class="rating">
-            <span class="stars">${'⭐'.repeat(Math.floor(store.rating || 0))}</span>
-            <span class="reviews">${store.total_reviews || 0} reviews</span>
-          </div>
-          <div class="delivery-info">
-            <span class="delivery-fee">₵${store.base_delivery_fee || 5} delivery</span>
-            <span class="delivery-time">~${Math.round(Math.random() * 20 + 15)} mins</span>
+          <p class="price">₵${store.base_delivery_fee || 7}.00 Delivery</p>
+          <div class="rating-info">
+            <span>⭐ ${store.rating || '4.5'}</span>
+            <span>(${store.total_reviews || 10})</span>
           </div>
         </div>
       </div>
