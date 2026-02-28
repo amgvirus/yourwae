@@ -38,15 +38,27 @@ async function loadProfile() {
     if (profile.dateOfBirth) {
       dobInput.value = profile.dateOfBirth;
     }
-    roleSpan.textContent = profile.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'Customer';
+
+    // UI Updates
+    const roleText = profile.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'Customer';
+    const displayName = profile.firstName ? `${profile.firstName} ${profile.lastName}` : (profile.email ? profile.email.split('@')[0] : 'User');
+    const initials = window.fastGetApp.getStoreInitials(displayName);
+
+    const roleBadge = document.getElementById('profileRoleBadge');
+    const displayNameEl = document.getElementById('profileDisplayName');
+    const initialsEl = document.getElementById('profileInitials');
+
+    if (roleBadge) roleBadge.textContent = roleText;
+    if (displayNameEl) displayNameEl.textContent = displayName;
+    if (initialsEl) initialsEl.textContent = initials;
 
     const age = window.fastGetApp.getUserAgeFromMetadata();
     if (age == null) {
-      ageInfoSpan.textContent = 'Not set – some pharmacy items may be blocked until you add this.';
+      ageInfoSpan.textContent = 'Not set';
     } else if (age < 18) {
-      ageInfoSpan.textContent = `${age} years • Under 18 – pharmacy and other age‑restricted items will be blocked.`;
+      ageInfoSpan.textContent = `${age} years (Minor)`;
     } else {
-      ageInfoSpan.textContent = `${age} years • Age‑verified for pharmacy items.`;
+      ageInfoSpan.textContent = `${age} years (Verified)`;
     }
   } catch (err) {
     console.error('loadProfile error:', err);

@@ -25,7 +25,8 @@
       <li><a href="index.html"><span class="menu-icon">🏠</span> Home</a></li>
       <li><a href="categories.html"><span class="menu-icon">🗂️</span> Categories</a></li>
       <li><a href="orders.html"><span class="menu-icon">📦</span> Orders</a></li>
-      <li class="auth-user-only" style="display:none;"><a href="profile.html" class="active"><span class="menu-icon">👤</span>
+      <li class="auth-user-only" style="display:none;"><a href="profile.html" class="active"><span
+            class="menu-icon">👤</span>
           Account</a></li>
       <li class="auth-guest-only"><a href="login.html" id="mobileLoginLink"><span class="menu-icon">🔑</span> Login</a>
       </li>
@@ -49,17 +50,20 @@
         <span class="search-icon">🔍</span>
         <input type="text" placeholder="Search..." disabled>
       </div>
-      <div class="navbar-menu">
-        <a href="index.html" class="nav-link">Home</a>
-        <a href="categories.html" class="nav-link">Categories</a>
-        <a href="orders.html" class="nav-link">Orders</a>
-        <a href="profile.html" class="nav-link active auth-user-only" style="display:none;" id="topNavAccount">Account</a>
-        <a href="login.html" class="nav-link auth-guest-only" id="topNavLogin">Login</a>
-
+      <div class="navbar-actions">
         <a href="cart.html" class="nav-cart" aria-label="Cart">
           <span class="nav-icon">🛒</span>
           <span class="cart-label">Cart</span>
         </a>
+      </div>
+
+      <div class="navbar-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="categories.html" class="nav-link">Categories</a>
+        <a href="orders.html" class="nav-link">Orders</a>
+        <a href="profile.html" class="nav-link active auth-user-only" style="display:none;"
+          id="topNavAccount">Account</a>
+        <a href="login.html" class="nav-link auth-guest-only" id="topNavLogin">Login</a>
       </div>
     </div>
   </nav>
@@ -69,57 +73,72 @@
     <div class="container">
       <h1>👤 My Profile</h1>
 
-      <div class="checkout-content" style="grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);">
-        <div class="checkout-form">
+      <div class="profile-grid-premium">
+        <!-- Main Form Card -->
+        <div class="premium-card profile-form-card">
+          <div class="card-header">
+            <h3><span class="header-icon">📝</span> Edit Personal Details</h3>
+            <p>Keep your account information up to date.</p>
+          </div>
+
           <div id="profileError" class="error-message" style="display:none;"></div>
           <div id="profileSuccess" class="success-message" style="display:none;"></div>
 
-          <div class="form-section">
-            <h2>Personal Details</h2>
-            <form id="profileForm">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="profileFirstName">First Name</label>
-                  <input type="text" id="profileFirstName" required>
-                </div>
-                <div class="form-group">
-                  <label for="profileLastName">Last Name</label>
-                  <input type="text" id="profileLastName" required>
-                </div>
+          <form id="profileForm" class="premium-form">
+            <div class="form-row-premium">
+              <div class="form-group-premium">
+                <label for="profileFirstName">First Name</label>
+                <input type="text" id="profileFirstName" placeholder="Enter first name" required>
               </div>
-
-              <div class="form-group">
-                <label for="profileEmail">Email (cannot change here)</label>
-                <input type="email" id="profileEmail" disabled>
+              <div class="form-group-premium">
+                <label for="profileLastName">Last Name</label>
+                <input type="text" id="profileLastName" placeholder="Enter last name" required>
               </div>
+            </div>
 
-              <div class="form-group">
-                <label for="profilePhone">Phone Number</label>
-                <input type="tel" id="profilePhone" required placeholder="10-digit phone number">
-              </div>
+            <div class="form-group-premium">
+              <label for="profileEmail">Email Address</label>
+              <input type="email" id="profileEmail" disabled class="disabled-input">
+              <small class="input-hint">Email cannot be changed directly for security.</small>
+            </div>
 
-              <div class="form-group">
-                <label for="profileDob">Date of Birth</label>
-                <input type="date" id="profileDob">
-                <small style="display:block;margin-top:4px;font-size:0.8rem;color:var(--text-muted);">
-                  We use this to make sure age‑restricted pharmacy items are only sold to customers 18+.
-                </small>
-              </div>
+            <div class="form-group-premium">
+              <label for="profilePhone">Phone Number</label>
+              <input type="tel" id="profilePhone" placeholder="0XXXXXXXXX" required>
+            </div>
 
-              <button type="submit" class="btn btn-primary btn-full" id="saveProfileBtn">Save Changes</button>
-            </form>
-          </div>
+            <div class="form-group-premium">
+              <label for="profileDob">Date of Birth</label>
+              <input type="date" id="profileDob">
+              <small class="input-hint">Verified for age-restricted items (18+).</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full shadow-hover" id="saveProfileBtn">Update
+              Profile</button>
+          </form>
         </div>
 
-        <div class="order-summary">
-          <h2>Account Snapshot</h2>
-          <div class="summary-content">
-            <p><strong>Role:</strong> <span id="profileRole">Customer</span></p>
-            <p><strong>Age Check:</strong> <span id="profileAgeInfo">Not set</span></p>
-            <p style="font-size:0.85rem;color:var(--text-muted);margin-top:12px;">
-              Setting your date of birth helps us automatically block under‑18 accounts from buying pharmacy and other
-              age‑restricted products, while keeping the rest of YourWae open for browsing.
-            </p>
+        <!-- Sidebar Info Card -->
+        <div class="profile-sidebar-premium">
+          <div class="premium-card stats-card">
+            <div class="user-profile-header">
+              <div class="large-avatar" id="profileInitials">YW</div>
+              <div class="user-meta-data">
+                <h4 id="profileDisplayName">User Name</h4>
+                <p id="profileRoleBadge" class="badge">Customer</p>
+              </div>
+            </div>
+            <div class="info-divider"></div>
+            <div class="p-info-item">
+              <span class="label">Age Status:</span>
+              <span id="profileAgeInfo" class="value">Not set</span>
+            </div>
+          </div>
+
+          <div class="premium-card action-card">
+            <button class="btn btn-outline btn-full danger-hover" onclick="handleLogout()">
+              <span class="icon">🚪</span> Logout Account
+            </button>
           </div>
         </div>
       </div>
@@ -150,9 +169,12 @@
         <span class="nav-icon">📦</span>
         <span>Orders</span>
       </a>
-      <a href="profile.html" class="bottom-nav-item active" id="bottomNavAccount">
-        <span class="nav-icon auth-guest-only">👤</span>
-        <span class="nav-icon auth-user-only" style="display:none;">👤</span>
+      <a href="profile.html" class="bottom-nav-item active auth-user-only" style="display:none;" id="bottomNavAccount">
+        <span class="nav-icon">👤</span>
+        <span>Account</span>
+      </a>
+      <a href="login.html" class="bottom-nav-item auth-guest-only" id="bottomNavLogin">
+        <span class="nav-icon">👤</span>
         <span>Account</span>
       </a>
     </div>
@@ -164,4 +186,3 @@
 </body>
 
 </html>
-

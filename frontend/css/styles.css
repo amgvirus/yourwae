@@ -309,9 +309,27 @@ textarea {
 /* JUMIA HOME LAYOUT */
 .home-main {
   display: block;
-  /* Strict Jumia Full Width */
   margin-top: 16px;
   padding-bottom: 40px;
+}
+
+.section-header-premium {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+.section-header-premium h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--secondary);
+}
+
+.see-all-link {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 14px;
 }
 
 .side-menu {
@@ -591,13 +609,198 @@ textarea {
 }
 
 .chip-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: var(--primary-light);
+  font-size: 24px;
+  box-shadow: inset 0 0 0 1px rgba(246, 139, 30, 0.1);
+}
+
+.category-chip span:not(.chip-icon) {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+/* ============== PREMIUM PROFILE PAGE ============== */
+.profile-grid-premium {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.premium-card {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 30px;
+  border: 1px solid var(--border-light);
+}
+
+.card-header {
+  margin-bottom: 24px;
+}
+
+.card-header h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-icon {
+  font-size: 1.6rem;
+}
+
+.card-header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-top: 4px;
+}
+
+.premium-form .form-row-premium {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group-premium {
+  margin-bottom: 20px;
+}
+
+.form-group-premium label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+.form-group-premium input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: var(--transition-smooth);
+}
+
+.form-group-premium input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(246, 139, 30, 0.1);
+}
+
+.disabled-input {
+  background: var(--bg-light);
+  cursor: not-allowed;
+  color: var(--text-muted);
+}
+
+.input-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.user-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.large-avatar {
+  width: 72px;
+  height: 72px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.user-meta-data h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 20px 0;
+}
+
+.p-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.p-info-item .label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.p-info-item .value {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.action-card {
+  margin-top: 16px;
+  padding: 20px;
+}
+
+.danger-hover:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(230, 22, 1, 0.05);
+}
+
+.shadow-hover {
+  box-shadow: 0 4px 10px rgba(246, 139, 30, 0.15);
+}
+
+.shadow-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(246, 139, 30, 0.25);
+}
+
+@media (max-width: 768px) {
+  .profile-grid-premium {
+    grid-template-columns: 1fr;
+  }
+
+  .premium-form .form-row-premium {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ============== CATEGORIES PAGE ============== */
@@ -661,6 +864,72 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* ============== PREMIUM HERO SECTION ============== */
+.hero-section-premium {
+  padding: 40px 0;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  margin-bottom: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.hero-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  background: linear-gradient(135deg, var(--primary-light) 0%, #ffffff 100%);
+  min-height: 280px;
+  border-radius: var(--radius-md);
+}
+
+.hero-content-text {
+  flex: 1;
+  max-width: 500px;
+}
+
+.hero-content-text h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--secondary);
+  line-height: 1.1;
+  margin-bottom: 16px;
+  letter-spacing: -1px;
+}
+
+.hero-content-text p {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  font-weight: 400;
+}
+
+.hero-visual {
+  flex: 0 0 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-emoji {
+  font-size: 120px;
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 /* ============== HERO / PROMO BANNER ============== */
@@ -1443,6 +1712,7 @@ textarea {
   line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1454,6 +1724,7 @@ textarea {
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -3008,9 +3279,28 @@ body.from-login .seller-section {
     display: block;
   }
 
-  /* Hide desktop nav items */
+  /* Hide desktop nav items except Cart */
   .navbar-menu {
     display: none;
+  }
+
+  .navbar-actions {
+    display: flex;
+    order: 3;
+  }
+
+  .nav-cart .cart-label {
+    display: none;
+  }
+
+  .nav-cart {
+    border: none;
+    padding: 8px;
+    background: transparent;
+  }
+
+  .nav-cart .nav-icon {
+    font-size: 24px;
   }
 
   .category-preview-grid {
@@ -3030,12 +3320,29 @@ body.from-login .seller-section {
   }
 
   /* Hero */
-  .hero {
-    padding: 32px 16px;
+  .hero-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 30px 20px;
+    min-height: auto;
   }
 
-  .hero-content h1 {
-    font-size: 1.5rem;
+  .hero-content-text h1 {
+    font-size: 1.8rem;
+  }
+
+  .hero-content-text p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+
+  .hero-visual {
+    margin-top: 20px;
+    flex: 0 0 auto;
+  }
+
+  .hero-emoji {
+    font-size: 80px;
   }
 
   .hero-content p {

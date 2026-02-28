@@ -50,17 +50,19 @@
         <input type="text" placeholder="Search categories..." disabled>
       </div>
 
+      <div class="navbar-actions">
+        <a href="cart.html" class="nav-cart" aria-label="Cart">
+          <span class="nav-icon">🛒</span>
+          <span class="cart-label">Cart</span>
+        </a>
+      </div>
+
       <div class="navbar-menu">
         <a href="index.html" class="nav-link">Home</a>
         <a href="categories.html" class="nav-link active">Categories</a>
         <a href="orders.html" class="nav-link">Orders</a>
         <a href="profile.html" class="nav-link auth-user-only" style="display:none;" id="topNavAccount">Account</a>
         <a href="login.html" class="nav-link auth-guest-only" id="topNavLogin">Login</a>
-
-        <a href="cart.html" class="nav-cart" aria-label="Cart">
-          <span class="nav-icon">🛒</span>
-          <span class="cart-label">Cart</span>
-        </a>
       </div>
     </div>
   </nav>
@@ -140,9 +142,12 @@
         <span class="nav-icon">📦</span>
         <span>Orders</span>
       </a>
-      <a href="login.html" class="bottom-nav-item" id="bottomNavAccount">
-        <span class="nav-icon auth-guest-only">👤</span>
-        <span class="nav-icon auth-user-only" style="display:none;">👤</span>
+      <a href="profile.html" class="bottom-nav-item auth-user-only" style="display:none;" id="bottomNavAccount">
+        <span class="nav-icon">👤</span>
+        <span>Account</span>
+      </a>
+      <a href="login.html" class="bottom-nav-item auth-guest-only" id="bottomNavLogin">
+        <span class="nav-icon">👤</span>
         <span>Account</span>
       </a>
     </div>
@@ -153,4 +158,3 @@
 </body>
 
 </html>
-

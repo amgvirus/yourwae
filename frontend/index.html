@@ -54,17 +54,19 @@
         <button class="search-btn" onclick="handleSearch()">SEARCH</button>
       </div>
 
+      <div class="navbar-actions">
+        <a href="cart.html" class="nav-cart" aria-label="Cart">
+          <span class="nav-icon">🛒</span>
+          <span class="cart-label">Cart</span>
+        </a>
+      </div>
+
       <div class="navbar-menu">
         <a href="index.html" class="nav-link active">Home</a>
         <a href="categories.html" class="nav-link">Categories</a>
         <a href="orders.html" class="nav-link">Orders</a>
         <a href="profile.html" class="nav-link auth-user-only" style="display:none;" id="topNavAccount">Account</a>
         <a href="login.html" class="nav-link auth-guest-only" id="topNavLogin">Login</a>
-
-        <a href="cart.html" class="nav-cart" aria-label="Cart">
-          <span class="nav-icon">🛒</span>
-          <span class="cart-label">Cart</span>
-        </a>
       </div>
     </div>
   </nav>
@@ -93,15 +95,16 @@
 
     <!-- Main Content Area -->
     <div class="home-content">
-      <!-- Top Carousel Section -->
-      <section class="carousel-section">
-        <div class="hero-carousel">
-          <div class="carousel-slide active" style="background: var(--primary-light);">
-            <div class="slide-info">
-              <h1>Official Store</h1>
-              <p>Shop top brands and get fast delivery nationwide</p>
-            </div>
-            <div class="slide-image">🏷️</div>
+      <!-- Hero Section -->
+      <section class="hero-section-premium">
+        <div class="hero-banner">
+          <div class="hero-content-text">
+            <h1>Shop Local, Get it Fast</h1>
+            <p>Order from your favourite local shop and get delivery fast</p>
+            <button class="btn btn-primary" onclick="window.location.href='stores.html'">Shop Now</button>
+          </div>
+          <div class="hero-visual">
+            <span class="hero-emoji">🚚</span>
           </div>
         </div>
       </section>
@@ -114,11 +117,16 @@
         </div>
 
         <div class="category-preview-grid">
-          <a class="category-chip" href="stores.html?cat=grocery"><span class="chip-icon">🧺</span><span>Grocery</span></a>
-          <a class="category-chip" href="stores.html?cat=pharmacy"><span class="chip-icon">💊</span><span>Pharmacy</span></a>
-          <a class="category-chip" href="stores.html?cat=electronics"><span class="chip-icon">📱</span><span>Electronics</span></a>
-          <a class="category-chip" href="stores.html?cat=fashion"><span class="chip-icon">👗</span><span>Fashion</span></a>
-          <a class="category-chip" href="stores.html?cat=beauty"><span class="chip-icon">🧴</span><span>Beauty</span></a>
+          <a class="category-chip" href="stores.html?cat=grocery"><span
+              class="chip-icon">🧺</span><span>Grocery</span></a>
+          <a class="category-chip" href="stores.html?cat=pharmacy"><span
+              class="chip-icon">💊</span><span>Pharmacy</span></a>
+          <a class="category-chip" href="stores.html?cat=electronics"><span
+              class="chip-icon">📱</span><span>Electronics</span></a>
+          <a class="category-chip" href="stores.html?cat=fashion"><span
+              class="chip-icon">👗</span><span>Fashion</span></a>
+          <a class="category-chip" href="stores.html?cat=beauty"><span
+              class="chip-icon">🧴</span><span>Beauty</span></a>
           <a class="category-chip" href="stores.html?cat=home"><span class="chip-icon">🏠</span><span>Home</span></a>
           <a class="category-chip" href="stores.html?cat=food"><span class="chip-icon">🍔</span><span>Food</span></a>
           <a class="category-chip" href="stores.html?cat=other"><span class="chip-icon">✨</span><span>More</span></a>
@@ -212,9 +220,12 @@
         <span class="nav-icon">📦</span>
         <span>Orders</span>
       </a>
-      <a href="login.html" class="bottom-nav-item" id="bottomNavAccount">
-        <span class="nav-icon auth-guest-only">👤</span>
-        <span class="nav-icon auth-user-only" style="display:none;">👤</span>
+      <a href="profile.html" class="bottom-nav-item auth-user-only" style="display:none;" id="bottomNavAccount">
+        <span class="nav-icon">👤</span>
+        <span>Account</span>
+      </a>
+      <a href="login.html" class="bottom-nav-item auth-guest-only" id="bottomNavLogin">
+        <span class="nav-icon">👤</span>
         <span>Account</span>
       </a>
     </div>
