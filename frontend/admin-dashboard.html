@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard - YourWae</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .admin-main {
+            padding-top: 40px;
+            padding-bottom: 100px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .admin-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 8px 0;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .admin-section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .data-table-wrapper {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.03);
+            padding: 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 16px;
+            border-top: 1px solid var(--border-light);
+            font-size: 0.95rem;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-warning {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .badge-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .action-icon {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: var(--transition-smooth);
+        }
+
+        .action-icon:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .tab-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 12px 24px;
+            border-radius: var(--radius-full);
+            font-weight: 700;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            transition: var(--transition-smooth);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(93, 93, 255, 0.3);
+        }
+    </style>
+</head>
+
+<body class="bg-page">
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <a href="index.html"><strong>Your<span class="brand-wae">Wae</span> Admin</strong></a>
+            </div>
+            <div class="navbar-menu">
+                <a href="index.html" class="nav-link">Main Site</a>
+                <button class="btn btn-outline btn-sm"
+                    onclick="window.fastGetApp.logout().then(() => window.location.href='login.html')">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container admin-main">
+        <header class="admin-section">
+            <h1>🚀 System Overview</h1>
+            <p style="color: var(--text-muted);">Welcome back, Super Admin. Here's how the platform is performing today.
+            </p>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="admin-card">
+                <span class="stat-icon">📈</span>
+                <p class="stat-label">Total Revenue</p>
+                <p class="stat-value" id="statRevenue">₵0.00</p>
+            </div>
+            <div class="admin-card">
+                <span class="stat-icon">📦</span>
+                <p class="stat-label">Active Orders</p>
+                <p class="stat-value" id="statOrders">0</p>
+            </div>
+            <div class="admin-card">
+                <span class="stat-icon">🏪</span>
+                <p class="stat-label">Total Stores</p>
+                <p class="stat-value" id="statStores">0</p>
+            </div>
+            <div class="admin-card">
+                <span class="stat-icon">👥</span>
+                <p class="stat-label">Total Users</p>
+                <p class="stat-value" id="statUsers">0</p>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('stores')">Store Management</button>
+            <button class="tab-btn" onclick="switchTab('users')">User Management</button>
+            <button class="tab-btn" onclick="switchTab('orders')">Global Orders</button>
+            </header>
+
+            <!-- Content Sections -->
+            <section id="storesSection" class="admin-section">
+                <div class="section-title">
+                    <span>🏪</span>
+                    <h2>Store Management</h2>
+                </div>
+                <div class="data-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Store Name</th>
+                                <th>Owner</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="storesTableBody">
+                            <!-- Loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="usersSection" class="admin-section" style="display: none;">
+                <div class="section-title">
+                    <span>👥</span>
+                    <h2>User Management</h2>
+                </div>
+                <div class="data-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="ordersSection" class="admin-section" style="display: none;">
+                <div class="section-title">
+                    <span>📦</span>
+                    <h2>Global Orders</h2>
+                </div>
+                <div class="data-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Store</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+    <script src="js/admin-dashboard.js"></script>
+</body>
+
+</html>

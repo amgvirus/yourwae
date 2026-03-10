@@ -57,7 +57,8 @@ async function loadProducts() {
         .order('created_at', { ascending: false });
 
     if (error) {
-        container.innerHTML = '<p>Error loading products.</p>';
+        console.error('Products load error:', error);
+        container.innerHTML = `<p style="color: red;">Error loading products: ${error.message}</p>`;
         return;
     }
 
@@ -312,7 +313,13 @@ async function handleProductSubmit(e) {
     };
 
 
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.textContent;
+
     try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
         let result;
         if (productId) {
             result = await supabaseClient
@@ -325,11 +332,16 @@ async function handleProductSubmit(e) {
                 .insert([formData]);
         }
 
-        if (result.error) throw result.error;
-        alert(productId ? 'Product updated!' : 'Product added!');
+        if (result && result.error) throw result.error;
+
+        alert(productId ? 'Product updated successfully!' : 'Product added successfully!');
         closeProductModal();
         loadProducts();
     } catch (err) {
-        alert('Error saving product: ' + err.message);
+        console.error('Save product error:', err);
+        alert('Error saving product: ' + (err.message || 'Unknown error'));
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
     }
 }

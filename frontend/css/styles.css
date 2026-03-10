@@ -3895,3 +3895,134 @@ body.from-login .seller-section {
     padding: 16px 12px;
   }
 }
+
+/* Tracking Timeline - Glassy Style */
+.tracking-timeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 40px 0;
+  padding: 0 10px;
+  position: relative;
+}
+
+.timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 2px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--text-muted);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-step.active .step-circle {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  box-shadow: 0 8px 20px rgba(93, 93, 255, 0.3);
+}
+
+.timeline-step.current .step-circle {
+  box-shadow: 0 0 0 6px var(--primary-light);
+  animation: pulse-tracking 2s infinite;
+}
+
+.step-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.timeline-step.active .step-label {
+  color: var(--primary);
+}
+
+.timeline-line {
+  position: absolute;
+  top: 18px;
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  background: var(--border-light);
+  z-index: 1;
+}
+
+.timeline-line-active {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.8s ease;
+}
+
+@keyframes pulse-tracking {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(93, 93, 255, 0.4);
+  }
+
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 12px rgba(93, 93, 255, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(93, 93, 255, 0);
+  }
+}
+
+.glassy-modal {
+  background: var(--glass-bg);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid var(--glass-border);
+  border-radius: 32px;
+  box-shadow: var(--glass-shadow);
+  padding: 32px;
+}
+
+.tracking-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.tracking-header h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.delivery-estimate {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.delivery-estimate h4 {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

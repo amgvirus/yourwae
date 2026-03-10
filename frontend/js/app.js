@@ -34,6 +34,7 @@ const { createClient } = supabase;
 let supabaseClient;
 try {
   supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  window.supabaseClient = supabaseClient; // Explicit global for other scripts
 } catch (initErr) {
   console.error('Supabase createClient failed:', initErr.message);
   // Create a stub client so downstream code doesn't throw ReferenceErrors
@@ -59,7 +60,14 @@ try {
       limit: function () { return this; },
       order: function () { return this; },
     }),
+    storage: {
+      from: () => ({
+        upload: async () => ({ data: null, error: new Error('Supabase storage not initialised') }),
+        getPublicUrl: () => ({ data: { publicUrl: '' } })
+      })
+    }
   };
+  window.supabaseClient = supabaseClient;
 }
 
 // Normalization helper (can stay)

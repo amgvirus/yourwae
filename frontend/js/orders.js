@@ -39,7 +39,7 @@ function displayOrders() {
     <div class="order-card" onclick="openOrderModal('${order.id}')">
       <div class="order-header">
         <div class="order-number">
-          <h3>${order.order_number}</h3>
+          <h3>Order #${order.order_number.slice(-6)}</h3>
           <p>${new Date(order.created_at).toLocaleDateString()}</p>
         </div>
         <div class="order-status">
@@ -48,16 +48,13 @@ function displayOrders() {
       </div>
 
       <div class="order-details">
-        <p><strong>Store:</strong> ${order.stores?.store_name || 'Unknown'}</p>
-        <p><strong>Items:</strong> ${order.items?.length || 0}</p>
+        <p><strong>Store:</strong> ${order.stores?.store_name || 'YourWae Store'}</p>
         <p><strong>Total:</strong> ₵${(order.total_amount || 0).toFixed(2)}</p>
       </div>
 
-      <div class="order-delivery">
-        ${order.deliveries ? `
-          <p><strong>Delivery Status:</strong> ${order.deliveries[0]?.status.replace('_', ' ').toUpperCase() || 'Pending'}</p>
-          <p><strong>Est. Delivery:</strong> ${order.estimated_delivery_time ? new Date(order.estimated_delivery_time).toLocaleString() : 'TBD'}</p>
-        ` : ''}
+      <div class="order-footer-actions">
+        <button class="btn btn-primary btn-sm" onclick="trackOrder('${order.id}', event)">Track Order</button>
+        <button class="btn btn-outline btn-sm">View Details</button>
       </div>
     </div>
   `).join('');
@@ -78,89 +75,57 @@ function filterOrders(status) {
 
 // Open order modal
 function openOrderModal(orderId) {
+  // ... existing modal logic if still needed, but we'll focus on tracking
+}
+
+function trackOrder(orderId, event) {
+  if (event) event.stopPropagation();
   const order = allOrders.find(o => o.id === orderId);
   if (!order) return;
 
-  const content = document.getElementById('modalOrderContent');
-  content.innerHTML = `
-    <div class="order-modal-content">
-      <div class="order-section">
-        <h3>Order Information</h3>
-        <p><strong>Order Number:</strong> ${order.order_number}</p>
-        <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
-        <p><strong>Status:</strong> <span class="status-badge status-${order.status}">${order.status.replace('_', ' ').toUpperCase()}</span></p>
-        <p><strong>Payment Status:</strong> <span class="status-badge status-${order.payment_status}">${order.payment_status.replace('_', ' ').toUpperCase()}</span></p>
-      </div>
+  const modal = document.getElementById('trackingModal');
+  const container = document.getElementById('trackingContent');
 
-      <div class="order-section">
-        <h3>Items</h3>
-        ${order.items?.map(item => `
-          <div class="order-item">
-            <p><strong>${item.product_name}</strong> x ${item.quantity}</p>
-            <p>₵${(item.price * item.quantity).toFixed(2)}</p>
-          </div>
-        `).join('') || '<p>No items</p>'}
-      </div>
+  const statuses = ['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered'];
+  const currentIdx = statuses.indexOf(order.status);
 
-      <div class="order-section">
-        <h3>Delivery Address</h3>
-        <p>${order.delivery_address?.street || 'N/A'}</p>
-        <p>${order.delivery_address?.city || 'N/A'}, ${order.delivery_address?.state || 'N/A'} ${order.delivery_address?.zip_code || 'N/A'}</p>
-      </div>
+  container.innerHTML = `
+        <div class="tracking-viz">
+            <div class="tracking-header">
+                <h3>Tracking Order #${order.order_number.slice(-6)}</h3>
+                <p>Status: <span class="badge status-${order.status}">${order.status.replace('_', ' ')}</span></p>
+            </div>
+            
+            <div class="tracking-timeline">
+                ${statuses.map((s, i) => `
+                    <div class="timeline-step ${i <= currentIdx ? 'active' : ''} ${i === currentIdx ? 'current' : ''}">
+                        <div class="step-circle">${i < currentIdx ? '✓' : (i === currentIdx ? '●' : '')}</div>
+                        <div class="step-label">${s.replace('_', ' ')}</div>
+                    </div>
+                `).join('<div class="timeline-line"></div>')}
+            </div>
 
-      <div class="order-section">
-        <h3>Amount Summary</h3>
-        <div class="summary-item">
-          <span>Subtotal:</span>
-          <span>₵${(order.subtotal || 0).toFixed(2)}</span>
+            <div class="delivery-estimate admin-card" style="margin-top: 30px;">
+                <h4>🚚 Delivery Information</h4>
+                <p>Estimated Arrival: <strong>${order.estimated_delivery_time ? new Date(order.estimated_delivery_time).toLocaleTimeString() : 'Calculating...'}</strong></p>
+                <p>Delivery to: <strong>${order.delivery_address?.street || 'Default Address'}</strong></p>
+            </div>
         </div>
-        <div class="summary-item">
-          <span>Tax:</span>
-          <span>₵${(order.tax || 0).toFixed(2)}</span>
-        </div>
-        <div class="summary-item">
-          <span>Delivery Fee:</span>
-          <span>₵${(order.delivery_fee || 0).toFixed(2)}</span>
-        </div>
-        <div class="summary-item total">
-          <span>Total:</span>
-          <span>₵${(order.total_amount || 0).toFixed(2)}</span>
-        </div>
-      </div>
+    `;
 
-      ${order.deliveries ? `
-        <div class="order-section">
-          <h3>Delivery Tracking</h3>
-          <p><strong>Status:</strong> ${order.deliveries[0]?.status.replace('_', ' ').toUpperCase() || 'Pending'}</p>
-          <p><strong>Est. Delivery:</strong> ${order.deliveries[0]?.estimated_delivery_time ? new Date(order.deliveries[0].estimated_delivery_time).toLocaleString() : 'TBD'}</p>
-        </div>
-      ` : ''}
-
-      ${order.rating ? `
-        <div class="order-section">
-          <h3>Your Rating</h3>
-          <p><strong>Rating:</strong> ${order.rating}/5</p>
-          ${order.review ? `<p><strong>Review:</strong> ${order.review}</p>` : ''}
-        </div>
-      ` : ''}
-    </div>
-  `;
-
-  document.getElementById('orderModal').style.display = 'block';
+  modal.style.display = 'block';
 }
 
-// Close order modal
-function closeOrderModal() {
-  document.getElementById('orderModal').style.display = 'none';
+function closeTrackingModal() {
+  document.getElementById('trackingModal').style.display = 'none';
 }
-
 
 // Close modal when clicking outside
 window.onclick = function (event) {
   const modal = document.getElementById('orderModal');
-  if (event.target === modal) {
-    closeOrderModal();
-  }
+  const trackingModal = document.getElementById('trackingModal');
+  if (event.target === modal) closeOrderModal();
+  if (event.target === trackingModal) closeTrackingModal();
 };
 
 // Load orders on page load
