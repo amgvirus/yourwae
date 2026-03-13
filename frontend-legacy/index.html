@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YourWae - Shop Local, Delivered Fast</title>
+  <meta name="description"
+    content="YourWae - Your hyperlocal e-commerce platform. Order from local stores and get delivery in minutes.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="bg-page">
+  <!-- Announcement Bar Removed for Strict Jumia Look -->
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" id="menuOverlay" onclick="closeMobileMenu()"></div>
+
+  <!-- Mobile Slide Menu -->
+  <nav class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <div class="user-avatar" id="mobileUserAvatar">👤</div>
+      <div class="user-info">
+        <div class="user-name" id="mobileUserName">Welcome</div>
+        <div class="user-email" id="mobileUserEmail">Sign in to your account</div>
+      </div>
+    </div>
+    <ul class="mobile-menu-links">
+      <li><a href="index.html" class="active"><span class="menu-icon">🏠</span> Home</a></li>
+      <li><a href="categories.html"><span class="menu-icon">🗂️</span> Categories</a></li>
+      <li><a href="orders.html"><span class="menu-icon">📦</span> Orders</a></li>
+      <li><a href="profile.html" class="auth-user-only" style="display:none;"><span class="menu-icon">👤</span>
+          Account</a></li>
+      <li class="auth-guest-only"><a href="login.html" id="mobileLoginLink"><span class="menu-icon">🔑</span> Login</a>
+      </li>
+      <li id="mobileLogoutItem" class="auth-user-only" style="display:none;"><a href="#" onclick="handleLogout()"><span
+            class="menu-icon">🚪</span> Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- Top Navbar (Jumia Style) -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </button>
+
+      <div class="navbar-logo">
+        <a href="index.html"><strong>Your<span class="brand-wae">Wae</span></strong></a>
+      </div>
+
+      <div class="navbar-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search products, brands and categories">
+        <button class="search-btn" onclick="handleSearch()">SEARCH</button>
+      </div>
+
+      <div class="navbar-actions">
+        <a href="cart.html" class="nav-cart" aria-label="Cart">
+          <span class="nav-icon">🛒</span>
+          <span class="cart-label">Cart</span>
+        </a>
+      </div>
+
+      <div class="navbar-menu">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="categories.html" class="nav-link">Categories</a>
+        <a href="orders.html" class="nav-link">Orders</a>
+        <a href="profile.html" class="nav-link auth-user-only" style="display:none;" id="topNavAccount">Account</a>
+        <a href="login.html" class="nav-link auth-guest-only" id="topNavLogin">Login</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Home Layout -->
+  <main class="home-main container">
+    <!-- Sidebar Categories (Hidden as requested) -->
+    <!--
+    <aside class="side-menu">
+      <ul class="side-menu-list">
+        <li><a href="stores.html?cat=grocery"><span>🧺</span> Supermarket</a></li>
+        <li><a href="stores.html?cat=pharmacy"><span>💊</span> Health & Beauty</a></li>
+        <li><a href="stores.html?cat=home"><span>🏠</span> Home & Office</a></li>
+        <li><a href="stores.html?cat=electronics"><span>💻</span> Phone & Tablets</a></li>
+        <li><a href="stores.html?cat=electronics"><span>📺</span> Computing</a></li>
+        <li><a href="stores.html?cat=electronics"><span>🎧</span> Electronics</a></li>
+        <li><a href="stores.html?cat=fashion"><span>👗</span> Fashion</a></li>
+        <li><a href="stores.html?cat=food"><span>🍔</span> Restaurants</a></li>
+        <li><a href="stores.html?cat=grocery"><span>🍼</span> Baby Products</a></li>
+        <li><a href="stores.html?cat=grocery"><span>🎮</span> Gaming</a></li>
+        <li><a href="stores.html?cat=grocery"><span>⚽</span> Sporting Goods</a></li>
+        <li><a href="stores.html?cat=grocery"><span>🚗</span> Automobile</a></li>
+      </ul>
+    </aside>
+    -->
+
+    <!-- Main Content Area -->
+    <div class="home-content">
+      <!-- Hero Section -->
+      <section class="hero-section-premium">
+        <div class="hero-banner">
+          <div class="hero-content-text">
+            <h1>Shop Local, Get it Fast</h1>
+            <p>Order from your favourite local shop and get delivery fast</p>
+            <button class="btn btn-primary" onclick="window.location.href='stores.html'">Shop Now</button>
+          </div>
+          <div class="hero-visual">
+            <span class="hero-emoji">🚚</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Categories Preview -->
+      <section class="home-categories">
+        <div class="section-header-premium" style="margin-bottom: 12px;">
+          <h2>Shop by Category</h2>
+          <a class="see-all-link" href="categories.html">See all</a>
+        </div>
+
+        <div class="category-preview-grid">
+          <a class="category-chip" href="stores.html?cat=grocery"><span
+              class="chip-icon">🧺</span><span>Grocery</span></a>
+          <a class="category-chip" href="stores.html?cat=pharmacy"><span
+              class="chip-icon">💊</span><span>Pharmacy</span></a>
+          <a class="category-chip" href="stores.html?cat=electronics"><span
+              class="chip-icon">📱</span><span>Electronics</span></a>
+          <a class="category-chip" href="stores.html?cat=fashion"><span
+              class="chip-icon">👗</span><span>Fashion</span></a>
+          <a class="category-chip" href="stores.html?cat=beauty"><span
+              class="chip-icon">🧴</span><span>Beauty</span></a>
+          <a class="category-chip" href="stores.html?cat=home"><span class="chip-icon">🏠</span><span>Home</span></a>
+          <a class="category-chip" href="stores.html?cat=food"><span class="chip-icon">🍔</span><span>Food</span></a>
+          <a class="category-chip" href="stores.html?cat=other"><span class="chip-icon">✨</span><span>More</span></a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- How It Works - Premium Design -->
+  <section class="how-it-works-premium">
+    <div class="container">
+      <div class="section-header-premium centered">
+        <span class="section-badge">Simple Process</span>
+        <h2>How YourWae Works</h2>
+        <p>Get what you need in three easy steps</p>
+      </div>
+
+      <div class="how-grid-premium">
+        <!-- Step 1 -->
+        <div class="how-card">
+          <div class="step-indicator">01</div>
+          <div class="how-icon-wrapper blue">
+            <span>🏪</span>
+          </div>
+          <h4>Stores Join Us</h4>
+          <p>Local businesses list their best products on our premium platform.</p>
+          <div class="how-card-line"></div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="how-card">
+          <div class="step-indicator">02</div>
+          <div class="how-icon-wrapper orange">
+            <span>🛒</span>
+          </div>
+          <h4>You Shop & Pay</h4>
+          <p>Browse through categories and add items to your secure cart.</p>
+          <div class="how-card-line"></div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="how-card">
+          <div class="step-indicator">03</div>
+          <div class="how-icon-wrapper green">
+            <span>⚡</span>
+          </div>
+          <h4>Fast Delivery</h4>
+          <p>Our riders pick up your order and deliver it to your doorstep in minutes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seller CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-banner-premium">
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 8px;">For new businesses YourWae?</p>
+        <button class="btn btn-primary btn-full" onclick="window.location.href='signup.html?role=store'"
+          style="margin-bottom: 12px; height: 48px; font-size: 16px;">Register Your Store</button>
+        <a href="login.html" class="auth-guest-only"
+          style="color: var(--text-primary); font-size: 13px; font-weight: 500;">Sign in for
+          customers via YourWae</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Stores Grid (Bottom of Home) -->
+  <section class="featured-stores container" style="margin-top: 16px;">
+    <div class="section-header-jumia">
+      <h2>Featured Stores</h2>
+      <a href="stores.html">SEE ALL ></a>
+    </div>
+    <div id="storesContainer" class="stores-grid-jumia">
+      <div class="loading">Finding stores...</div>
+    </div>
+  </section>
+
+  <!-- Premium Footer -->
+  <footer class="footer-premium">
+    <div class="container">
+      <div class="footer-main-grid">
+        <!-- Branding & About -->
+        <div class="footer-col branding-col">
+          <a href="index.html" class="footer-logo">Your<span class="brand-wae">Wae</span></a>
+          <p class="footer-description">
+            YourWae is your premium hyperlocal marketplace, connecting you with the best local shops for lightning-fast
+            delivery.
+          </p>
+          <div class="social-links-premium">
+            <a href="#" class="social-circle">fb</a>
+            <a href="#" class="social-circle">tw</a>
+            <a href="#" class="social-circle">ig</a>
+            <a href="#" class="social-circle">li</a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="footer-col">
+          <h5 class="footer-title">Marketplace</h5>
+          <ul class="footer-links-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="stores.html">All Stores</a></li>
+            <li><a href="categories.html">Categories</a></li>
+            <li><a href="signup.html?role=store">Become a Seller</a></li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div class="footer-col">
+          <h5 class="footer-title">Support</h5>
+          <ul class="footer-links-list">
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Safety Tips</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Terms & Conditions</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact & Download -->
+        <div class="footer-col contact-col">
+          <h5 class="footer-title">Contact Us</h5>
+          <div class="contact-methods">
+            <div class="contact-item">
+              <span class="contact-icon">📞</span>
+              <span>0599882214</span>
+            </div>
+            <div class="contact-item">
+              <span class="contact-icon">✉️</span>
+              <span>zhilakcodes@gmail.com</span>
+            </div>
+          </div>
+          <div class="app-badges">
+            <div class="app-badge-placeholder">App Store</div>
+            <div class="app-badge-placeholder">Google Play</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom-premium">
+        <p>&copy; 2026 Your<span class="brand-wae">Wae</span>. All rights reserved.</p>
+        <div class="payment-methods-icons">
+          <span>💳</span><span>📱</span><span>💵</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-items">
+      <a href="index.html" class="bottom-nav-item active">
+        <span class="nav-icon">🏠</span>
+        <span>Home</span>
+      </a>
+      <a href="categories.html" class="bottom-nav-item">
+        <span class="nav-icon">🗂️</span>
+        <span>Categories</span>
+      </a>
+      <a href="orders.html" class="bottom-nav-item">
+        <span class="nav-icon">📦</span>
+        <span>Orders</span>
+      </a>
+      <a href="profile.html" class="bottom-nav-item auth-user-only" style="display:none;" id="bottomNavAccount">
+        <span class="nav-icon">👤</span>
+        <span>Account</span>
+      </a>
+      <a href="login.html" class="bottom-nav-item auth-guest-only" id="bottomNavLogin">
+        <span class="nav-icon">👤</span>
+        <span>Account</span>
+      </a>
+    </div>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/index.js"></script>
+</body>
+
+</html>
