@@ -52,10 +52,10 @@ const Cart = () => {
           <Link to="/stores" className="btn btn-primary" style={{ marginTop: '20px' }}>Start Shopping</Link>
         </div>
       ) : (
-        <div className="cart-content" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px' }}>
+        <div className="cart-content">
           <div className="cart-items-list">
             {cartItems.map(item => (
-              <div key={item.id} className="premium-card" style={{ marginBottom: '16px', display: 'flex', gap: '20px', alignItems: 'center' }}>
+              <div key={item.id} className="premium-card cart-item-card" style={{ marginBottom: '16px', display: 'flex', gap: '20px', alignItems: 'center' }}>
                 <img 
                   src={item.products?.image || 'https://via.placeholder.com/100'} 
                   alt={item.products?.name} 

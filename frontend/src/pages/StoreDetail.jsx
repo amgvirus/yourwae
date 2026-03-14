@@ -27,7 +27,7 @@ const StoreDetail = () => {
   return (
     <div className="store-detail-page">
       <header className="store-detail-header" style={{ marginBottom: '32px' }}>
-        <div className="premium-card" style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+        <div className="premium-card store-detail-header-card" style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
           <img 
             src={store.image || 'https://via.placeholder.com/150'} 
             alt={store.name} 
@@ -43,7 +43,7 @@ const StoreDetail = () => {
 
       <section className="products-section">
         <h2 style={{ marginBottom: '20px' }}>Our Products</h2>
-        <div className="products-grid" style={{ 
+        <div className="products-grid products-grid-premium" style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', 
           gap: '24px' 

@@ -93,7 +93,7 @@ const Checkout = () => {
         <h2>Checkout</h2>
       </header>
 
-      <form className="checkout-content" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '40px' }} onSubmit={handlePlaceOrder}>
+      <form className="checkout-content" onSubmit={handlePlaceOrder}>
         <div className="delivery-info">
           <div className="premium-card">
             <h3>Delivery Details</h3>

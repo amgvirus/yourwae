@@ -210,7 +210,7 @@ const SuperAdmin = () => {
         ))}
       </div>
 
-      <div className="admin-tables" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', '@media (max-width: 768px)': { gridTemplateColumns: '1fr' } }}>
+      <div className="admin-tables">
         {/* Recent Registrations Table */}
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="premium-card glass-card">
           <div className="card-header" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px' }}>

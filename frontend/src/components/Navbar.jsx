@@ -44,6 +44,16 @@ const Navbar = () => {
         </form>
 
         <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
+          <form className="mobile-search-form" onSubmit={handleSearch}>
+            <input 
+              type="text" 
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button type="submit">Go</button>
+          </form>
+
           <Link to="/" className="nav-link">Home</Link>
           
           {role === 'rider' && (
