@@ -66,6 +66,24 @@ const SuperAdmin = () => {
     fetchAdminData();
   }, [supabase]);
 
+  // Global Orders State for Admin
+  const [globalOrders, setGlobalOrders] = useState([]);
+  
+  useEffect(() => {
+    const fetchGlobalOrders = async () => {
+      const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(10);
+      if (data) setGlobalOrders(data);
+    };
+    fetchGlobalOrders();
+
+    const subscription = supabase
+      .channel('admin:orders')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchGlobalOrders)
+      .subscribe();
+      
+    return () => { supabase.removeChannel(subscription); };
+  }, [supabase]);
+
   const handleAddRider = async (e) => {
     e.preventDefault();
     setRiderLoading(true);
@@ -302,6 +320,51 @@ const SuperAdmin = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Global Orders Tracking Table */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="premium-card glass-card" style={{ marginTop: '30px' }}>
+        <div className="card-header" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px' }}>
+          <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Activity size={20} color="var(--primary)" /> Global Active Orders
+          </h3>
+        </div>
+        
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ textAlign: 'left', color: 'var(--text-secondary)', fontSize: '13px', borderBottom: '1px solid var(--border)' }}>
+                <th style={{ padding: '12px 10px' }}>Order ID</th>
+                <th>Destination</th>
+                <th>Amount</th>
+                <th>Tracking Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {globalOrders.map((order) => (
+                <tr key={order.id} style={{ borderBottom: '1px solid var(--border-light)', transition: 'background 0.2s', background: order.status === 'delivering' ? 'rgba(93, 93, 255, 0.05)' : 'transparent' }} className="table-row-hover">
+                  <td style={{ padding: '15px 10px' }}>
+                    <span style={{ fontWeight: '800', fontFamily: 'monospace' }}>#{order.id.slice(0, 8)}</span>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{new Date(order.created_at).toLocaleTimeString()}</p>
+                  </td>
+                  <td>
+                    <p style={{ fontWeight: '600' }}>{order.delivery_address || 'N/A'}</p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{order.town}</p>
+                  </td>
+                  <td style={{ fontWeight: '700', color: 'var(--primary)' }}>₵{order.total_amount?.toFixed(2)}</td>
+                  <td>
+                    <span className={`status-badge status-${order.status || 'pending'}`}>
+                      {order.status || 'Pending'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {globalOrders.length === 0 && (
+                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>No recent orders to track.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
     </div>
   );
 };

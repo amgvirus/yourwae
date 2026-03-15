@@ -41,7 +41,17 @@ const SellerDashboard = () => {
     };
     
     fetchSellerData();
-  }, [user, supabase]);
+
+    if (user && storeData) {
+      const subscription = supabase
+        .channel('public:orders:seller')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `store_id=eq.${storeData.id}` }, payload => {
+          fetchSellerData(); // Simplistic refresh for all stats
+        })
+        .subscribe();
+      return () => { supabase.removeChannel(subscription); };
+    }
+  }, [user, supabase, storeData?.id]);
 
   if (loading) {
     return <div className="container centered" style={{ minHeight: '60vh' }}><div className="loading" /></div>;
@@ -83,8 +93,10 @@ const SellerDashboard = () => {
             </div>
             <TrendingUp size={20} color="var(--success)" />
           </div>
-          <h4 style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '5px' }}>Total Revenue</h4>
-          <p style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--secondary)' }}>₵0.00</p>
+          <h4 style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '5px' }}>Estimated Revenue</h4>
+          <p style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--secondary)' }}>
+            ₵{orders.reduce((sum, o) => sum + (o.total_amount || 0), 0).toFixed(2)}
+          </p>
         </motion.div>
 
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="premium-card glass-card">
@@ -93,7 +105,7 @@ const SellerDashboard = () => {
               <ShoppingBag size={24} color="var(--success)" />
             </div>
           </div>
-          <h4 style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '5px' }}>Total Orders</h4>
+          <h4 style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '5px' }}>Total Store Orders</h4>
           <p style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--secondary)' }}>{orders.length}</p>
         </motion.div>
 
@@ -103,7 +115,7 @@ const SellerDashboard = () => {
               <Package size={24} color="var(--warning)" />
             </div>
           </div>
-          <h4 style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '5px' }}>Total Products</h4>
+          <h4 style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '5px' }}>Active Products</h4>
           <p style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--secondary)' }}>{products.length}</p>
         </motion.div>
       </div>
@@ -112,7 +124,7 @@ const SellerDashboard = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="premium-card">
           <div className="card-header" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px' }}>
             <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ShoppingBag size={20} color="var(--primary)" /> Recent Orders
+              <ShoppingBag size={20} color="var(--primary)" /> Recent Incoming Orders
             </h3>
           </div>
           
@@ -125,22 +137,45 @@ const SellerDashboard = () => {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ textAlign: 'left', color: 'var(--text-secondary)', fontSize: '13px', borderBottom: '1px solid var(--border)' }}>
-                    <th style={{ padding: '12px 10px' }}>Order ID</th>
-                    <th>Date</th>
+                    <th style={{ padding: '12px 10px' }}>Order ID & Date</th>
+                    <th>Delivery Target</th>
                     <th>Amount</th>
                     <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.slice(0, 5).map(order => (
-                    <tr key={order.id} style={{ borderBottom: '1px solid var(--border-light)', transition: 'background 0.2s', cursor: 'pointer' }} className="table-row-hover">
-                      <td style={{ padding: '15px 10px', fontWeight: '600' }}>#{order.id.substring(0, 8)}</td>
-                      <td style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{new Date(order.created_at).toLocaleDateString()}</td>
-                      <td style={{ fontWeight: '700' }}>₵{order.total_amount?.toFixed(2)}</td>
+                  {orders.slice(0, 10).map(order => (
+                    <tr key={order.id} style={{ borderBottom: '1px solid var(--border-light)', transition: 'background 0.2s', background: order.status === 'pending' ? 'rgba(245, 158, 11, 0.05)' : 'transparent' }} className="table-row-hover">
+                      <td style={{ padding: '15px 10px' }}>
+                        <p style={{ fontWeight: '800', fontFamily: 'monospace' }}>#{order.id.substring(0, 8)}</p>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{new Date(order.created_at).toLocaleString()}</p>
+                      </td>
+                      <td>
+                        <p style={{ fontWeight: '600' }}>{order.delivery_address || 'N/A'}</p>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{order.town}</p>
+                      </td>
+                      <td style={{ fontWeight: '800', color: 'var(--primary)' }}>₵{order.total_amount?.toFixed(2)}</td>
                       <td>
                         <span className={`status-badge status-${order.status || 'pending'}`}>
                           {order.status || 'Pending'}
                         </span>
+                      </td>
+                      <td>
+                        {order.status === 'pending' ? (
+                          <button 
+                            onClick={async () => {
+                              const { error } = await supabase.from('orders').update({ status: 'confirmed' }).eq('id', order.id);
+                              if (!error) setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'confirmed' } : o));
+                            }}
+                            className="btn btn-primary" 
+                            style={{ padding: '6px 16px', fontSize: '12px', background: 'var(--success)' }}
+                          >
+                            Accept Order
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Assigned to Rider</span>
+                        )}
                       </td>
                     </tr>
                   ))}

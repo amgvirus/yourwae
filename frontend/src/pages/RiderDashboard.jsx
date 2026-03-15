@@ -261,7 +261,7 @@ const RiderDashboard = () => {
                     <Store size={16} color="var(--primary)" />
                   </div>
                   <p style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>Pick Up At</p>
-                  <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Local Grocery, {activeOrder.town}</p>
+                  <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Vendor Location</p>
                 </div>
 
                 <div style={{ position: 'relative' }}>
@@ -269,7 +269,8 @@ const RiderDashboard = () => {
                     <MapPin size={16} color="var(--success)" />
                   </div>
                   <p style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>Deliver To</p>
-                  <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Customer Address, {activeOrder.town}</p>
+                  <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{activeOrder.delivery_address}</p>
+                  <p style={{ color: 'var(--text-secondary)' }}>{activeOrder.town}</p>
                 </div>
               </div>
 
