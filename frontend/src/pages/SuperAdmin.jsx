@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Users, TrendingUp, Map, Briefcase, Activity, Store, Bike, PieChart, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -13,19 +14,29 @@ const supabaseAdmin = createClient(
 );
 
 const SuperAdmin = () => {
-  const { supabase, user } = useAuth();
+  const { supabase, user, role, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalSellers: 0,
     totalRiders: 0,
-    bestTown: 'Accra',
+    bestTown: '-',
     ordersThisMonth: 0,
-    activeRegions: 4,
+    activeRegions: 0,
     revenue: 0
   });
   const [recentUsers, setRecentUsers] = useState([]);
   const [towns, setTowns] = useState([]);
+  const [townChartData, setTownChartData] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Security Check
+  useEffect(() => {
+    if (!authLoading && role !== 'admin') {
+      navigate('/login');
+    }
+  }, [authLoading, role, navigate]);
   
   // Add Rider State
   const [showAddRider, setShowAddRider] = useState(false);
@@ -35,36 +46,59 @@ const SuperAdmin = () => {
 
   useEffect(() => {
     const fetchAdminData = async () => {
-      // Add realistic dummy/fetched stats
+      if (!user || role !== 'admin') return;
+
       const { count: userCount } = await supabase.from('users').select('*', { count: 'exact', head: true });
       const { count: orderCount } = await supabase.from('orders').select('*', { count: 'exact', head: true });
       const { data: stores } = await supabase.from('stores').select('*');
+      const { count: riderCount } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'rider');
       
-      // Fetch operational towns
+      const { data: recentUsersData } = await supabase.from('users').select('*').order('created_at', { ascending: false }).limit(5);
+      const { data: ordersData } = await supabase.from('orders').select('total_amount, town');
       const { data: townsData } = await supabase.from('towns').select('*');
+
       if (townsData) setTowns(townsData);
-      else setTowns([{name: 'Hohoe'}, {name: 'Ho'}, {name: 'Kpando'}]); // fallback
+      else setTowns([{name: 'Hohoe'}, {name: 'Ho'}, {name: 'Kpando'}]);
+
+      const totalRevenue = ordersData?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+      
+      const townFreq = {};
+      ordersData?.forEach(o => {
+        if (o.town) townFreq[o.town] = (townFreq[o.town] || 0) + 1;
+      });
+      
+      const sortedTowns = Object.entries(townFreq).sort((a,b) => b[1] - a[1]);
+      const bestTown = sortedTowns.length > 0 ? sortedTowns[0][0] : 'None';
+      const chartValues = sortedTowns.slice(0, 3).map(t => ({ town: t[0], value: Math.max(10, t[1] * 10) })); // Scaling logic to fit visual% if small
+      
+      if (chartValues.length === 0) {
+        chartValues.push({ town: 'Accra', value: 80 }, { town: 'Kumasi', value: 55 }, { town: 'Tema', value: 40 }); // Fallback for visual
+      }
+      setTownChartData(chartValues);
 
       setStats({
-        totalUsers: userCount || 24,
-        totalSellers: stores?.length || 8,
-        totalRiders: 15,
-        bestTown: 'Accra',
-        ordersThisMonth: orderCount || 102,
-        activeRegions: 5,
-        revenue: 14500.50
+        totalUsers: userCount || 0,
+        totalSellers: stores?.length || 0,
+        totalRiders: riderCount || 0,
+        bestTown,
+        ordersThisMonth: orderCount || 0,
+        activeRegions: townsData?.length || 3,
+        revenue: totalRevenue
       });
 
-      setRecentUsers([
-        { id: 1, name: 'John Doe', role: 'Customer', town: 'Accra', date: '2023-10-25' },
-        { id: 2, name: 'Jane Smith', role: 'Seller', town: 'Kumasi', date: '2023-10-24' },
-        { id: 3, name: 'Max Rider', role: 'Rider', town: 'Tema', date: '2023-10-23' },
-        { id: 4, name: 'Super Mart', role: 'Seller', town: 'Accra', date: '2023-10-22' },
-      ]);
+      if (recentUsersData) {
+        setRecentUsers(recentUsersData.map(u => ({
+          id: u.id,
+          name: u.full_name || u.email,
+          role: u.role,
+          town: u.address || u.town || 'Unknown',
+          date: u.created_at
+        })));
+      }
       setLoading(false);
     };
-    fetchAdminData();
-  }, [supabase]);
+    if (!authLoading && role === 'admin') fetchAdminData();
+  }, [supabase, authLoading, role, user]);
 
   // Global Orders State for Admin
   const [globalOrders, setGlobalOrders] = useState([]);
@@ -132,15 +166,11 @@ const SuperAdmin = () => {
     }
   };
 
-  if (loading) {
-     return <div className="container centered" style={{ minHeight: '60vh' }}><div className="loading" /></div>;
+  if (loading || authLoading) {
+     return <div className="container centered" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div className="loading" /></div>;
   }
 
-  const chartData = [
-    { town: 'Hohoe', value: 80 },
-    { town: 'Ho', value: 55 },
-    { town: 'Kpando', value: 40 }
-  ];
+  const chartData = townChartData;
 
   return (
     <div className="dashboard-layout container" style={{ paddingTop: '20px', paddingBottom: '60px' }}>
@@ -200,22 +230,25 @@ const SuperAdmin = () => {
       {/* Top Stats Grid */}
       <div className="stats-grid" style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
         gap: '20px',
         marginBottom: '30px'
       }}>
         {[
-          { icon: <Users size={24} color="var(--primary)" />, title: 'Total Customers', val: stats.totalUsers, bg: 'var(--primary-light)', delay: 0 },
-          { icon: <Store size={24} color="var(--success)" />, title: 'Total Sellers', val: stats.totalSellers, bg: 'rgba(16, 185, 129, 0.1)', delay: 0.1 },
-          { icon: <Bike size={24} color="var(--warning)" />, title: 'Total Riders', val: stats.totalRiders, bg: 'rgba(245, 158, 11, 0.1)', delay: 0.2 },
-          { icon: <Briefcase size={24} color="var(--secondary)" />, title: 'Monthly Orders', val: stats.ordersThisMonth, bg: 'var(--border-light)', delay: 0.3 }
+          { icon: <Briefcase size={24} color="var(--success)" />, title: 'Total Revenue', val: `₵${stats.revenue.toFixed(2)}`, bg: 'rgba(16, 185, 129, 0.1)', delay: 0 },
+          { icon: <Users size={24} color="var(--primary)" />, title: 'Total Customers', val: stats.totalUsers, bg: 'var(--primary-light)', delay: 0.1 },
+          { icon: <Store size={24} color="var(--warning)" />, title: 'Total Sellers', val: stats.totalSellers, bg: 'rgba(245, 158, 11, 0.1)', delay: 0.2 },
+          { icon: <Bike size={24} color="#ec4899" />, title: 'Total Riders', val: stats.totalRiders, bg: 'rgba(236, 72, 153, 0.1)', delay: 0.3 },
+          { icon: <Activity size={24} color="var(--secondary)" />, title: 'Total Orders', val: stats.ordersThisMonth, bg: 'var(--border-light)', delay: 0.4 }
         ].map((stat, i) => (
           <motion.div 
             key={i}
+            whileHover={{ y: -5, boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}
             initial={{ y: 20, opacity: 0 }} 
             animate={{ y: 0, opacity: 1 }} 
             transition={{ delay: stat.delay }} 
             className="premium-card glass-card"
+            style={{ padding: '24px' }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
               <div style={{ background: stat.bg, padding: '12px', borderRadius: '12px' }}>
