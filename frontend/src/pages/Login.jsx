@@ -20,6 +20,7 @@ const Login = () => {
       const role = data.user?.user_metadata?.role || 'customer';
       if (role === 'rider') navigate('/rider');
       else if (role === 'admin') navigate('/admin');
+      else if (role === 'seller') navigate('/seller');
       else navigate('/');
     } catch (err) {
       setError(err.message || 'Failed to login');

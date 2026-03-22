@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Menu, X, User, LogOut, Package, Shield } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, User, LogOut, Package, Shield, Store } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -65,6 +65,12 @@ const Navbar = () => {
           {role === 'admin' && (
             <Link to="/admin" className="nav-link" style={{color: 'var(--success)', fontWeight: 'bold'}}>
               <Shield size={16} /> Admin
+            </Link>
+          )}
+
+          {role === 'seller' && (
+            <Link to="/seller" className="nav-link" style={{color: 'var(--warning)', fontWeight: 'bold'}}>
+              <Store size={16} /> Seller Dashboard
             </Link>
           )}
 
