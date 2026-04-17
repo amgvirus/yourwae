@@ -69,7 +69,7 @@ const RiderDashboard = () => {
         const storeIcon = {
            path: google.maps.SymbolPath.CIRCLE,
            scale: 10,
-           fillColor: "#5d5dff",
+           fillColor: "#f97316",
            fillOpacity: 1,
            strokeWeight: 2,
            strokeColor: "#ffffff",

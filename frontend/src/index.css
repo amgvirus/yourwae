@@ -1,10 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --primary: #5d5dff;
-  --primary-dark: #4a4ae6;
-  --primary-light: rgba(93, 93, 255, 0.1);
-  --secondary: #0f172a;
+  --primary: #f97316; /* Orange-500 */
+  --primary-dark: #ea580c; /* Orange-600 */
+  --primary-light: rgba(249, 115, 22, 0.1);
+  --secondary: #0ea5e9; /* Blue-500 as secondary */
   --success: #10b981;
   --danger: #ef4444;
   --warning: #f59e0b;
@@ -94,7 +94,7 @@ textarea {
 }
 
 .brand-wae {
-  color: #5d5dff;
+  color: var(--primary);
 }
 
 /* TOP NAVBAR */
@@ -208,7 +208,7 @@ textarea {
   background: #111111;
   color: #eeeeee;
   padding: 80px 0 40px;
-  border-top: 4px solid var(--primary);
+  border-top: 4px solid var(--secondary);
   margin-top: 40px;
 }
 
