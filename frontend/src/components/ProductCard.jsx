@@ -25,9 +25,11 @@ const ProductCard = ({ product }) => {
     }
   };
 
+  const imageSrc = product.image || product.images?.[0] || 'https://via.placeholder.com/200';
+
   return (
     <div className="product-card">
-      <img src={product.image || 'https://via.placeholder.com/200'} alt={product.name} />
+      <img src={imageSrc} alt={product.name} />
       <div className="product-info">
         <h3>{product.name}</h3>
         <p className="description">{product.description}</p>
