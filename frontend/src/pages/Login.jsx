@@ -36,14 +36,13 @@ const Login = () => {
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center', 
-      background: 'linear-gradient(135deg, var(--bg-page) 0%, #e2e8f0 100%)',
       padding: '40px 16px'
     }}>
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, type: 'spring' }}
-        className="premium-card glass-card" 
+        className="auth-panel premium-card glass-card" 
         style={{ 
           maxWidth: '440px', 
           width: '100%', 
@@ -53,6 +52,7 @@ const Login = () => {
       >
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <motion.div 
+            className="hero-icon"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring' }}

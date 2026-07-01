@@ -93,14 +93,13 @@ const Signup = () => {
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center', 
-      background: 'linear-gradient(135deg, var(--bg-page) 0%, #e2e8f0 100%)',
       padding: '40px 16px' 
     }}>
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, type: 'spring' }}
-        className="premium-card glass-card" 
+        className="auth-panel premium-card glass-card" 
         style={{ 
           maxWidth: '540px', 
           width: '100%', 
@@ -114,6 +113,7 @@ const Signup = () => {
         
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <motion.div 
+            className="hero-icon"
             key={formData.role}
             initial={{ scale: 0, rotate: -45 }}
             animate={{ scale: 1, rotate: 0 }}
