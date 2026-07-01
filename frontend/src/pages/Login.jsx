@@ -31,24 +31,12 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-page" style={{ 
-      minHeight: '85vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      padding: '40px 16px'
-    }}>
+    <div className="auth-page">
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, type: 'spring' }}
-        className="auth-panel premium-card glass-card" 
-        style={{ 
-          maxWidth: '440px', 
-          width: '100%', 
-          padding: '48px 40px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)'
-        }}
+        className="auth-panel premium-card glass-card"
       >
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <motion.div 

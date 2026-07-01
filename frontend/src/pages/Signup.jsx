@@ -88,26 +88,12 @@ const Signup = () => {
   };
 
   return (
-    <div className="auth-page" style={{ 
-      minHeight: '85vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      padding: '40px 16px' 
-    }}>
+    <div className="auth-page">
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, type: 'spring' }}
-        className="auth-panel premium-card glass-card" 
-        style={{ 
-          maxWidth: '540px', 
-          width: '100%', 
-          padding: '40px', 
-          position: 'relative', 
-          overflow: 'hidden',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)'
-        }}
+        className="auth-panel premium-card glass-card"
       >
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: formData.role === 'seller' ? 'var(--warning)' : 'var(--primary)', transition: 'background 0.3s' }} />
         
@@ -148,7 +134,7 @@ const Signup = () => {
             border: '1px solid var(--border-light)' 
           }}>
             <label style={{ fontSize: '13px', fontWeight: '700', color: 'var(--secondary)', marginBottom: '12px', display: 'block' }}>Account Type</label>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div className="auth-type-toggle">
               <button 
                 type="button" 
                 onClick={() => setFormData({...formData, role: 'customer'})}
@@ -177,7 +163,7 @@ const Signup = () => {
             <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '12px', textAlign: 'center', fontSize: '12px' }}>*Rider accounts are exclusively created by the Super Admin.</small>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="auth-form-grid">
             <div className="form-group">
               <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '8px', display: 'block' }}>Full Name</label>
               <input type="text" className="search-input" style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '14px' }} name="full_name" value={formData.full_name} onChange={handleInputChange} required placeholder="John Doe" />
